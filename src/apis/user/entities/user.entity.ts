@@ -1,13 +1,13 @@
 import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
-import { Collection } from 'src/apis/collection/entities/collection.entity';
 import { Post } from 'src/apis/post/entities/post.entity';
-import { PostLike } from 'src/apis/post/entities/postLike.entity';
+import { PostLike } from 'src/apis/post/entities/post-like.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, ManyToMany, ManyToOne, JoinColumn, Unique } from 'typeorm';
-import { PostUserTag } from 'src/apis/post/entities/postUserTag.entity';
-import { CommentLike } from 'src/apis/comment/entities/commentLike.entity';
-import { CommentUserTag } from 'src/apis/comment/entities/commentUserTag.entity';
+import { PostUserTag } from 'src/apis/post/entities/post-usertag.entity';
+import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
+import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity';
 import { IsEnum } from 'class-validator';
+import { MyList } from 'src/apis/my-list/entities/my-list.entity';
 
 /*TODO:
 @Unique(['nickname']) 과   @Column({ unique: true }) 둘의 차이점이 뭘까?
@@ -47,9 +47,9 @@ export class User {
   @Column()
   profile_image: string;
   
-  @OneToMany(type => Collection, collections => collections.user)
+  @OneToMany(type => MyList, my_lists => my_lists.user)
   @JoinColumn()
-  collections: Collection[];
+  my_lists: MyList[];
 
   @OneToMany(type => Bookmark, bookmarks => bookmarks.user)
   @JoinColumn()

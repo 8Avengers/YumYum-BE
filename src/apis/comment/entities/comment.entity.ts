@@ -1,8 +1,8 @@
 import { Post } from 'src/apis/post/entities/post.entity';
 import { User } from 'src/apis/user/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { CommentLike } from './commentLike.entity';
-import { CommentUserTag } from './commentUserTag.entity';
+import { CommentLike } from './comment-like.entity';
+import { CommentUserTag } from './comment-usertag.entity';
 
 
 @Entity()

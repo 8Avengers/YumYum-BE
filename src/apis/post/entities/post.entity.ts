@@ -1,13 +1,13 @@
 import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
-import { Collection } from 'src/apis/collection/entities/collection.entity';
 import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { User } from 'src/apis/user/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, ManyToOne, ManyToMany, JoinTable, JoinColumn } from 'typeorm';
 import { Hashtag } from './hashtag.entity';
 import { Image } from './image.entity';
-import { PostLike } from './postLike.entity';
+import { PostLike } from './post-like.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
-import { PostUserTag } from './postUserTag.entity';
+import { PostUserTag } from './post-usertag.entity';
+import { MyList } from 'src/apis/my-list/entities/my-list.entity';
 
 @Entity()
 export class Post {
@@ -57,9 +57,9 @@ export class Post {
   @JoinTable()
   hashtags: Hashtag[];
 
-  @ManyToMany(type => Collection, collections => collections.posts)
+  @ManyToMany(type => MyList, my_lists => my_lists.posts)
   @JoinTable()
-  collections: Collection[];
+  my_lists: MyList[];
 
 
   @OneToMany(type => PostUserTag, postUserTags => postUserTags.post)

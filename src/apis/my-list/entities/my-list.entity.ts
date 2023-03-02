@@ -3,7 +3,7 @@ import { User } from 'src/apis/user/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, ManyToMany } from 'typeorm';
 
 @Entity()
-export class Collection {
+export class MyList {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,9 +22,9 @@ export class Collection {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @ManyToOne(type => User, user => user.collections)
+  @ManyToOne(type => User, user => user.my_lists)
   user: User;
 
-  @ManyToMany(type => Post, posts => posts.collections)
+  @ManyToMany(type => Post, posts => posts.my_lists)
   posts: Post[];
 }
