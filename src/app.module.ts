@@ -1,21 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './apis/auth/auth.module';
+import { UserModule } from './apis/user/user.module';
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
-   
       useClass: TypeOrmConfigService,
-
-
     }),
 
-    //TODO: 모듈 삽입, 어떤 모듈을 넣는 게 맞을까
+    //TODO: Avengers들이여 이곳이 차례차례 모듈을 넣어주세요.
+    UserModule, //
+    AuthModule, //
   ],
-
 })
 export class AppModule {}
-
