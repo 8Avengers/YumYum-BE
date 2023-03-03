@@ -48,26 +48,29 @@ export class AuthController {
     return this.authService.createAccessToken({ user });
   }
 
+  // @Res()res
+
   @Post('logout')
-  async logout(@Res() res) {
-    console.log('로그아웃하면, res가 뭘까', res);
+  async logout(@Res() response) {
+    return 'ok';
 
-    try {
-      console.log('여긴가 1번');
+    // try {
+    //   console.log(res.clearCookie); //[Function: clearCookie]
 
-      res.clearCookie('refreshToken');
-      console.log('여긴가 2번');
+    //   res.clearCookie('refreshToken');
+    //   console.log('여긴가 2번');
 
-      // console.log('res 쿠키 사라졌나 확인해보자', res);
+    //   // console.log('res 쿠키 사라졌나 확인해보자', res);
+    //   console.log('okays');
 
-      return { message: '로그아웃이 성공했습니다.' };
-    } catch (error) {
-      console.log('여긴가 3번');
+    //   return { message: '로그아웃이 성공했습니다.' };
+    // } catch (error) {
+    //   console.log('여긴가 3번');
 
-      console.log(error);
+    //   console.log(error);
 
-      throw error;
-    }
+    //   throw error;
+    // }
   }
 
   @UseGuards(AuthRefreshGuard)
