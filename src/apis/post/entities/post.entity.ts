@@ -42,15 +42,19 @@ export class Post {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @DeleteDateColumn()
-  deletedAt: Date | null;
+  @Column({
+    type: 'enum',
+    enum: ['public', 'private'],
+    default: 'public'
+  })
+  visibility: 'public' | 'private';
 
-  @ManyToOne((type) => Restaurant, (restaurant) => restaurant.posts)
+  @ManyToOne(type => Restaurant, restaurant => restaurant.posts)
   @JoinColumn()
   restaurant: Restaurant;
 
-  @ManyToMany((type) => Bookmark, (bookmarks) => bookmarks.posts)
-  @JoinTable()
+  @OneToMany(type => Bookmark, bookmark => bookmark.post)
+
   bookmarks: Bookmark[];
 
   @OneToMany((type) => Image, (images) => images.post)
@@ -81,6 +85,8 @@ export class Post {
   @JoinColumn()
   postUserTags: PostUserTag[];
 
-  //TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
-  //TODO : 프리티어 줄 설정을 어떻게 해줘야 하는 것일까?
+
+
+//TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
 }
+

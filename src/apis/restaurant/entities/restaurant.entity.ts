@@ -48,9 +48,10 @@ export class Restaurant {
   @JoinColumn()
   posts: Post[];
 
-  @ManyToMany(type => Bookmark, bookmarks => bookmarks.restaurants )
-  @JoinTable()
-  bookMarks: Bookmark[];
+  @ManyToMany(type => Bookmark, bookmarks => bookmarks.restaurant )
+  bookmarks: Bookmark[];
+
+  
 
 
 }

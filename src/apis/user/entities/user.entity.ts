@@ -8,14 +8,15 @@ import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
 import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity';
 import { IsEnum } from 'class-validator';
 import { MyList } from 'src/apis/my-list/entities/my-list.entity';
+import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookmark-collection.entity';
 
 /*TODO:
 @Unique(['nickname']) 과   @Column({ unique: true }) 둘의 차이점이 뭘까?
-
 */
 
 @Entity()
 @Unique(['nickname'])
+@Unique(['email'])
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -23,7 +24,7 @@ export class User {
   @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column()
@@ -79,34 +80,31 @@ export class User {
   @JoinColumn()
   commentUserTags: CommentUserTag[];
 
+  @OneToMany(type => User, user => user.bookmark_collections)
+  @JoinColumn()
+  bookmark_collections: BookmarkCollection[];
 
 
 
 
-  //TODO : 팔로잉 팔로워 수정필요 , 프리티어 설정 수정필요
 
+  //TODO : 팔로잉 팔로워 수정필요 
+  // @ManyToMany(type => User, user => user.followings)
+  // @JoinTable({
+  //   name: 'follow',
+  //   joinColumn: {
+  //     name: 'followingId',
+  //     referencedColumnName: 'id',
+  //   },
+  //   inverseJoinColumn: {
+  //     name: 'followerId',
+  //     referencedColumnName: 'id',
+  //   },
+  // })
+  // followers: User[];
 
-  @Column({ name: 'followers_count', default: 0 })
-  followers_count: number;
-
-  @Column({ name: ' followings_count:', default: 0 })
-  followings_count: number;
-
-
-
-
-  @ManyToMany(type => User)
-  @JoinTable({
-    name: 'follow',
-    joinColumn: { name: 'followingId', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'followerId', referencedColumnName: 'id' },
-  })
-  followings: User[];
-
-  @ManyToMany(type => User, user => user.followings)
-  followers: User[];
+  // @ManyToMany(type => User, user => user.followers)
+  // followings: User[];
 }
-function Enum(arg0: string[]) {
-  throw new Error('Function not implemented.');
-}
+
 

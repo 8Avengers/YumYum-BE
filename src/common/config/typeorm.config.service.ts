@@ -14,6 +14,7 @@ import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { User } from 'src/apis/user/entities/user.entity';
 import { MyList } from 'src/apis/my-list/entities/my-list.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.strategy';
+import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookmark-collection.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -32,12 +33,13 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('DATABASE_PASSWORD'),
       database: this.configService.get<string>('DATABASE_NAME'),
       namingStrategy: new SnakeNamingStrategy(),
-      logging: Boolean(this.configService.get<string>('DATABASE_SYNC')), 
+      logging: Boolean(this.configService.get<string>('DATABASE_logging')), 
       synchronize: Boolean(this.configService.get<string>('DATABASE_SYNC')),  // 배포 시 false
       entities: [
         Bookmark,//
-        MyList,
+        BookmarkCollection,//
         Comment,CommentLike,CommentUserTag,//
+        MyList,//
         Post,Hashtag,Image,PostLike,PostUserTag,//
         Restaurant,//
         User,//
