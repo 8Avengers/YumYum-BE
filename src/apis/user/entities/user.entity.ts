@@ -12,6 +12,9 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { PostUserTag } from '../../post/entities/post-usertag.entity';
 import { CommentLike } from '../../comment/entities/comment-like.entity';
@@ -55,6 +58,15 @@ export class User {
 
   @Column()
   profile_image: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @OneToMany((type) => MyList, (my_lists) => my_lists.user)
   @JoinColumn()

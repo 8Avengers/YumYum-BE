@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   ManyToMany,
+  DeleteDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -29,6 +30,9 @@ export class MyList {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @ManyToOne((type) => User, (user) => user.my_lists)
   user: User;

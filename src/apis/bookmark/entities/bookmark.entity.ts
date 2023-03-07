@@ -12,6 +12,7 @@ import {
   JoinTable,
   ManyToOne,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -24,6 +25,9 @@ export class Bookmark {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @ManyToOne((type) => Restaurant, (restaurant) => restaurant.bookmarks)
   @JoinColumn()

@@ -9,6 +9,7 @@ import {
   JoinTable,
   ManyToMany,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Post } from '../../post/entities/post.entity';
 import { Bookmark } from '../../bookmark/entities/bookmark.entity';
@@ -53,6 +54,9 @@ export class Restaurant {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @OneToMany((type) => Post, (posts) => posts.restaurant)
   @JoinColumn()

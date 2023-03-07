@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
   ManyToMany,
   PrimaryGeneratedColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Bookmark } from '../../bookmark/entities/bookmark.entity';
@@ -26,6 +27,9 @@ export class BookmarkCollection {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @ManyToOne((type) => User, (user) => user.bookmark_collections)
   @JoinColumn()

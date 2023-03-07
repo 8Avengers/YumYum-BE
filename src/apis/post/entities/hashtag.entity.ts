@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  DeleteDateColumn,
+} from 'typeorm';
 import { Post } from './post.entity';
 
 @Entity()
@@ -15,6 +23,9 @@ export class Hashtag {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToMany(type => Post, posts => posts.hashtags)
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
+
+  @ManyToMany((type) => Post, (posts) => posts.hashtags)
   posts: Post[];
 }
