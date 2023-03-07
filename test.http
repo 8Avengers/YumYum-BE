@@ -1,3 +1,32 @@
+###모든 포스팅 보기
+GET localhost:3000/posts
+
+###포스팅 상세보기
+GET localhost:3000/posts/4
+
+###포스팅 작성
+POST localhost:3000/posts
+Content-Type: application/json
+
+{
+  "content": "아주 엄청난 맛집이군요",
+  "rating": 5,
+  "img": "img_url",
+  "visibility": "public"
+}
+
+###포스팅 수정
+PUT localhost:3000/posts/4
+Content-Type: application/json
+
+{
+  "content": "아주 엄청난 맛집이군요",
+  "visibility": "private"
+}
+
+###포스팅 삭제
+DELETE localhost:3000/posts/4
+
 ###특정 게시글에 해당하는 모든 댓글 보기
 GET localhost:3000/posts/1/comments
 

@@ -13,23 +13,30 @@ describe('PostService', () => {
   let mockPostRepository: Repository<Post>;
 
   beforeEach(async () => {
-    let mockPosts;
-
-    const mockRepository = {
-      createQueryBuilder: jest.fn(() => ({
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        select: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValueOnce(mockPosts),
-      })),
-    };
+    // const mockRepository = {
+    //   createQueryBuilder: jest.fn(() => ({
+    //     leftJoinAndSelect: jest.fn().mockReturnThis(),
+    //     where: jest.fn().mockReturnThis(),
+    //     andWhere: jest.fn().mockReturnThis(),
+    //     select: jest.fn().mockReturnThis(),
+    //     getMany: jest.fn().mockResolvedValueOnce(mockPosts),
+    //   })),
+    // };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
         PostService,
         {
           provide: getRepositoryToken(Post),
-          useFactory: () => mockRepository,
+          useValue: {
+            createQueryBuilder: jest.fn(() => ({
+              leftJoinAndSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              andWhere: jest.fn().mockReturnThis(),
+              select: jest.fn().mockReturnThis(),
+              getMany: jest.fn(),
+            })),
+          },
         },
       ],
     }).compile();
@@ -38,6 +45,10 @@ describe('PostService', () => {
     mockPostRepository = moduleRef.get<Repository<Post>>(
       getRepositoryToken(Post),
     );
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   describe('getPosts', () => {
@@ -66,6 +77,7 @@ describe('PostService', () => {
       mockPostRepository.createQueryBuilder = jest.fn().mockReturnValueOnce({
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValueOnce(mockPosts),
       } as any);
@@ -80,6 +92,7 @@ describe('PostService', () => {
       mockPostRepository.createQueryBuilder = jest.fn().mockReturnValueOnce({
         leftJoinAndSelect: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
         select: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValueOnce([]),
       } as any);
@@ -154,40 +167,33 @@ describe('PostService', () => {
   });
 
   describe('createPost', () => {
-    const restaurantId = 1;
+    const newPost = {
+      content: 'content1',
+      rating: 5,
+      img_url: 'img_url',
+      visibility: 'public',
+    };
     it('should create a new post', async () => {
-      const newPost = {
-        content: 'content1',
-        rating: 5,
-        img_url: 'img_url',
-        restaurant: { id: restaurantId },
-      };
       const expectedPost = {
         content: newPost.content,
         rating: newPost.rating,
         img_url: newPost.img_url,
-        identifiers: [{ id: restaurantId }],
+        visibility: newPost.visibility,
       };
 
       mockPostRepository.insert = jest.fn().mockResolvedValueOnce(expectedPost);
 
       const createdPost = await postService.createPost(
-        newPost.restaurant.id,
         newPost.content,
         newPost.rating,
         newPost.img_url,
+        newPost.visibility,
       );
 
       expect(createdPost).toEqual(expectedPost);
     });
 
     it('should throw an error if post could not be created', async () => {
-      const newPost = {
-        content: 'content1',
-        rating: 5,
-        img_url: 'img_url',
-        restaurant: { id: restaurantId },
-      };
       mockPostRepository.insert = jest
         .fn()
         .mockRejectedValueOnce(
@@ -196,18 +202,18 @@ describe('PostService', () => {
 
       await expect(
         postService.createPost(
-          newPost.restaurant.id,
           newPost.content,
           newPost.rating,
           newPost.img_url,
+          newPost.visibility,
         ),
       ).rejects.toThrow(InternalServerErrorException);
 
       expect(mockPostRepository.insert).toHaveBeenCalledWith({
-        restaurant: { id: newPost.restaurant.id },
         content: newPost.content,
         rating: newPost.rating,
         img_url: newPost.img_url,
+        visibility: newPost.visibility,
       });
     });
   });
@@ -218,6 +224,7 @@ describe('PostService', () => {
       content: 'This post has been updated',
       rating: 4,
       img: 'updated-image-url',
+      visibility: 'private',
     };
     it('should update an existing post', async () => {
       mockPostRepository.update = jest.fn().mockResolvedValueOnce({
@@ -230,12 +237,14 @@ describe('PostService', () => {
         updatePost.content,
         updatePost.rating,
         updatePost.img,
+        updatePost.visibility,
       );
 
       expect(mockPostRepository.update).toHaveBeenCalledWith(postId, {
         content: updatePost.content,
         rating: updatePost.rating,
         img_url: updatePost.img,
+        visibility: updatePost.visibility,
       });
     });
 
@@ -250,6 +259,7 @@ describe('PostService', () => {
           updatePost.content,
           updatePost.rating,
           updatePost.img,
+          updatePost.visibility,
         ),
       ).rejects.toThrow(NotFoundException);
     });
@@ -267,6 +277,7 @@ describe('PostService', () => {
           updatePost.content,
           updatePost.rating,
           updatePost.img,
+          updatePost.visibility,
         ),
       ).rejects.toThrow(InternalServerErrorException);
 
@@ -274,6 +285,7 @@ describe('PostService', () => {
         content: updatePost.content,
         rating: updatePost.rating,
         img_url: updatePost.img,
+        visibility: updatePost.visibility,
       });
     });
   });
@@ -284,6 +296,7 @@ describe('PostService', () => {
       content: 'This is a test post',
       rating: 5,
       img: 'img_url',
+      visibility: 'public',
     };
 
     beforeEach(async () => {

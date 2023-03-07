@@ -9,4 +9,6 @@ export class CreatePostDto {
 
   @IsString()
   readonly img: string;
+
+  readonly visibility: 'public' | 'private';
 }
