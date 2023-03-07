@@ -12,7 +12,7 @@ import { TypeOrmConfigService } from './common/config/typeorm.config.service';
       useClass: TypeOrmConfigService,
     }),
 
-    //TODO: Avengers들이여 이곳이 차례차례 모듈을 넣어주세요.
+    //TODO:  이곳이 차례차례 모듈을 넣어주세요.
     UserModule, //
     AuthModule, //
   ],

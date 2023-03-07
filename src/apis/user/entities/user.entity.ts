@@ -53,6 +53,7 @@ export class User {
   @Column()
   birth: Date;
 
+  //TODO: 회원가입시 default 값으로 가입완료
   @Column()
   profile_image: string;
 

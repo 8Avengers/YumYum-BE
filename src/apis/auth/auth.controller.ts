@@ -11,10 +11,17 @@ import { UnprocessableEntityException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
 import { ValidationPipe } from '@nestjs/common';
-import { AuthRefreshGuard } from './guards/auth.guards';
+import { AuthAccessGuard, AuthRefreshGuard } from './guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/crrunet-user.decorator';
 import { UserService } from '../user/user.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from '../user/entities/user.entity';
+import { Response } from 'express';
+
+interface IOAuthUser {
+  user: Pick<User, 'email' | 'password' | 'name' | 'gender' | 'birth'>;
+}
 
 @Controller('auth')
 export class AuthController {
@@ -27,14 +34,10 @@ export class AuthController {
   async login(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
     @Req() req, //
-    @Res() res, //
+    // @Res() res, // res 를 써주지 않으면 무한로딩한다.
   ) {
     const { email, password } = loginUserDto;
-    console.log('로그인시 email이 들어오는지 찍어보자', email);
-    console.log('로그인시 password가 들어오는지 찍어보자', password);
-
     const user = await this.userService.findOne({ email });
-    console.log('로그인시 user가있는지 확인해보자!', user);
 
     if (!user)
       throw new UnprocessableEntityException(' 등록된 이메일이 없습니다.');
@@ -43,37 +46,19 @@ export class AuthController {
     if (!isAuth)
       throw new UnprocessableEntityException('비밀번호가 일치하지 않습니다.');
 
-    this.authService.createRefreshToken({ user, res });
+    const accessToken = this.authService.createAccessToken({
+      user,
+    });
+    const refreshToken = this.authService.createRefreshToken({ user });
 
-    return this.authService.createAccessToken({ user });
+    return {
+      refreshToken,
+      accessToken,
+    };
   }
 
-  // @Res()res
-
-  @Post('logout')
-  async logout(@Res() response) {
-    return 'ok';
-
-    // try {
-    //   console.log(res.clearCookie); //[Function: clearCookie]
-
-    //   res.clearCookie('refreshToken');
-    //   console.log('여긴가 2번');
-
-    //   // console.log('res 쿠키 사라졌나 확인해보자', res);
-    //   console.log('okays');
-
-    //   return { message: '로그아웃이 성공했습니다.' };
-    // } catch (error) {
-    //   console.log('여긴가 3번');
-
-    //   console.log(error);
-
-    //   throw error;
-    // }
-  }
-
-  @UseGuards(AuthRefreshGuard)
+  //AccessToken 재발급 API
+  @UseGuards(AuthAccessGuard)
   @Post('restoreAccessToken')
   async restoreAccessToken(
     // @Req() req,//
@@ -83,4 +68,60 @@ export class AuthController {
 
     return this.authService.createAccessToken({ user: currentUser });
   }
+
+  //구글로그인
+  @Get('/login/google')
+  @UseGuards(AuthGuard('google'))
+  async loginGoogle(
+    @Req() req: Request & IOAuthUser, //
+    @Res() res: Response,
+  ) {
+    this.authService.loginOauth({ req, res });
+  }
+
+  //네이버로그인
+  @Get('/login/naver')
+  @UseGuards(AuthGuard('naver'))
+  async loginNaver(
+    @Req() req: Request & IOAuthUser, //
+    @Res() res: Response,
+  ) {
+    this.authService.loginOauth({ req, res });
+  }
+
+  //카카오로그인
+  @Get('/login/kakao')
+  @UseGuards(AuthGuard('kakao'))
+  async loginKakao(
+    @Req() req: Request & IOAuthUser, //
+    @Res() res: Response,
+  ) {
+    // 1. 가입확인
+    this.authService.loginOauth({ req, res });
+  }
 }
+
+// // @Res()res
+// //로그아웃 API 쿠키는 프론트에서 지우면된다.
+
+// @Post('logout')
+// async logout(@Res() res) {
+//   return 'ok';
+
+//   // try {
+//   //   console.log(res.clearCookie); //[Function: clearCookie]
+
+//   //   res.clearCookie('refreshToken');
+//   //   console.log('여긴가 2번');
+
+//   //   // console.log('res 쿠키 사라졌나 확인해보자', res);
+//   //   console.log('okays');
+
+//   //   return { message: '로그아웃이 성공했습니다.' };
+//   // } catch (error) {
+//   //   console.log('여긴가 3번');
+
+//   //   console.log(error);
+
+//   //   throw error;
+//   // }

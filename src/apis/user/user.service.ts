@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm'; //데이터들어갈떄
+import { InjectRepository } from '@nestjs/typeorm'; //데이터들어갈떄
 import { ConflictException } from '@nestjs/common';
-import { User } from './entities/user.entity';
+import { User } from './entities/user.entity'; //데이터들어갈떄
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(User) //데이터들어갈떄
+    private readonly userRepository: Repository<User>, //데이터들어갈떄
   ) {}
 
   async findOne({ email }) {
