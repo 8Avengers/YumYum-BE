@@ -18,10 +18,10 @@ export class PostService {
   ) {}
 
   /*
-    ### 23.03.06
-    ### 이드보라
-    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
-    */
+      ### 23.03.06
+      ### 이드보라
+      ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
+      */
   async getPosts() {
     try {
       const posts = await this.postRepository
@@ -54,10 +54,10 @@ export class PostService {
   }
 
   /*
-      ### 23.03.06
-      ### 이드보라
-      ### 포스팅 상세보기
-      */
+        ### 23.03.06
+        ### 이드보라
+        ### 포스팅 상세보기
+        */
   async getPostById(id: number) {
     try {
       const post = await this.postRepository
@@ -91,10 +91,10 @@ export class PostService {
   }
 
   /*
-      ### 23.03.06
-      ### 이드보라
-      ### 포스팅 작성
-      */
+        ### 23.03.06
+        ### 이드보라
+        ### 포스팅 작성
+        */
   createPost(
     restaurantId: number,
     content: string,
@@ -102,7 +102,7 @@ export class PostService {
     img: string,
   ) {
     try {
-      this.postRepository.insert({
+      return this.postRepository.insert({
         restaurant: { id: restaurantId },
         content,
         rating,
@@ -116,10 +116,10 @@ export class PostService {
   }
 
   /*
-      ### 23.03.06
-      ### 이드보라
-      ### 포스팅 수정
-      */
+        ### 23.03.06
+        ### 이드보라
+        ### 포스팅 수정
+        */
   async updatePost(id: number, content: string, rating: number, img: string) {
     try {
       const result = await this.postRepository.update(id, {
@@ -132,7 +132,7 @@ export class PostService {
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
-        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+        throw err;
       } else {
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
@@ -142,11 +142,11 @@ export class PostService {
   }
 
   /*
-      ### 23.03.06
-      ### 이드보라
-      ### 포스팅 삭제
-      */
-  async deleteArticle(id: number) {
+        ### 23.03.06
+        ### 이드보라
+        ### 포스팅 삭제
+        */
+  async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
       if (result.affected === 0) {
@@ -154,7 +154,7 @@ export class PostService {
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
-        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+        throw err;
       } else {
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
