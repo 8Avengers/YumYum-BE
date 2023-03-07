@@ -1,10 +1,10 @@
-###뉴스피드 페이지
-GET localhost:3000/posts
+###특정 게시글에 해당하는 모든 댓글 보기
+GET localhost:3000/posts/1/comments
+#
+####포스팅 상세보기
+#GET localhost:3000/posts/3
 
-###포스팅 상세보기
-GET localhost:3000/posts/3
-
-###포스팅 작성
+###댓글 작성
 POST localhost:3000/posts/1
 Content-Type: application/json
 
@@ -14,7 +14,7 @@ Content-Type: application/json
   "img": "엄청난 사진입니당."
 }
 
-###포스팅 수정
+###댓글 수정
 PUT localhost:3000/posts/3
 Content-Type: application/json
 
@@ -22,5 +22,5 @@ Content-Type: application/json
   "content": "사실 별로였습니당"
 }
 
-###포스팅 삭제
+###댓글 삭제
 DELETE localhost:3000/posts/3
