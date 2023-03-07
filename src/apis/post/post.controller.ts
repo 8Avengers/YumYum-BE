@@ -81,12 +81,12 @@ export class PostController {
   }
 
   /*
-    ### 23.03.03
+    ### 23.03.07
     ### 이드보라
     ### 포스팅 삭제
     */
   @Delete('/:postId')
-  async deleteArticle(@Param('postId') postId: number) {
-    return this.postService.deleteArticle(postId);
+  async deletePost(@Param('postId') postId: number) {
+    return this.postService.deletePost(postId);
   }
 }
