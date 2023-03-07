@@ -43,10 +43,11 @@ export class CommentController {
    */
   @Put(':commentId')
   async updateArticle(
+    @Param('postId') postId: number,
     @Param('commentId') commentId: number,
     @Body() data: UpdateCommentDto,
   ) {
-    return this.commentService.updateComment(commentId, data.content);
+    return this.commentService.updateComment(postId, commentId, data.content);
   }
 
   /*
@@ -55,7 +56,10 @@ export class CommentController {
      ###댓글 삭제
    */
   @Delete(':commentId')
-  async deleteArticle(@Param('commentId') commentId: number) {
-    return this.commentService.deleteComment(commentId);
+  async deleteArticle(
+    @Param('postId') postId: number,
+    @Param('commentId') commentId: number,
+  ) {
+    return this.commentService.deleteComment(postId, commentId);
   }
 }

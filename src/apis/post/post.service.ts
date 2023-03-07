@@ -75,9 +75,12 @@ export class PostService {
           'restaurant.name',
         ])
         .getOne();
+
       if (!post) {
         throw new NotFoundException(`Post with id ${id} not found.`);
       }
+
+      console.log('55555', post);
       return post;
     } catch (err) {
       if (err instanceof NotFoundException) {

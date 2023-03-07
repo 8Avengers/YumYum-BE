@@ -1,21 +1,16 @@
 ###특정 게시글에 해당하는 모든 댓글 보기
 GET localhost:3000/posts/1/comments
-#
-####포스팅 상세보기
-#GET localhost:3000/posts/3
 
 ###댓글 작성
-POST localhost:3000/posts/1
+POST localhost:3000/posts/1/comments
 Content-Type: application/json
 
 {
-  "content": "아주 엄청난 맛집이군요",
-  "rating": 2,
-  "img": "엄청난 사진입니당."
+  "content": "아주 엄청난 맛집이군요"
 }
 
 ###댓글 수정
-PUT localhost:3000/posts/3
+PUT localhost:3000/posts/1/comments/1
 Content-Type: application/json
 
 {
@@ -23,4 +18,4 @@ Content-Type: application/json
 }
 
 ###댓글 삭제
-DELETE localhost:3000/posts/3
+DELETE localhost:3000/posts/1/comments/1
