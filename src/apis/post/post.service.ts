@@ -28,7 +28,7 @@ export class PostService {
         .createQueryBuilder('post')
         .leftJoinAndSelect('post.restaurant', 'restaurant')
         .leftJoinAndSelect('post.user', 'user')
-        .where('post.deletedAt IS NULL')
+        .where('post.deleted_at IS NULL')
         .select([
           'post.content',
           'post.rating',
@@ -65,7 +65,7 @@ export class PostService {
         .leftJoinAndSelect('post.restaurant', 'restaurant')
         .leftJoinAndSelect('post.user', 'user')
         .where('post.id = :id', { id })
-        .andWhere('post.deletedAt IS NULL')
+        .andWhere('post.deleted_at IS NULL')
         .select([
           'post.content',
           'post.rating',
