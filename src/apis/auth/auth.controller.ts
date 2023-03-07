@@ -99,12 +99,11 @@ export class AuthController {
   @UseGuards(AuthRefreshGuard)
   @Post('/restoreAccessToken')
   async restoreAccessToken(
-    @CurrentUser() currentUser: any, // @Req() req,
+    @CurrentUser() currentUser: any, // @Req() req, // @Request() req,//
   ) {
     // console.log('UseGuards통과한후 req::::::: 찍어보자 ', req.user);
     // console.log('currentUser::::::::::::::::::::', currentUser);
     // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
-
     return this.authService.createAccessToken({ user: currentUser });
     // return this.authService.createAccessToken({ user: req.user });
   }
