@@ -101,7 +101,7 @@ export class AuthController {
     @CurrentUser() currentUser: any, //이걸 왜쓸까?
   ) {
     // console.log('UseGuards통과한후 req.user::::::: 찍어보자 ', req.user);
-    // console.log('currentUser::::::::::::::::::::', currentUser);
+    console.log('currentUser::::::::::::::::::::', currentUser);
     // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
 
     return this.authService.createAccessToken({ user: currentUser });
