@@ -1,14 +1,24 @@
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
-import { Post } from 'src/apis/post/entities/post.entity';
-import { PostLike } from 'src/apis/post/entities/post-like.entity';
-import { Comment } from 'src/apis/comment/entities/comment.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinTable, ManyToMany, ManyToOne, JoinColumn, Unique } from 'typeorm';
-import { PostUserTag } from 'src/apis/post/entities/post-usertag.entity';
-import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
-import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity';
+import { Bookmark } from '../../bookmark/entities/bookmark.entity';
+import { Post } from '../../post/entities/post.entity';
+import { PostLike } from '../../post/entities/post-like.entity';
+import { Comment } from '../../comment/entities/comment.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+} from 'typeorm';
+import { PostUserTag } from '../../post/entities/post-usertag.entity';
+import { CommentLike } from '../../comment/entities/comment-like.entity';
+import { CommentUserTag } from '../../comment/entities/comment-usertag.entity';
 import { IsEnum } from 'class-validator';
-import { MyList } from 'src/apis/my-list/entities/my-list.entity';
-import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookmark-collection.entity';
+import { MyList } from '../../my-list/entities/my-list.entity';
+import { BookmarkCollection } from '../../bookmark-collection/entities/bookmark-collection.entity';
 
 /*TODO:
 @Unique(['nickname']) 과   @Column({ unique: true }) 둘의 차이점이 뭘까?
@@ -36,59 +46,53 @@ export class User {
   @Column()
   phone_number: string;
 
-  
   @Column()
   @IsEnum(['M', 'F'])
   gender: 'M' | 'F';
-
 
   @Column()
   birth: Date;
 
   @Column()
   profile_image: string;
-  
-  @OneToMany(type => MyList, my_lists => my_lists.user)
+
+  @OneToMany((type) => MyList, (my_lists) => my_lists.user)
   @JoinColumn()
   my_lists: MyList[];
 
-  @OneToMany(type => Bookmark, bookmarks => bookmarks.user)
+  @OneToMany((type) => Bookmark, (bookmarks) => bookmarks.user)
   @JoinColumn()
   bookmarks: Bookmark[];
 
-  @OneToMany(type => Post, posts => posts.user)
+  @OneToMany((type) => Post, (posts) => posts.user)
   @JoinColumn()
   posts: Post[];
 
-  @OneToMany(type => PostLike, postLikes => postLikes.user)
+  @OneToMany((type) => PostLike, (postLikes) => postLikes.user)
   @JoinColumn()
   postLikes: PostLike[];
 
-  @OneToMany(type => PostUserTag, postUserTags => postUserTags.user)
+  @OneToMany((type) => PostUserTag, (postUserTags) => postUserTags.user)
   @JoinColumn()
   postUserTags: PostUserTag[];
 
-  @OneToMany(type => Comment, comments => comments.user)
+  @OneToMany((type) => Comment, (comments) => comments.user)
   @JoinColumn()
   comments: Comment[];
 
-  @OneToMany(type => CommentLike, commentLikes => commentLikes.user)
+  @OneToMany((type) => CommentLike, (commentLikes) => commentLikes.user)
   @JoinColumn()
   commentLikes: CommentLike[];
 
-  @OneToMany(type => CommentLike, commentUserTags => commentUserTags.user)
+  @OneToMany((type) => CommentLike, (commentUserTags) => commentUserTags.user)
   @JoinColumn()
   commentUserTags: CommentUserTag[];
 
-  @OneToMany(type => User, user => user.bookmark_collections)
+  @OneToMany((type) => User, (user) => user.bookmark_collections)
   @JoinColumn()
   bookmark_collections: BookmarkCollection[];
 
-
-
-
-
-  //TODO : 팔로잉 팔로워 수정필요 
+  //TODO : 팔로잉 팔로워 수정필요
   // @ManyToMany(type => User, user => user.followings)
   // @JoinTable({
   //   name: 'follow',
@@ -106,5 +110,3 @@ export class User {
   // @ManyToMany(type => User, user => user.followers)
   // followings: User[];
 }
-
-

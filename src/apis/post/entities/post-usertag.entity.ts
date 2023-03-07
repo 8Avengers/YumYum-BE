@@ -1,25 +1,23 @@
 import { Entity, Column, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
-import { User } from 'src/apis/user/entities/user.entity';
-import { Post } from 'src/apis/post/entities/post.entity';
+import { User } from '../../user/entities/user.entity';
+import { Post } from './post.entity';
 
 @Entity()
 export class PostUserTag {
   @PrimaryColumn()
   id: number;
 
+  //   @Column()
+  //   user_id: number;
 
-//   @Column()
-//   user_id: number;
+  //   @Column()
+  //   post_id: number;
 
-//   @Column()
-//   post_id: number;
-
-
-  @ManyToOne(type => User, user => user.postUserTags)
+  @ManyToOne((type) => User, (user) => user.postUserTags)
   @JoinColumn()
   user: User;
 
-  @ManyToOne(type => Post, post => post.postUserTags)
+  @ManyToOne((type) => Post, (post) => post.postUserTags)
   @JoinColumn()
   post: Post;
 }

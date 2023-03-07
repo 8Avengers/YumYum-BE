@@ -1,6 +1,6 @@
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
-import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
-import { User } from 'src/apis/user/entities/user.entity';
+import { Bookmark } from '../../bookmark/entities/bookmark.entity';
+import { Restaurant } from '../../restaurant/entities/restaurant.entity';
+import { User } from '../../user/entities/user.entity';
 import {
   Entity,
   Column,
@@ -18,9 +18,9 @@ import {
 import { Hashtag } from './hashtag.entity';
 import { Image } from './image.entity';
 import { PostLike } from './post-like.entity';
-import { Comment } from 'src/apis/comment/entities/comment.entity';
+import { Comment } from '../../comment/entities/comment.entity';
 import { PostUserTag } from './post-usertag.entity';
-import { MyList } from 'src/apis/my-list/entities/my-list.entity';
+import { MyList } from '../../my-list/entities/my-list.entity';
 
 @Entity()
 export class Post {
@@ -45,16 +45,15 @@ export class Post {
   @Column({
     type: 'enum',
     enum: ['public', 'private'],
-    default: 'public'
+    default: 'public',
   })
   visibility: 'public' | 'private';
 
-  @ManyToOne(type => Restaurant, restaurant => restaurant.posts)
+  @ManyToOne((type) => Restaurant, (restaurant) => restaurant.posts)
   @JoinColumn()
   restaurant: Restaurant;
 
-  @OneToMany(type => Bookmark, bookmark => bookmark.post)
-
+  @OneToMany((type) => Bookmark, (bookmark) => bookmark.post)
   bookmarks: Bookmark[];
 
   @OneToMany((type) => Image, (images) => images.post)
@@ -85,8 +84,5 @@ export class Post {
   @JoinColumn()
   postUserTags: PostUserTag[];
 
-
-
-//TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
+  //TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
 }
-
