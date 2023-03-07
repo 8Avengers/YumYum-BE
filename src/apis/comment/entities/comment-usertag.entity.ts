@@ -6,12 +6,24 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 
 @Entity()
 export class CommentUserTag {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @ManyToOne((type) => User, (user) => user.commentUserTags)
   @JoinColumn()

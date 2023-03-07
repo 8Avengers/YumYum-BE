@@ -1,4 +1,13 @@
-import { Entity, Column, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Post } from './post.entity';
 
@@ -6,6 +15,15 @@ import { Post } from './post.entity';
 export class PostUserTag {
   @PrimaryColumn()
   id: number;
+
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   //   @Column()
   //   user_id: number;

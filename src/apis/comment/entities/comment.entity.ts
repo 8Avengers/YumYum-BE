@@ -7,6 +7,9 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  DeleteDateColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { CommentLike } from './comment-like.entity';
 import { CommentUserTag } from './comment-usertag.entity';
@@ -18,6 +21,15 @@ export class Comment {
 
   @Column()
   content: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @ManyToOne((type) => User, (user) => user.comments)
   @JoinColumn()
