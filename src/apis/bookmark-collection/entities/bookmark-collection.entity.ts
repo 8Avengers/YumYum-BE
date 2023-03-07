@@ -1,27 +1,41 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany, JoinTable, CreateDateColumn, UpdateDateColumn, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from 'src/apis/user/entities/user.entity';
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  JoinTable,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  DeleteDateColumn,
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity';
+import { Bookmark } from '../../bookmark/entities/bookmark.entity';
 
 @Entity({ name: 'bookmark_collection' })
 export class BookmarkCollection {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-@PrimaryGeneratedColumn()
-id: number;
+  @Column()
+  name: string;
 
-@Column()
-name: string;
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
 
-@CreateDateColumn({ name: 'created_at' })
-created_at: Date;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
 
-@UpdateDateColumn({ name: 'updated_at' })
-updated_at: Date;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
-@ManyToOne(type => User, user => user.bookmark_collections)
-@JoinColumn()
-user: User;
+  @ManyToOne((type) => User, (user) => user.bookmark_collections)
+  @JoinColumn()
+  user: User;
 
-@ManyToMany(type => Bookmark, bookmarks => bookmarks.bookmark_collections)
-bookmarks: Bookmark[];
-    //TODO: 다대다 관계에서는 @JoinTable()은 한쪽만 써야합니다.
+  @ManyToMany((type) => Bookmark, (bookmarks) => bookmarks.bookmark_collections)
+  bookmarks: Bookmark[];
+  //TODO: 다대다 관계에서는 @JoinTable()은 한쪽만 써야합니다.
 }

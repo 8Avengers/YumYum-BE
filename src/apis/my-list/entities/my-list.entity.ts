@@ -1,6 +1,15 @@
-import { Post } from 'src/apis/post/entities/post.entity';
-import { User } from 'src/apis/user/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, ManyToMany } from 'typeorm';
+import { Post } from '../../post/entities/post.entity';
+import { User } from '../../user/entities/user.entity';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  ManyToMany,
+  DeleteDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class MyList {
@@ -22,9 +31,12 @@ export class MyList {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @ManyToOne(type => User, user => user.my_lists)
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
+
+  @ManyToOne((type) => User, (user) => user.my_lists)
   user: User;
 
-  @ManyToMany(type => Post, posts => posts.my_lists)
+  @ManyToMany((type) => Post, (posts) => posts.my_lists)
   posts: Post[];
 }

@@ -1,0 +1,26 @@
+###뉴스피드 페이지
+GET localhost:3000/posts
+
+###포스팅 상세보기
+GET localhost:3000/posts/3
+
+###포스팅 작성
+POST localhost:3000/posts/1
+Content-Type: application/json
+
+{
+  "content": "아주 엄청난 맛집이군요",
+  "rating": 2,
+  "img": "엄청난 사진입니당."
+}
+
+###포스팅 수정
+PUT localhost:3000/posts/3
+Content-Type: application/json
+
+{
+  "content": "사실 별로였습니당"
+}
+
+###포스팅 삭제
+DELETE localhost:3000/posts/3

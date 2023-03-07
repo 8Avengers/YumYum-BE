@@ -1,25 +1,41 @@
-import { Entity, Column, ManyToOne, JoinColumn, PrimaryColumn } from 'typeorm';
-import { User } from 'src/apis/user/entities/user.entity';
-import { Post } from 'src/apis/post/entities/post.entity';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
+import { User } from '../../user/entities/user.entity';
+import { Post } from './post.entity';
 
 @Entity()
 export class PostUserTag {
   @PrimaryColumn()
   id: number;
 
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
 
-//   @Column()
-//   user_id: number;
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
 
-//   @Column()
-//   post_id: number;
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
+  //   @Column()
+  //   user_id: number;
 
-  @ManyToOne(type => User, user => user.postUserTags)
+  //   @Column()
+  //   post_id: number;
+
+  @ManyToOne((type) => User, (user) => user.postUserTags)
   @JoinColumn()
   user: User;
 
-  @ManyToOne(type => Post, post => post.postUserTags)
+  @ManyToOne((type) => Post, (post) => post.postUserTags)
   @JoinColumn()
   post: Post;
 }
