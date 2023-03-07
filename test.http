@@ -2,7 +2,7 @@
 GET localhost:3000/posts
 
 ###포스팅 상세보기
-GET localhost:3000/posts/4
+GET localhost:3000/posts/6
 
 ###포스팅 작성
 POST localhost:3000/posts
@@ -28,7 +28,7 @@ Content-Type: application/json
 DELETE localhost:3000/posts/4
 
 ###특정 게시글에 해당하는 모든 댓글 보기
-GET localhost:3000/posts/1/comments
+GET localhost:3000/posts/6/comments
 
 ###댓글 작성
 POST localhost:3000/posts/1/comments

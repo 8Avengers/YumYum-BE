@@ -85,7 +85,7 @@ export class PostService {
       return post;
     } catch (err) {
       if (err instanceof NotFoundException) {
-        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+        throw err;
       } else {
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',

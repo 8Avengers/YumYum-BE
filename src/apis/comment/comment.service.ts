@@ -19,15 +19,13 @@ export class CommentService {
   ) {}
 
   /*
-                    ### 23.03.07
-                    ### 이드보라
-                    ### 특정 포스팅에 해당하는 모든 댓글 불러오기
-                   */
+                        ### 23.03.07
+                        ### 이드보라
+                        ### 특정 포스팅에 해당하는 모든 댓글 불러오기
+                       */
   async getAllComments(postId: number) {
     try {
       await this.postService.getPostById(postId);
-
-      console.log('11111');
 
       const comments = await this.commentRepository
         .createQueryBuilder('comment')
@@ -37,13 +35,11 @@ export class CommentService {
         .andWhere('post.id = :postId', { postId })
         .select(['comment.content', 'user.nickname'])
         .getMany();
-      console.log('222222');
 
       if (!comments || comments.length === 0) {
         throw new NotFoundException('No comments found.');
       }
 
-      console.log('333333');
       return comments;
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -87,10 +83,10 @@ export class CommentService {
   // }
 
   /*
-                        ### 23.03.07
-                        ### 이드보라
-                        ### 댓글 작성
-                        */
+                            ### 23.03.07
+                            ### 이드보라
+                            ### 댓글 작성
+                            */
   async createComment(postId: number, content: string) {
     try {
       await this.postService.getPostById(postId);
@@ -112,10 +108,10 @@ export class CommentService {
   }
 
   /*
-                        ### 23.03.07
-                        ### 이드보라
-                        ### 댓글 수정
-                        */
+                            ### 23.03.07
+                            ### 이드보라
+                            ### 댓글 수정
+                            */
   async updateComment(postId: number, commentId: number, content: string) {
     try {
       await this.postService.getPostById(postId);
@@ -138,10 +134,10 @@ export class CommentService {
   }
 
   /*
-                        ### 23.03.07
-                        ### 이드보라
-                        ### 댓글 삭제
-                        */
+                            ### 23.03.07
+                            ### 이드보라
+                            ### 댓글 삭제
+                            */
   async deleteComment(postId: number, commentId: number) {
     try {
       await this.postService.getPostById(postId);
