@@ -11,7 +11,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
       //얘는 쿠키에서 꺼내주는 게 없어서 우리가 만들어줘야 한다.
 
       jwtFromRequest: (req) => {
-        const cookie = req.headers.cookie; //쿠키의 헤더에서 refreshToken을 꺼내야 한다.
+        const cookie = req.headers.cookie; // request header의 쿠키에서 refreshToken을 꺼내야 한다.
         const refreshToken = cookie.replace('refreshToken=', '');
         console.log('내가만든쿠키::::::::::::', cookie);
         console.log('내가추출한리프레시::::::::', refreshToken);

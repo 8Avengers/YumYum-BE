@@ -18,7 +18,7 @@ export class AuthService {
       { email: user.email, id: user.id, profileImage: user.profile_image }, //
       {
         secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_SEC'),
+        expiresIn: '14d',
       },
     );
 
@@ -33,7 +33,7 @@ export class AuthService {
       { email: user.email, id: user.id, profileImage: user.profile_image },
       {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_SEC'),
+        expiresIn: '14d',
       },
     );
     return refreshToken;
@@ -73,6 +73,3 @@ export class AuthService {
     res.redirect('http://localhost:5500/frontend/social-login.html');
   }
 }
-
-//개발환경 쿠키는 헤더에 들어가 있다.
-//     res.setHeader('set-cookie', `refreshToken=${refreshToken}; path=/;`);
