@@ -23,7 +23,7 @@ interface IOAuthUser {
   user: Pick<User, 'email' | 'password' | 'name' | 'gender' | 'birth'>;
 }
 
-@Controller('auth')
+@Controller('')
 export class AuthController {
   constructor(
     private readonly userService: UserService,
@@ -31,7 +31,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  async login(
+  async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
     @Req() req, //
     // @Res() res, // res 를 써주지 않으면 무한로딩한다.
@@ -55,18 +55,6 @@ export class AuthController {
       refreshToken,
       accessToken,
     };
-  }
-
-  //AccessToken 재발급 API
-  @UseGuards(AuthAccessGuard)
-  @Post('restoreAccessToken')
-  async restoreAccessToken(
-    // @Req() req,//
-    @CurrentUser() currentUser: any, //
-  ) {
-    console.log('currentUser::::::::::::::::::::', currentUser);
-
-    return this.authService.createAccessToken({ user: currentUser });
   }
 
   //구글로그인
@@ -98,6 +86,25 @@ export class AuthController {
   ) {
     // 1. 가입확인
     this.authService.loginOauth({ req, res });
+  }
+
+  //AccessToken 재발급 API
+  // @UseGuards(AuthAccessGuard)
+  @UseGuards(AuthRefreshGuard)
+  //userGuards를 통과하면, user가 통과되었다 refresh토큰에 user정보가 담겨!
+  //UseGuards 가 전역에서 사용이 가능할까?
+  //useGuards가 전역에서 사용이 가능하도록 해야한다.
+  //useGuards가 => 이걸 어떻게 전역에서 사용할 수 있을까?
+  @Post('restoreAccessToken')
+  async restoreAccessToken(
+    @Req() req,
+    @CurrentUser() currentUser: any, //이걸 왜쓸까?
+  ) {
+    // console.log('UseGuards통과한후 req.user::::::: 찍어보자 ', req.user);
+    // console.log('currentUser::::::::::::::::::::', currentUser);
+    // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
+
+    return this.authService.createAccessToken({ user: currentUser });
   }
 }
 

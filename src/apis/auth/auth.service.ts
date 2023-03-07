@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
@@ -40,27 +40,37 @@ export class AuthService {
   }
 
   async loginOauth({ req, res }) {
-    // 1. 가입확인
-    let user = await this.userService.findOne({ email: req.user.email });
+    try {
+      // 1. 가입확인
+      let user = await this.userService.findOne({ email: req.user.email });
 
-    // 2. 회원가입
-    if (!user) {
-      user = await this.userService.createUser({
-        email: req.user.email,
-        hashedPassword: req.user.password,
-        nickname: req.user.nickname,
-        name: req.user.name,
-        gender: req.user.gender,
-        birth: req.user.birth,
-        profileImage: req.user.profileImage,
-        phoneNumber: req.user.phoneNumber,
-      });
+      // 2. 회원가입
+      if (!user) {
+        user = await this.userService.createUser({
+          email: req.user.email,
+          hashedPassword: req.user.password,
+          nickname: req.user.nickname,
+          name: req.user.name,
+          gender: req.user.gender,
+          birth: req.user.birth,
+          profileImage: req.user.profileImage,
+          phoneNumber: req.user.phoneNumber,
+        });
+      }
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        console.error(
+          `Error: The nickname is already in use: ${error.message}`,
+        );
+        // Handle the error here, for example by redirecting the user to a different page
+      } else {
+        throw error;
+      }
     }
+
     // 3. 로그인
     // this.createRefreshToken({ user, res }); //자기 자신의 리프레시 토큰을 가지고 오는 것이다.이제 req, res만 밖에서 받아오면 된다.
-    res.redirect(
-      'http://localhost:5500/21-03-login-google/frontend/social-login.html',
-    );
+    res.redirect('http://localhost:5500/frontend/social-login.html');
   }
 }
 

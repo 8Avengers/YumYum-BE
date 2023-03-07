@@ -47,21 +47,23 @@ export class CreateUserDto {
   @IsString({ message: '닉네임은 문자열 형식이여야 합니다.' })
   @MaxLength(20, { message: '닉네임은 최대 20글자 입니다.' })
   @Matches(/^[가-힣a-z0-9A-Z]{4,20}$/, {
-    message: '닉네임은 한글 또는 숫자로 영문으로 입력해주세요',
+    message: '닉네임은 한글 또는 숫자 또는 영문으로 입력해주세요',
   })
   @IsNotEmpty()
   readonly nickname: string;
 
   //TODO: 회원가입시 나중에 휴대폰인증으로 바꾸자.
   @IsNotEmpty()
-  @Matches(/^010-\d{4}-\d{4}$/, { message: '010-1234-1234형식을 맞춰주세요.' })
+  @Matches(/^010\d{4}\d{4}$/, {
+    message: '01012341234형식을 맞춰주세요. 하이픈을 제거해주세요.',
+  })
   readonly phoneNumber: string;
 
   //TODO: 회원가입시 성별 입력값을 어떻게 받을까?
   @IsEnum(['M', 'F'])
   gender: 'M' | 'F';
 
-  //TODO: 회원가입시 birth: 입력값을 어떻게 받을까?
+  //TODO: 회원가입시 birth: 입력값을 어떻게 받을까? 920913은 안된다. 19920913 또는 1992-09-13
   @IsDateString()
   birth: Date;
 

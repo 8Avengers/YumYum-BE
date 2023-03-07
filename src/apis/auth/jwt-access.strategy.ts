@@ -14,7 +14,7 @@ export class JwtAccessStrategy extends PassportStrategy(Strategy, 'access') {
   }
 
   validate(payload) {
-    console.log('payload::::::::::::::::::::::::::::::', payload); //email: a@a.com , sub: user.id
+    console.log('액세스토큰의 payload 인가완료:::::::::::', payload); //email: a@a.com , sub: user.id
 
     return {
       email: payload.email,
