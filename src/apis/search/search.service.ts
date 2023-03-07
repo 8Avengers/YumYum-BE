@@ -17,21 +17,21 @@ export class SearchService {
 
   async getUserSearch(keyword: String) {
     const userSearchResult = await this.userRepository.findBy({
-      nickname: Like(`%${keyword}%`),
+      nickname: Like(`${keyword}%`),
     });
     return userSearchResult;
   }
 
   async getRestaurantSearch(keyword: String) {
     const restaurantSearchResult = await this.restaurantRepository.findBy({
-      name: Like(`%${keyword}%`),
+      name: Like(`${keyword}%`),
     });
     return restaurantSearchResult;
   }
 
   async getHashtagSearch(keyword: String) {
     const hashtagSearchResult = await this.hashtagRepository.findBy({
-      name: Like(`%${keyword}%`),
+      name: Like(`${keyword}%`),
     });
     return hashtagSearchResult;
   }
