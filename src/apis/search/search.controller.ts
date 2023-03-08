@@ -15,8 +15,14 @@ export class SearchController {
   async getRestaurantSearch(@Query('keyword') keyword: string) {
     return await this.searchService.getRestaurantSearch(keyword);
   }
+
   @Get('/hashtag')
   async getHashtagSearch(@Query('keyword') keyword: string) {
     return await this.searchService.getHashtagSearch(keyword);
+  }
+
+  @Get('/post')
+  async getPostSearchByHashtag(@Query('hashtag') hashtag: string) {
+    return await this.searchService.getPostSearchByHashtag(hashtag);
   }
 }

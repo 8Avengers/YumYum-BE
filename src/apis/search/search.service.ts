@@ -35,4 +35,23 @@ export class SearchService {
     });
     return hashtagSearchResult;
   }
+
+  async getPostSearchByHashtag(hashtag: String) {
+    const postSearchByHashtagResult = await this.hashtagRepository
+      .createQueryBuilder('hashtag')
+      .innerJoinAndSelect('hashtag', 'post')
+      .where('post.deleted_at IS NULL')
+      .andWhere(`INCLUDE ${hashtag} IN hashtag`)
+      .select([
+        'post.content',
+        'post.rating',
+        'post.img_url',
+        'post.updated_at',
+        'user.nickname',
+        'restaurant.name',
+      ])
+      .getMany();
+
+    console.log(postSearchByHashtagResult);
+  }
 }
