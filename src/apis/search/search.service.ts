@@ -14,44 +14,53 @@ export class SearchService {
     private restaurantRepository: Repository<Restaurant>,
     @InjectRepository(Hashtag) private hashtagRepository: Repository<Hashtag>,
   ) {}
-
-  async getUserSearch(keyword: String) {
+  /*
+      ### 23.03.06
+      ### 최호인
+      ### 사용자 정보 검색
+    */
+  async getUserSearch(keyword: string) {
     const userSearchResult = await this.userRepository.findBy({
       nickname: Like(`${keyword}%`),
     });
     return userSearchResult;
   }
-
-  async getRestaurantSearch(keyword: String) {
+  /*
+      ### 23.03.06
+      ### 최호인
+      ### 음식점 정보 검색
+    */
+  async getRestaurantSearch(keyword: string) {
     const restaurantSearchResult = await this.restaurantRepository.findBy({
       name: Like(`${keyword}%`),
     });
     return restaurantSearchResult;
   }
-
-  async getHashtagSearch(keyword: String) {
+  /*
+      ### 23.03.06
+      ### 최호인
+      ### 해시태그 검색
+    */
+  async getHashtagSearch(keyword: string) {
     const hashtagSearchResult = await this.hashtagRepository.findBy({
       name: Like(`${keyword}%`),
     });
     return hashtagSearchResult;
   }
 
-  async getPostSearchByHashtag(hashtag: String) {
-    const postSearchByHashtagResult = await this.hashtagRepository
-      .createQueryBuilder('hashtag')
-      .innerJoinAndSelect('hashtag', 'post')
-      .where('post.deleted_at IS NULL')
-      .andWhere(`INCLUDE ${hashtag} IN hashtag`)
-      .select([
-        'post.content',
-        'post.rating',
-        'post.img_url',
-        'post.updated_at',
-        'user.nickname',
-        'restaurant.name',
-      ])
-      .getMany();
+  /*
+      ### 23.03.08
+      ### 최호인
+      ### 해시태그를 기반으로 포스팅 불러오기
+    */
+
+  async getPostSearchByHashtag(hashtag: string) {
+    const postSearchByHashtagResult = await this.hashtagRepository.find({
+      relations: ['posts'],
+      where: [{ deleted_at: null }, { name: hashtag }],
+    });
 
     console.log(postSearchByHashtagResult);
+    return postSearchByHashtagResult;
   }
 }
