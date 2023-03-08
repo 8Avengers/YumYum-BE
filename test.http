@@ -47,4 +47,4 @@ Content-Type: application/json
 }
 
 ###댓글 삭제
-DELETE localhost:3000/posts/1/comments/1
+DELETE localhost:3000/posts/1/comments/8

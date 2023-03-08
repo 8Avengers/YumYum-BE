@@ -116,4 +116,157 @@ describe('CommentService', () => {
       );
     });
   });
+
+  describe('createComment', () => {
+    const postId = { id: 1 };
+    const newComment = {
+      content: 'content1',
+    };
+    it('should create a new comment', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.insert = jest
+        .fn()
+        .mockResolvedValueOnce(newComment);
+
+      await commentService.createComment(postId.id, newComment.content);
+
+      expect(mockCommentRepository.insert).toHaveBeenCalledWith({
+        content: newComment.content,
+        post: postId,
+      });
+      expect(mockPostService.getPostById).toHaveBeenCalledWith(postId.id);
+    });
+
+    it('should throw an error if comment could not be created', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.insert = jest.fn().mockImplementationOnce(() => {
+        throw new Error('Something went wrong');
+      });
+
+      await expect(
+        commentService.createComment(postId.id, newComment.content),
+      ).rejects.toThrowError(
+        new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        ),
+      );
+    });
+  });
+
+  describe('updateComment', () => {
+    const testPostId = 1;
+    const updateComment = {
+      id: 1,
+      content: 'content2',
+    };
+    it('should update an existing comment', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.update = jest
+        .fn()
+        .mockResolvedValueOnce(updateComment);
+
+      await commentService.updateComment(
+        testPostId,
+        updateComment.id,
+        updateComment.content,
+      );
+
+      expect(mockCommentRepository.update).toHaveBeenCalledWith(
+        updateComment.id,
+        {
+          content: updateComment.content,
+        },
+      );
+      expect(mockPostService.getPostById).toHaveBeenCalledWith(testPostId);
+    });
+
+    it('should throw a NotFoundException when updating a non-existing comment', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.update = jest
+        .fn()
+        .mockResolvedValueOnce({ affected: 0 });
+
+      await expect(
+        commentService.updateComment(
+          testPostId,
+          updateComment.id,
+          updateComment.content,
+        ),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw an error if comment could not be updated', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.update = jest.fn().mockImplementationOnce(() => {
+        throw new Error('Something went wrong');
+      });
+
+      await expect(
+        commentService.updateComment(
+          testPostId,
+          updateComment.id,
+          updateComment.content,
+        ),
+      ).rejects.toThrowError(
+        new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        ),
+      );
+    });
+  });
+
+  describe('deleteComment', () => {
+    const testPostId = 1;
+    const deleteComment = {
+      id: 1,
+      content: 'content3',
+    };
+    it('should delete a comment by id', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.softDelete = jest
+        .fn()
+        .mockResolvedValueOnce(deleteComment);
+
+      const result = await commentService.deleteComment(
+        testPostId,
+        deleteComment.id,
+      );
+
+      expect(result).toBeUndefined();
+      expect(mockCommentRepository.softDelete).toHaveBeenCalledWith(
+        deleteComment.id,
+      );
+      expect(mockPostService.getPostById).toHaveBeenCalledWith(testPostId);
+    });
+
+    it('should throw a NotFoundException when deleting a non-existing comment', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.softDelete = jest
+        .fn()
+        .mockResolvedValueOnce({ affected: 0 });
+
+      await expect(
+        commentService.deleteComment(testPostId, deleteComment.id),
+      ).rejects.toThrowError(
+        new NotFoundException(`Comment with id ${deleteComment.id} not found.`),
+      );
+    });
+
+    it('should throw an error if comment could not be deleted', async () => {
+      mockPostService.getPostById.mockResolvedValueOnce({});
+      mockCommentRepository.softDelete = jest
+        .fn()
+        .mockImplementationOnce(() => {
+          throw new Error('Something went wrong');
+        });
+
+      await expect(
+        commentService.deleteComment(testPostId, deleteComment.id),
+      ).rejects.toThrowError(
+        new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        ),
+      );
+    });
+  });
 });
