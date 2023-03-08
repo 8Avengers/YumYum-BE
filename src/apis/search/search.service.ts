@@ -60,7 +60,6 @@ export class SearchService {
       where: [{ deleted_at: null }, { name: hashtag }],
     });
 
-    console.log(postSearchByHashtagResult);
     return postSearchByHashtagResult;
   }
 }
