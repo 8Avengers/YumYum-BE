@@ -10,19 +10,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
+import { LikeService } from '../like/like.service';
+import { PostWithLikesDto } from './dto/post-with-likes.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
+    private readonly likeService: LikeService,
   ) {}
 
   /*
-          ### 23.03.06
-          ### 이드보라
-          ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
-          */
-  async getPosts() {
+                          ### 23.03.08
+                          ### 이드보라
+                          ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
+                          */
+  async getPosts(): Promise<PostWithLikesDto[]> {
     try {
       const posts = await this.postRepository
         .createQueryBuilder('post')
@@ -42,7 +45,16 @@ export class PostService {
       if (!posts || posts.length === 0) {
         throw new NotFoundException('No posts found.');
       }
-      return posts;
+      const postIds = posts.map((post) => post.id);
+      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+
+      const postListWithLikes = posts.map((post) => {
+        const likes =
+          postLikes.find((like) => like.post_id === post.id)?.totalLikes || 0;
+        return { ...post, totalLikes: likes };
+      });
+
+      return postListWithLikes;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw new HttpException(err.message, HttpStatus.NOT_FOUND);
@@ -55,10 +67,10 @@ export class PostService {
   }
 
   /*
-            ### 23.03.06
-            ### 이드보라
-            ### 포스팅 상세보기
-            */
+                            ### 23.03.08
+                            ### 이드보라
+                            ### 포스팅 상세보기.좋아요 기능 추가
+                            */
   async getPostById(id: number) {
     try {
       const post = await this.postRepository
@@ -82,7 +94,8 @@ export class PostService {
         throw new NotFoundException(`Post with id ${id} not found.`);
       }
 
-      return post;
+      const totalLikes = await this.likeService.getLikesForPost(id);
+      return { ...post, totalLikes };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -95,10 +108,10 @@ export class PostService {
   }
 
   /*
-            ### 23.03.06
-            ### 이드보라
-            ### 포스팅 작성
-            */
+                            ### 23.03.06
+                            ### 이드보라
+                            ### 포스팅 작성
+                            */
   createPost(content: string, rating: number, img: string, visibility) {
     try {
       return this.postRepository.insert({
@@ -115,10 +128,10 @@ export class PostService {
   }
 
   /*
-            ### 23.03.06
-            ### 이드보라
-            ### 포스팅 수정
-            */
+                            ### 23.03.06
+                            ### 이드보라
+                            ### 포스팅 수정
+                            */
   async updatePost(
     id: number,
     content: string,
@@ -148,10 +161,10 @@ export class PostService {
   }
 
   /*
-            ### 23.03.06
-            ### 이드보라
-            ### 포스팅 삭제
-            */
+                            ### 23.03.06
+                            ### 이드보라
+                            ### 포스팅 삭제
+                            */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!

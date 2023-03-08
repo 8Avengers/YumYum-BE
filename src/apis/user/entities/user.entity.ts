@@ -1,6 +1,6 @@
 import { Bookmark } from '../../bookmark/entities/bookmark.entity';
 import { Post } from '../../post/entities/post.entity';
-import { PostLike } from '../../post/entities/post-like.entity';
+import { PostLike } from '../../like/entities/post-like.entity';
 import { Comment } from '../../comment/entities/comment.entity';
 import {
   Entity,
@@ -17,7 +17,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { PostUserTag } from '../../post/entities/post-usertag.entity';
-import { CommentLike } from '../../comment/entities/comment-like.entity';
+import { CommentLike } from '../../like/entities/comment-like.entity';
 import { CommentUserTag } from '../../comment/entities/comment-usertag.entity';
 import { IsEnum } from 'class-validator';
 import { MyList } from '../../my-list/entities/my-list.entity';

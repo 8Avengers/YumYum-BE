@@ -17,7 +17,7 @@ import {
 } from 'typeorm';
 import { Hashtag } from './hashtag.entity';
 import { Image } from './image.entity';
-import { PostLike } from './post-like.entity';
+import { PostLike } from '../../like/entities/post-like.entity';
 import { Comment } from '../../comment/entities/comment.entity';
 import { PostUserTag } from './post-usertag.entity';
 import { MyList } from '../../my-list/entities/my-list.entity';

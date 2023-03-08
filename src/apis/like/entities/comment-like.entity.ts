@@ -9,7 +9,7 @@ import {
   DeleteDateColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { Comment } from './comment.entity';
+import { Comment } from '../../comment/entities/comment.entity';
 
 @Entity()
 export class CommentLike {
