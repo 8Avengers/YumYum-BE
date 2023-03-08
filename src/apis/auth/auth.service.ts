@@ -1,63 +1,75 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService, //
-    private readonly configService: ConfigService
-  
-  
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
   ) {}
- 
 
-
-  createRefreshToken({user, res}) {
-    const refreshToken = this.jwtService.sign({
-        
-      email: user.email,
-      sub: user.id,
-    }, {
-      secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET')
-      ,
-      expiresIn: '2w',
-    });
-
-    console.log('::::::::::::authservice에서 refreshToken이뭘까?::::::::',refreshToken)
-
-    //개발환경 쿠키는 헤더에 들어가 있다.
-   res.setHeader('set-cookie', `refreshToken=${refreshToken}; path=/;`);
-   res.send({ refreshToken, user});
-    //누가 들어가는지 확인용브라우저에 나올수있다.
-
-
-    /* 배포할때 바꿔주자.
-     쿠키에 저장할 때 보안옵션을 줄 수 있다.
-     
-    res.setHeader('Access-Control-Allow-Origin', 'https://myfrontsite.com')
-    res.setHeader(
-    'Set-Cookie',
-    `refreshToken=${refreshToken}; path=/; domain=.mybacksite.com; SameSite=None; Secure; httpOnly;`
-        )
-
-    */
-  }
-
-
-  createAccessToken({user}) {
-    console.log('::::authService에서user가 뭘까?::::',user);
-    
+  //액세스토큰생성
+  createAccessToken({ user }) {
+    console.log('acessToken의 유저', user);
     const accessToken = this.jwtService.sign(
-    { email: user.email,  sub: user.id, },// 
-    { secret: 'myAccessKey',expiresIn: '30s',});
+      { email: user.email, id: user.id, profileImage: user.profile_image }, //
+      {
+        secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+        expiresIn: '14d',
+      },
+    );
 
-    console.log(':::::::::authService에서 accessToken이 뭘까?::::::',accessToken);
-    
-    return accessToken
-    // return res.send({ accessToken });
-
-    
+    return accessToken;
   }
 
+  //리프레시토큰생성
+  createRefreshToken({ user }) {
+    console.log('refreshToken의 유저', user);
+
+    const refreshToken = this.jwtService.sign(
+      { email: user.email, id: user.id, profileImage: user.profile_image },
+      {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        expiresIn: '14d',
+      },
+    );
+    return refreshToken;
+  }
+
+  async loginOauth({ req, res }) {
+    try {
+      // 1. 가입확인
+      let user = await this.userService.findOne({ email: req.user.email });
+
+      // 2. 회원가입
+      if (!user) {
+        user = await this.userService.createUser({
+          email: req.user.email,
+          hashedPassword: req.user.password,
+          nickname: req.user.nickname,
+          name: req.user.name,
+          gender: req.user.gender,
+          birth: req.user.birth,
+          profileImage: req.user.profileImage,
+          phoneNumber: req.user.phoneNumber,
+        });
+      }
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        console.error(
+          `Error: The nickname is already in use: ${error.message}`,
+        );
+        // Handle the error here, for example by redirecting the user to a different page
+      } else {
+        throw error;
+      }
+    }
+
+    // 3. 로그인
+    // this.createRefreshToken({ user, res }); //자기 자신의 리프레시 토큰을 가지고 오는 것이다.이제 req, res만 밖에서 받아오면 된다.
+    res.redirect('http://localhost:5500/frontend/social-login.html');
+  }
 }

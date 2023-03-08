@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config'; //필수 
+import { ConfigService } from '@nestjs/config'; //필수
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
@@ -18,11 +18,7 @@ import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookma
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
-  constructor(
-    private readonly configService: ConfigService,
-    
-    
-    ) {} //필수 
+  constructor(private readonly configService: ConfigService) {} //필수
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return {
@@ -33,18 +29,23 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('DATABASE_PASSWORD'),
       database: this.configService.get<string>('DATABASE_NAME'),
       namingStrategy: new SnakeNamingStrategy(),
-      logging: Boolean(this.configService.get<string>('DATABASE_logging')), 
-      synchronize: Boolean(this.configService.get<string>('DATABASE_SYNC')),  // 배포 시 false
+      logging: Boolean(this.configService.get<string>('DATABASE_logging')),
+      synchronize: Boolean(this.configService.get<string>('DATABASE_SYNC')), // 배포 시 false
       entities: [
-        Bookmark,//
-        BookmarkCollection,//
-        Comment,CommentLike,CommentUserTag,//
-        MyList,//
-        Post,Hashtag,Image,PostLike,PostUserTag,//
-        Restaurant,//
-        User,//
+        Bookmark, //
+        BookmarkCollection, //
+        Comment,
+        CommentLike,
+        CommentUserTag, //
+        MyList, //
+        Post,
+        Hashtag,
+        Image,
+        PostLike,
+        PostUserTag, //
+        Restaurant, //
+        User, //
       ],
     };
   }
 }
-

@@ -5,19 +5,20 @@
 //   catch(exception: HttpException) {
 //     const status = exception.getStatus();
 //     const message = exception.message;
-//
+
 //     console.log('===================');
 //     console.log('에러가 발생했어요!!');
 //     console.log('예외내용', message);
 //     console.log('예외코드', status);
 //     console.log('=======================================');
-//
+
 //     if (status === 500)
 //       return new HttpException('이 에러는 서버문제입니다.!', 500);
 //   }
 // }
 
-//TODO: 학습이 필요한 코드입니다.
+// TODO: 학습이 필요한 코드입니다. 이 코드는 무슨 뜻일까?
+
 import {
   ExceptionFilter,
   Catch,
