@@ -4,7 +4,10 @@ import { AuthGuard } from '@nestjs/passport';
 @Injectable()
 export class AuthAccessGuard extends AuthGuard('access') {
   getRequest(context: ExecutionContext) {
+    console.log('여기통과하나????????');
+    
     return context.switchToHttp().getRequest();
+    
   }
 }
 

@@ -25,5 +25,11 @@ import { JwtNaverStrategy } from './jwt-social-naver.strategy';
   ],
 
   controllers: [AuthController],
+  exports: [ JwtGoogleStrategy, //
+    JwtNaverStrategy, //
+    JwtKakaoStrategy, //
+    JwtRefreshStrategy, //
+    JwtAccessStrategy, // 
+  ],
 })
 export class AuthModule {}

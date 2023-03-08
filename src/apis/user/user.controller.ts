@@ -1,13 +1,18 @@
-import { Controller, Post, Body, ValidationPipe } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, Param, Get, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 
-@Controller('auth')
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { User } from './entities/user.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthAccessGuard } from '../auth/guards/auth.guards';
+
+@Controller('/')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('signUp')
+  @Post('/signUp')
   async signUp(@Body(ValidationPipe) createUserDto: CreateUserDto) {
     const {
       email,
@@ -34,4 +39,21 @@ export class UserController {
       profileImage,
     });
   }
+
+  @Get('users/:id')
+  async view(@Param('id') id: string) {
+    const user = await this.userService.getUserById(id);
+    return user;
+  }
+
+  
+
+
+  @Get('/user')
+  @UseGuards(AuthAccessGuard)
+  // @UseGuards(AuthGuard())  
+ async user(@CurrentUser() user: User ) {
+    return user;
+  }
+
 }

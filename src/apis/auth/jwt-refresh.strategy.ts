@@ -30,7 +30,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
 
     return {
       email: payload.email,
-      id: payload.sub,
+      id: payload.id,
       profileImage: payload.profileImage,
     };
 
