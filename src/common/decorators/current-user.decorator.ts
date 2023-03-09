@@ -8,7 +8,7 @@ export const CurrentUser = createParamDecorator(
     // console.log('::::::data찍어보자::::::', data);
     // console.log('::::::context찍어보자::::::', context);
     const req = context.switchToHttp().getRequest();
-    console.log('데코레이터의 req.user::::::::::::', req.user);
+    console.log(':::::현재유저는 누구일까? req.user:::::', req.user);
 
     return req.user;
   },

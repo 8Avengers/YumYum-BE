@@ -1,27 +1,62 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany, JoinTable, CreateDateColumn, UpdateDateColumn, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from 'src/apis/user/entities/user.entity';
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
+// import { Post } from 'src/apis/post/entities/post.entity';
+// import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
+// import {
+//   Entity,
+//   Column,
+//   CreateDateColumn,
+//   UpdateDateColumn,
+//   DeleteDateColumn,
+//   ManyToOne,
+//   JoinColumn,
+//   ManyToMany,
+//   JoinTable,
+//   PrimaryGeneratedColumn,
+// } from 'typeorm';
+// import { Bookmark } from './bookmark.entity';
 
-@Entity({ name: 'bookmark_collection' })
-export class BookmarkCollection {
+// @Entity({ name: 'bookmark_collection' })
+// export class BookmarkCollection {
+//   @PrimaryGeneratedColumn()
+//   id: number;
 
-@PrimaryGeneratedColumn()
-id: number;
+//   @CreateDateColumn({ name: 'created_at' })
+//   createdAt: Date;
 
-@Column()
-name: string;
+//   @UpdateDateColumn({ name: 'updated_at' })
+//   updatedAt: Date;
 
-@CreateDateColumn({ name: 'created_at' })
-created_at: Date;
+//   @DeleteDateColumn({ name: 'deleted_at' })
+//   deletedAt: Date;
 
-@UpdateDateColumn({ name: 'updated_at' })
-updated_at: Date;
+//   @ManyToOne((type) => Bookmark, (bookmark) => bookmark.bookmarkCollections)
+//   @JoinColumn({ name: 'bookmark_id' })
+//   bookmark: Bookmark;
 
-@ManyToOne(type => User, user => user.bookmark_collections)
-@JoinColumn()
-user: User;
+//   @ManyToMany((type) => Post)
+//   @JoinTable({
+//     name: 'bookmark_collection_post',
+//     joinColumn: {
+//       name: 'bookmark_collection_id',
+//       referencedColumnName: 'id',
+//     },
+//     inverseJoinColumn: {
+//       name: 'post_id',
+//       referencedColumnName: 'id',
+//     },
+//   })
+//   posts: Post[];
 
-@ManyToMany(type => Bookmark, bookmarks => bookmarks.bookmark_collections)
-bookmarks: Bookmark[];
-    //TODO: 다대다 관계에서는 @JoinTable()은 한쪽만 써야합니다.
-}
+//   @ManyToMany((type) => Restaurant)
+//   @JoinTable({
+//     name: 'bookmark_collection_restaurant',
+//     joinColumn: {
+//       name: 'bookmark_collection_id',
+//       referencedColumnName: 'id',
+//     },
+//     inverseJoinColumn: {
+//       name: 'restaurant_id',
+//       referencedColumnName: 'id',
+//     },
+//   })
+//   restaurants: Restaurant[];
+// }

@@ -15,13 +15,9 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserService } from '../user/user.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../user/entities/user.entity';
 import { Response } from 'express';
 import { AuthAccessGuard, AuthRefreshGuard } from './guards/auth.guards';
-
-interface IOAuthUser {
-  user: Pick<User, 'email' | 'password' | 'name' | 'gender' | 'birth'>;
-}
+import { OauthUserDto } from '../user/dto/oauth-user.dto';
 
 @Controller('/')
 export class AuthController {
@@ -30,6 +26,7 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  //TODO: 이미 소셜로그인 완료했는데, 이메일로 또 로그인하려는 경우 에러처리해야한다.
   @Post('/login')
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
@@ -57,35 +54,28 @@ export class AuthController {
     };
   }
 
-  //구글로그인
+  //소셜(구글)로회원가입 API
+  @Get('/signup/google')
+  @UseGuards(AuthGuard('google'))
+  async signupGoogle(
+    @CurrentUser() user: OauthUserDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    return this.authService.signupOauth({ user });
+  }
+
+  //소셜(구글)로로그인 API
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    this.authService.loginOauth({ req, res });
-  }
-
-  //네이버로그인
-  @Get('/login/naver')
-  @UseGuards(AuthGuard('naver'))
-  async loginNaver(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    this.authService.loginOauth({ req, res });
-  }
-
-  //카카오로그인
-  @Get('/login/kakao')
-  @UseGuards(AuthGuard('kakao'))
-  async loginKakao(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    // 1. 가입확인
-    this.authService.loginOauth({ req, res });
+    @CurrentUser() user: OauthUserDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    return this.authService.loginOauth({ user });
   }
 
   //AccessToken 재발급 API
@@ -108,3 +98,24 @@ export class AuthController {
     // return this.authService.createAccessToken({ user: req.user });
   }
 }
+
+// //네이버로그인
+// @Get('/login/naver')
+// @UseGuards(AuthGuard('naver'))
+// async loginNaver(
+//   @Req() req: Request & IOAuthUser, //
+//   // @Res() res: Response,
+// ) {
+//   return this.authService.loginOauth({ req });
+// }
+
+// //카카오로그인
+// @Get('/login/kakao')
+// @UseGuards(AuthGuard('kakao'))
+// async loginKakao(
+//   @Req() req: Request & IOAuthUser, //
+//   // @Res() res: Response,
+// ) {
+//   // 1. 가입확인
+//   return this.authService.loginOauth({ req });
+// }

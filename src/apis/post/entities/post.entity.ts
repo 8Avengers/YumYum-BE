@@ -1,7 +1,19 @@
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
+import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
 import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { User } from 'src/apis/user/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, ManyToOne, ManyToMany, JoinTable, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+  JoinColumn,
+} from 'typeorm';
 import { Hashtag } from './hashtag.entity';
 import { Image } from './image.entity';
 import { PostLike } from './post-like.entity';
@@ -29,50 +41,48 @@ export class Post {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-
   @Column({
     type: 'enum',
     enum: ['public', 'private'],
-    default: 'public'
+    default: 'public',
   })
   visibility: 'public' | 'private';
 
-  @ManyToOne(type => Restaurant, restaurant => restaurant.posts)
+  @ManyToOne((type) => Restaurant, (restaurant) => restaurant.posts)
   @JoinColumn()
   restaurant: Restaurant;
 
-  @OneToMany(type => Bookmark, bookmark => bookmark.post)
-  bookmarks: Bookmark[];
+  //TODO: bookmark-collection으로 수정
+  @OneToMany((type) => Bookmark, (bookmark) => bookmark.sads)
+  bookmark_co: Bookmark[];
 
-  @OneToMany(type => Image, images => images.post)
+  @OneToMany((type) => Image, (images) => images.post)
   @JoinColumn()
   images: Image[];
 
-  @OneToMany(type => PostLike, postLIkes => postLIkes.post)
+  @OneToMany((type) => PostLike, (postLIkes) => postLIkes.post)
   @JoinColumn()
   postLikes: PostLike[];
 
-  @OneToMany(type => Comment, comments => comments.post)
+  @OneToMany((type) => Comment, (comments) => comments.post)
   @JoinColumn()
   comments: Comment[];
 
-  @ManyToOne(type => User, user => user.posts)
+  @ManyToOne((type) => User, (user) => user.posts)
   @JoinColumn()
   user: User;
 
-  @ManyToMany(type => Hashtag, hashtags => hashtags.posts)
+  @ManyToMany((type) => Hashtag, (hashtags) => hashtags.posts)
   @JoinTable()
   hashtags: Hashtag[];
 
-  @ManyToMany(type => MyList, my_lists => my_lists.posts)
+  @ManyToMany((type) => MyList, (my_lists) => my_lists.posts)
   @JoinTable()
   my_lists: MyList[];
 
-
-  @OneToMany(type => PostUserTag, postUserTags => postUserTags.post)
+  @OneToMany((type) => PostUserTag, (postUserTags) => postUserTags.post)
   @JoinColumn()
   postUserTags: PostUserTag[];
 
-
-//TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
+  //TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
 }

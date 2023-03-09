@@ -1,6 +1,17 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Double, OneToMany, JoinTable, ManyToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Double,
+  OneToMany,
+  JoinTable,
+  ManyToMany,
+  JoinColumn,
+} from 'typeorm';
 import { Post } from 'src/apis/post/entities/post.entity';
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
+import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
 
 @Entity()
 export class Restaurant {
@@ -43,15 +54,10 @@ export class Restaurant {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-
-  @OneToMany(type => Post, posts => posts.restaurant)
+  @OneToMany((type) => Post, (posts) => posts.restaurant)
   @JoinColumn()
   posts: Post[];
 
-  @ManyToMany(type => Bookmark, bookmarks => bookmarks.restaurant )
+  @ManyToMany((type) => Bookmark, (bookmarks) => bookmarks.restaurant)
   bookmarks: Bookmark[];
-
-  
-
-
 }

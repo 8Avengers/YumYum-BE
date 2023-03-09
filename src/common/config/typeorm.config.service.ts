@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config'; //필수
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
+import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
 import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
 import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity';

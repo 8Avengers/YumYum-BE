@@ -1,4 +1,4 @@
-import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
+import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
 import { Post } from 'src/apis/post/entities/post.entity';
 import { PostLike } from 'src/apis/post/entities/post-like.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
@@ -12,6 +12,9 @@ import {
   ManyToOne,
   JoinColumn,
   Unique,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { PostUserTag } from 'src/apis/post/entities/post-usertag.entity';
 import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
@@ -37,25 +40,37 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column()
   nickname: string;
 
-  @Column()
+  @Column({ nullable: true })
   phone_number: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsEnum(['M', 'F'])
   gender: 'M' | 'F';
 
-  @Column()
+  @Column({ nullable: true })
   birth: Date;
 
-  //TODO: 회원가입시 default 값으로 가입완료
-  @Column()
+  @Column({ nullable: true, length: 100 })
+  introduce: String;
+
+  //TODO: 회원가입시 default 이미지로값으로 가입완료
+  @Column({ nullable: true, default: 'default-image-url' })
   profile_image: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updated_at: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deleted_at: Date;
 
   @OneToMany((type) => MyList, (my_lists) => my_lists.user)
   @JoinColumn()
