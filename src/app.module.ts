@@ -1,10 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 import { PostModule } from './apis/post/post.module';
 import { CollectionModule } from './apis/bookmark-collection/bookmark-collection.module';
 import { BookmarkModule } from './apis/bookmark/bookmark.module';
+
+import { AuthModule } from './apis/auth/auth.module';
+import { UserModule } from './apis/user/user.module';
+
+
 
 @Module({
   imports: [
@@ -13,10 +19,15 @@ import { BookmarkModule } from './apis/bookmark/bookmark.module';
       useClass: TypeOrmConfigService,
     }),
 
+
     PostModule,
     CollectionModule,
     BookmarkModule,
-    //TODO: 모듈 삽입, 어떤 모듈을 넣는 게 맞을까
+
+
+    UserModule, //
+    AuthModule, //
+
   ],
 })
 export class AppModule {}
