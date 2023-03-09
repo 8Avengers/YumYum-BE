@@ -5,7 +5,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 import { PostModule } from './apis/post/post.module';
-import { FollowModule } from './follow/follow.module';
+ 
 
 @Module({
   imports: [
@@ -17,7 +17,8 @@ import { FollowModule } from './follow/follow.module';
     //TODO:  이곳이 차례차례 모듈을 넣어주세요.
     PostModule,
     UserModule, //
-    AuthModule, FollowModule, //
+    AuthModule, 
+ 
   ],
 })
 export class AppModule {}
