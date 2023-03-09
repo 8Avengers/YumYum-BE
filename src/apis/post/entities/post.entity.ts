@@ -1,4 +1,3 @@
-import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
 import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { User } from 'src/apis/user/entities/user.entity';
 import {
@@ -13,13 +12,15 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Hashtag } from './hashtag.entity';
 import { Image } from './image.entity';
 import { PostLike } from './post-like.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
 import { PostUserTag } from './post-usertag.entity';
-import { MyList } from 'src/apis/my-list/entities/my-list.entity';
+import { Collection } from 'src/apis/collection/entities/collection.entity';
+import { CollectionItem } from 'src/apis/collection/entities/collection-item';
 
 @Entity()
 export class Post {
@@ -41,6 +42,9 @@ export class Post {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
+
   @Column({
     type: 'enum',
     enum: ['public', 'private'],
@@ -51,10 +55,6 @@ export class Post {
   @ManyToOne((type) => Restaurant, (restaurant) => restaurant.posts)
   @JoinColumn()
   restaurant: Restaurant;
-
-  //TODO: bookmark-collection으로 수정
-  @OneToMany((type) => Bookmark, (bookmark) => bookmark.sads)
-  bookmark_co: Bookmark[];
 
   @OneToMany((type) => Image, (images) => images.post)
   @JoinColumn()
@@ -72,17 +72,15 @@ export class Post {
   @JoinColumn()
   user: User;
 
+  //TODO: 다대다 관계 정의해주기
   @ManyToMany((type) => Hashtag, (hashtags) => hashtags.posts)
   @JoinTable()
   hashtags: Hashtag[];
 
-  @ManyToMany((type) => MyList, (my_lists) => my_lists.posts)
-  @JoinTable()
-  my_lists: MyList[];
+  @OneToMany((type) => CollectionItem, (collectionItem) => collectionItem.post)
+  collectionItems: CollectionItem[];
 
   @OneToMany((type) => PostUserTag, (postUserTags) => postUserTags.post)
   @JoinColumn()
   postUserTags: PostUserTag[];
-
-  //TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
 }

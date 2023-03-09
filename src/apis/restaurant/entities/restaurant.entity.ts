@@ -9,9 +9,11 @@ import {
   JoinTable,
   ManyToMany,
   JoinColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { Post } from 'src/apis/post/entities/post.entity';
-import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
+import { Collection } from 'src/apis/collection/entities/collection.entity';
+import { CollectionItem } from 'src/apis/collection/entities/collection-item';
 
 @Entity()
 export class Restaurant {
@@ -48,16 +50,23 @@ export class Restaurant {
   @Column()
   road_address: string;
 
+  //TODO: 베이스엔티티로 바꾸기
   @CreateDateColumn({ name: 'created_at' })
-  created_at: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  updated_at: Date;
+  updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
 
   @OneToMany((type) => Post, (posts) => posts.restaurant)
   @JoinColumn()
   posts: Post[];
 
-  @ManyToMany((type) => Bookmark, (bookmarks) => bookmarks.restaurant)
-  bookmarks: Bookmark[];
+  @OneToMany(
+    (type) => CollectionItem,
+    (collectionItem) => collectionItem.restaurant,
+  )
+  collectionItems: CollectionItem[];
 }

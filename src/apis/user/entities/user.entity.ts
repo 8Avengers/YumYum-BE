@@ -1,4 +1,3 @@
-import { Bookmark } from 'src/apis/bookmark-collection/entities/bookmark.entity';
 import { Post } from 'src/apis/post/entities/post.entity';
 import { PostLike } from 'src/apis/post/entities/post-like.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
@@ -7,9 +6,6 @@ import {
   Column,
   PrimaryGeneratedColumn,
   OneToMany,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
   JoinColumn,
   Unique,
   CreateDateColumn,
@@ -20,12 +16,7 @@ import { PostUserTag } from 'src/apis/post/entities/post-usertag.entity';
 import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
 import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity';
 import { IsEnum } from 'class-validator';
-import { MyList } from 'src/apis/my-list/entities/my-list.entity';
-import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookmark-collection.entity';
-
-/*TODO:
-@Unique(['nickname']) 과   @Column({ unique: true }) 둘의 차이점이 뭘까?
-*/
+import { Collection } from 'src/apis/collection/entities/collection.entity';
 
 @Entity()
 @Unique(['nickname'])
@@ -63,6 +54,12 @@ export class User {
   @Column({ nullable: true, default: 'default-image-url' })
   profile_image: string;
 
+  @Column({ name: 'follower_count', default: 0 })
+  followerCount: number;
+
+  @Column({ name: 'following_count', default: 0 })
+  followingCount: number;
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 
@@ -71,14 +68,6 @@ export class User {
 
   @DeleteDateColumn({ name: 'deleted_at' })
   deleted_at: Date;
-
-  @OneToMany((type) => MyList, (my_lists) => my_lists.user)
-  @JoinColumn()
-  my_lists: MyList[];
-
-  @OneToMany((type) => Bookmark, (bookmarks) => bookmarks.user)
-  @JoinColumn()
-  bookmarks: Bookmark[];
 
   @OneToMany((type) => Post, (posts) => posts.user)
   @JoinColumn()
@@ -104,25 +93,7 @@ export class User {
   @JoinColumn()
   commentUserTags: CommentUserTag[];
 
-  @OneToMany((type) => User, (user) => user.bookmark_collections)
+  @OneToMany((type) => User, (user) => user.collections)
   @JoinColumn()
-  bookmark_collections: BookmarkCollection[];
-
-  //TODO : 팔로잉 팔로워 수정필요
-  // @ManyToMany(type => User, user => user.followings)
-  // @JoinTable({
-  //   name: 'follow',
-  //   joinColumn: {
-  //     name: 'followingId',
-  //     referencedColumnName: 'id',
-  //   },
-  //   inverseJoinColumn: {
-  //     name: 'followerId',
-  //     referencedColumnName: 'id',
-  //   },
-  // })
-  // followers: User[];
-
-  // @ManyToMany(type => User, user => user.followers)
-  // followings: User[];
+  collections: Collection[];
 }

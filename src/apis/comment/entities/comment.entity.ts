@@ -1,9 +1,18 @@
 import { Post } from 'src/apis/post/entities/post.entity';
 import { User } from 'src/apis/user/entities/user.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  UpdateDateColumn,
+  CreateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 import { CommentLike } from './comment-like.entity';
 import { CommentUserTag } from './comment-usertag.entity';
-
 
 @Entity()
 export class Comment {
@@ -13,27 +22,29 @@ export class Comment {
   @Column()
   content: string;
 
-  @ManyToOne(type => User, user => user.comments)
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at' })
+  deletedAt: Date;
+
+  @ManyToOne((type) => User, (user) => user.comments)
   @JoinColumn()
   user: User;
 
-  @ManyToOne(type => Post, post => post.comments)
+  @ManyToOne((type) => Post, (post) => post.comments)
   @JoinColumn()
   post: Post;
 
-  @OneToMany(type => CommentUserTag, commentUserTags => commentUserTags.user)
+  @OneToMany(
+    (type) => CommentUserTag,
+    (commentUserTags) => commentUserTags.user,
+  )
   commentUserTags: CommentUserTag[];
 
-  @OneToMany(type => CommentLike, commentLikes => commentLikes.comment)
-    commentLikes: CommentLike[];
-
-    //TODO: 이부분 프리티어로 어떻게 해결할까?
-
+  @OneToMany((type) => CommentLike, (commentLikes) => commentLikes.comment)
+  commentLikes: CommentLike[];
 }
-
-
-
-/*
-ManyToOne 관계에서는 이렇게 써줘야 하는것인가? 
-ser_id를 통해서 nickname과 user_profile을 불러올 수 있을까? 
-*/
