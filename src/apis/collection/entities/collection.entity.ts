@@ -47,7 +47,7 @@ export class Collection {
 
   @OneToMany(
     (type) => CollectionItem,
-    (collectionItem) => collectionItem.collection,
+    (collectionItems) => collectionItems.collection,
   )
   collectionItems: CollectionItem[];
 

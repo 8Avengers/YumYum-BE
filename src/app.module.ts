@@ -5,6 +5,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 import { PostModule } from './apis/post/post.module';
+import { Collection } from './apis/collection/entities/collection.entity';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { PostModule } from './apis/post/post.module';
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
     }),
+    Collection,
     PostModule,
     UserModule, //
     AuthModule, //
