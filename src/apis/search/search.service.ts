@@ -59,7 +59,6 @@ export class SearchService {
       relations: ['posts'],
       where: [{ deleted_at: null }, { name: hashtag }],
     });
-
     return postSearchByHashtagResult;
   }
 }
