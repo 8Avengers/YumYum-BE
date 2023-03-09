@@ -10,7 +10,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-import { CollectionItem } from './collection-item';
+import { CollectionItem } from './collection-item.entity';
 
 @Entity({ name: 'collection' })
 export class Collection {

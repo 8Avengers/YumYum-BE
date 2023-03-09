@@ -14,7 +14,7 @@ import { User } from 'src/apis/user/entities/user.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.strategy';
 import { Collection } from 'src/apis/collection/entities/collection.entity';
 import { Follow } from 'src/apis/user/entities/follow.entity';
-import { CollectionItem } from 'src/apis/collection/entities/collection-item';
+import { CollectionItem } from 'src/apis/collection/entities/collection-item.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
