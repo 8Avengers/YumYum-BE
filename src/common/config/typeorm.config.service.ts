@@ -15,6 +15,7 @@ import { User } from 'src/apis/user/entities/user.entity';
 import { MyList } from 'src/apis/my-list/entities/my-list.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.strategy';
 import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookmark-collection.entity';
+import { Follow } from 'src/apis/user/entities/follow.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -45,6 +46,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         PostUserTag, //
         Restaurant, //
         User, //
+        Follow,
       ],
     };
   }

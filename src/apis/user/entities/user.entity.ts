@@ -19,6 +19,7 @@ import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity
 import { IsEnum } from 'class-validator';
 import { MyList } from 'src/apis/my-list/entities/my-list.entity';
 import { BookmarkCollection } from 'src/apis/bookmark-collection/entities/bookmark-collection.entity';
+import { Follow } from './follow.entity';
 
 /*TODO:
 @Unique(['nickname']) 과   @Column({ unique: true }) 둘의 차이점이 뭘까?
@@ -57,6 +58,9 @@ export class User {
   @Column()
   profile_image: string;
 
+  @Column()
+  introduce: string;
+
   @OneToMany((type) => MyList, (my_lists) => my_lists.user)
   @JoinColumn()
   my_lists: MyList[];
@@ -92,6 +96,12 @@ export class User {
   @OneToMany((type) => User, (user) => user.bookmark_collections)
   @JoinColumn()
   bookmark_collections: BookmarkCollection[];
+
+  @Column({ name: 'follower_count', default: 0 })
+  followerCount: number;
+
+  @Column({ name: 'following_count', default: 0 })
+  followingCount: number;
 
   //TODO : 팔로잉 팔로워 수정필요
   // @ManyToMany(type => User, user => user.followings)
