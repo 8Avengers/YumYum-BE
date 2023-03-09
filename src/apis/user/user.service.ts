@@ -105,6 +105,7 @@ export class UserService {
         name,
       });
 
+      //회원가입시 자동으로 bookmark의 모든게시물 collection이 private으로 생성
       const collection = new Collection();
       collection.type = 'bookmark';
       collection.visibility = 'private';
