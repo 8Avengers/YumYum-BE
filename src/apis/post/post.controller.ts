@@ -33,9 +33,7 @@ export class PostController {
         */
   @Get()
   async getPosts() {
-    console.log('아무거나');
     const posts = await this.postService.getPosts();
-    console.log('**********', posts);
     return posts;
   }
 

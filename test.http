@@ -2,7 +2,7 @@
 GET localhost:3000/posts
 
 ###포스팅 상세보기
-GET localhost:3000/posts/6
+GET localhost:3000/posts/2
 
 ###포스팅 작성
 POST localhost:3000/posts
@@ -27,6 +27,14 @@ Content-Type: application/json
 ###포스팅 삭제
 DELETE localhost:3000/posts/4
 
+###포스팅 좋아요
+POST localhost:3000/posts/2/like
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+
 ###특정 게시글에 해당하는 모든 댓글 보기
 GET localhost:3000/posts/6/comments
 
@@ -48,3 +56,4 @@ Content-Type: application/json
 
 ###댓글 삭제
 DELETE localhost:3000/posts/1/comments/8
+

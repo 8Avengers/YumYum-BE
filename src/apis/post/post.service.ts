@@ -95,7 +95,8 @@ export class PostService {
       }
 
       const totalLikes = await this.likeService.getLikesForPost(id);
-      return { ...post, totalLikes };
+
+      return { ...post, totalLikes: totalLikes };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
