@@ -1,6 +1,6 @@
-import { Bookmark } from '../../bookmark/entities/bookmark.entity';
 import { Restaurant } from '../../restaurant/entities/restaurant.entity';
 import { User } from '../../user/entities/user.entity';
+
 import {
   Entity,
   Column,
@@ -8,7 +8,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
-  OneToOne,
   OneToMany,
   ManyToOne,
   ManyToMany,
@@ -20,7 +19,8 @@ import { Image } from './image.entity';
 import { PostLike } from './post-like.entity';
 import { Comment } from '../../comment/entities/comment.entity';
 import { PostUserTag } from './post-usertag.entity';
-import { MyList } from '../../my-list/entities/my-list.entity';
+
+import { CollectionItem } from '../../collection/entities/collection-item.entity';
 
 @Entity()
 export class Post {
@@ -56,9 +56,6 @@ export class Post {
   @JoinColumn()
   restaurant: Restaurant;
 
-  @OneToMany((type) => Bookmark, (bookmark) => bookmark.post)
-  bookmarks: Bookmark[];
-
   @OneToMany((type) => Image, (images) => images.post)
   @JoinColumn()
   images: Image[];
@@ -75,17 +72,15 @@ export class Post {
   @JoinColumn()
   user: User;
 
+  //TODO: 다대다 관계 정의해주기
   @ManyToMany((type) => Hashtag, (hashtags) => hashtags.posts)
   @JoinTable()
   hashtags: Hashtag[];
 
-  @ManyToMany((type) => MyList, (my_lists) => my_lists.posts)
-  @JoinTable()
-  my_lists: MyList[];
+  @OneToMany((type) => CollectionItem, (collectionItem) => collectionItem.post)
+  collectionItems: CollectionItem[];
 
   @OneToMany((type) => PostUserTag, (postUserTags) => postUserTags.post)
   @JoinColumn()
   postUserTags: PostUserTag[];
-
-  //TODO : 프리티어 자동줄맞춤 설정 어떻게 하는 것일까?
 }
