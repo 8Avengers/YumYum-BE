@@ -43,12 +43,13 @@ export class PostLikeService {
   async getLikesForAllPosts(
     postIds: number[],
   ): Promise<{ postId: number; totalLikes: number }[]> {
+    console.log('postIds', postIds);
     const postLikes = await this.postLikeRepository
       .createQueryBuilder('post_like')
-      .select('post_like.id', 'post_id')
+      .select('post_like.post_id', 'post_id')
       .addSelect('COUNT(*)', 'totalLikes')
-      .where('post_like.id IN (:...postIds)', { postIds })
-      .groupBy('post_like.id')
+      .where('post_like.post_id IN (:...postIds)', { postIds })
+      .groupBy('post_like.post_id')
       .getRawMany();
 
     return postLikes.map((postLike) => ({
