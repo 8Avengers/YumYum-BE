@@ -36,10 +36,10 @@ Content-Type: application/json
 }
 
 ###특정 게시글에 해당하는 모든 댓글 보기
-GET localhost:3000/posts/6/comments
+GET localhost:3000/posts/2/comments
 
 ###댓글 작성
-POST localhost:3000/posts/1/comments
+POST localhost:3000/posts/2/comments
 Content-Type: application/json
 
 {
@@ -56,4 +56,12 @@ Content-Type: application/json
 
 ###댓글 삭제
 DELETE localhost:3000/posts/1/comments/8
+
+###댓글 좋아요
+POST localhost:3000/posts/2/comments/5/like
+Content-Type: application/json
+
+{
+  "userId": 1
+}
 

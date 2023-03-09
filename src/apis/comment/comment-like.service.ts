@@ -19,10 +19,10 @@ export class CommentLikeService {
   ) {}
 
   /*
-                              ### 23.03.09
-                              ### 이드보라
-                              ### 한개의 댓글의 총 좋아요 수 불러오기
-                              */
+                                  ### 23.03.09
+                                  ### 이드보라
+                                  ### 한개의 댓글의 총 좋아요 수 불러오기
+                                  */
 
   async getLikesForComment(commentId: number): Promise<number> {
     const likes = await this.commentLikeRepository
@@ -35,14 +35,16 @@ export class CommentLikeService {
   }
 
   /*
-                            ### 23.03.09
-                            ### 이드보라
-                            ### 모든 댓글의 각 좋아요 수 불러오기
-                            */
+                                ### 23.03.09
+                                ### 이드보라
+                                ### 모든 댓글의 각 좋아요 수 불러오기
+                                */
 
   async getLikesForAllComments(
     commentIds: number[],
   ): Promise<{ commentId: number; totalLikes: number }[]> {
+    console.log('commentIds', commentIds);
+
     const commentLikes = await this.commentLikeRepository
       .createQueryBuilder('comment_like')
       .select('comment_like.comment_id', 'comment_id')
@@ -58,17 +60,43 @@ export class CommentLikeService {
   }
 
   /*
-                            ### 23.03.09
-                            ### 이드보라
-                            ### 댓글 하나 좋아요 하기
-                            */
+                                ### 23.03.09
+                                ### 이드보라
+                                ### 댓글 하나 좋아요 하기
+                                */
 
-  async createCommentLike(commentId, userId) {
+  async likeComment(commentId, userId) {
     try {
-      return this.commentLikeRepository.insert({
-        comment: { id: commentId },
-        user: { id: userId },
+      if (!commentId) {
+        throw new NotFoundException(`Post with id ${commentId} not found.`);
+      }
+
+      const existLike = await this.commentLikeRepository.findOne({
+        where: {
+          comment: { id: commentId },
+          user: { id: userId },
+        },
+        withDeleted: true,
       });
+
+      if (existLike && existLike.deleted_at === null) {
+        await this.commentLikeRepository.softDelete({
+          comment: { id: commentId },
+          user: { id: userId },
+        });
+      } else {
+        if (existLike && existLike.deleted_at !== null) {
+          await this.commentLikeRepository.restore({
+            comment: { id: commentId },
+            user: { id: userId },
+          });
+        } else {
+          await this.commentLikeRepository.insert({
+            comment: { id: commentId },
+            user: { id: userId },
+          });
+        }
+      }
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

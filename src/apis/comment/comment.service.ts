@@ -10,20 +10,23 @@ import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
 import { PostService } from '../post/post.service';
+import { CommentWithLikesDto } from './dto/comment-with-likes.dto';
+import { CommentLikeService } from './comment-like.service';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     @Inject(PostService) private postService: PostService,
+    private readonly commentLikeService: CommentLikeService,
   ) {}
 
   /*
-                        ### 23.03.07
-                        ### 이드보라
-                        ### 특정 포스팅에 해당하는 모든 댓글 불러오기
-                       */
-  async getAllComments(postId: number) {
+                            ### 23.03.07
+                            ### 이드보라
+                            ### 특정 포스팅에 해당하는 모든 댓글 불러오기
+                           */
+  async getAllComments(postId: number): Promise<CommentWithLikesDto[]> {
     try {
       await this.postService.getPostById(postId);
 
@@ -33,14 +36,26 @@ export class CommentService {
         .leftJoinAndSelect('comment.post', 'post')
         .where('comment.deleted_at IS NULL')
         .andWhere('post.id = :postId', { postId })
-        .select(['comment.content', 'user.nickname'])
+        .select(['comment.id', 'comment.content', 'user.nickname'])
         .getMany();
 
       if (!comments || comments.length === 0) {
         throw new NotFoundException('No comments found.');
       }
 
-      return comments;
+      const commentIds = comments.map((comment) => comment.id);
+      const commentLikes = await this.commentLikeService.getLikesForAllComments(
+        commentIds,
+      );
+
+      const commentListWithLikes = comments.map((comment) => {
+        const likes =
+          commentLikes.find((like) => like.commentId === comment.id)
+            ?.totalLikes || 0;
+        return { ...comment, totalLikes: likes };
+      });
+
+      return commentListWithLikes;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -83,10 +98,10 @@ export class CommentService {
   // }
 
   /*
-                            ### 23.03.07
-                            ### 이드보라
-                            ### 댓글 작성
-                            */
+                                ### 23.03.07
+                                ### 이드보라
+                                ### 댓글 작성
+                                */
   async createComment(postId: number, content: string) {
     try {
       await this.postService.getPostById(postId);
@@ -108,10 +123,10 @@ export class CommentService {
   }
 
   /*
-                            ### 23.03.07
-                            ### 이드보라
-                            ### 댓글 수정
-                            */
+                                ### 23.03.07
+                                ### 이드보라
+                                ### 댓글 수정
+                                */
   async updateComment(postId: number, commentId: number, content: string) {
     try {
       await this.postService.getPostById(postId);
@@ -134,10 +149,10 @@ export class CommentService {
   }
 
   /*
-                            ### 23.03.07
-                            ### 이드보라
-                            ### 댓글 삭제
-                            */
+                                ### 23.03.07
+                                ### 이드보라
+                                ### 댓글 삭제
+                                */
   async deleteComment(postId: number, commentId: number) {
     try {
       await this.postService.getPostById(postId);
