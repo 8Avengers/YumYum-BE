@@ -10,14 +10,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
-import { LikeService } from '../like/like.service';
+import { PostLikeService } from './post-like.service';
 import { PostWithLikesDto } from './dto/post-with-likes.dto';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
-    private readonly likeService: LikeService,
+    private readonly likeService: PostLikeService,
   ) {}
 
   /*
@@ -50,7 +50,7 @@ export class PostService {
 
       const postListWithLikes = posts.map((post) => {
         const likes =
-          postLikes.find((like) => like.post_id === post.id)?.totalLikes || 0;
+          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
         return { ...post, totalLikes: likes };
       });
 

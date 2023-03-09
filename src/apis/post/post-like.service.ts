@@ -10,15 +10,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { PostLike } from './entities/post-like.entity';
-import { CommentLike } from './entities/comment-like.entity';
 
 @Injectable()
-export class LikeService {
+export class PostLikeService {
   constructor(
     @InjectRepository(PostLike)
     private readonly postLikeRepository: Repository<PostLike>,
-    @InjectRepository(CommentLike)
-    private readonly commentLikeRepository: Repository<CommentLike>,
   ) {}
 
   /*
@@ -45,7 +42,7 @@ export class LikeService {
 
   async getLikesForAllPosts(
     postIds: number[],
-  ): Promise<{ post_id: number; totalLikes: number }[]> {
+  ): Promise<{ postId: number; totalLikes: number }[]> {
     const postLikes = await this.postLikeRepository
       .createQueryBuilder('post_like')
       .select('post_like.post_id', 'post_id')
@@ -55,7 +52,7 @@ export class LikeService {
       .getRawMany();
 
     return postLikes.map((postLike) => ({
-      post_id: postLike.post_id,
+      postId: postLike.post_id,
       totalLikes: postLike.totalLikes,
     }));
   }

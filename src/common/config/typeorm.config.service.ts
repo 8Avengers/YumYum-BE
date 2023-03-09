@@ -3,12 +3,12 @@ import { ConfigService } from '@nestjs/config'; //필수
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Bookmark } from 'src/apis/bookmark/entities/bookmark.entity';
 import { Comment } from 'src/apis/comment/entities/comment.entity';
-import { CommentLike } from 'src/apis/like/entities/comment-like.entity';
+import { CommentLike } from 'src/apis/comment/entities/comment-like.entity';
 import { CommentUserTag } from 'src/apis/comment/entities/comment-usertag.entity';
 import { Hashtag } from 'src/apis/post/entities/hashtag.entity';
 import { Image } from 'src/apis/post/entities/image.entity';
 import { Post } from 'src/apis/post/entities/post.entity';
-import { PostLike } from 'src/apis/like/entities/post-like.entity';
+import { PostLike } from 'src/apis/post/entities/post-like.entity';
 import { PostUserTag } from 'src/apis/post/entities/post-usertag.entity';
 import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { User } from 'src/apis/user/entities/user.entity';

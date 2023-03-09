@@ -11,7 +11,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CommentLike } from '../../like/entities/comment-like.entity';
+import { CommentLike } from './comment-like.entity';
 import { CommentUserTag } from './comment-usertag.entity';
 
 @Entity()
