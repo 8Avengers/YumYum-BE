@@ -44,7 +44,7 @@ export class PostService {
         ])
         .getMany();
       if (!posts || posts.length === 0) {
-        throw new NotFoundException('No posts found.');
+        throw new NotFoundException('포스트가 없습니다.');
       }
       const postIds = posts.map((post) => post.id);
 
@@ -93,7 +93,7 @@ export class PostService {
         .getOne();
 
       if (!post) {
-        throw new NotFoundException(`Post with id ${id} not found.`);
+        throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
 
       const totalLikes = await this.likeService.getLikesForPost(id);
@@ -172,7 +172,7 @@ export class PostService {
     try {
       const result = await this.postRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
       if (result.affected === 0) {
-        throw new NotFoundException(`Post with id ${id} not found.`);
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
       }
     } catch (err) {
       if (err instanceof NotFoundException) {

@@ -1,7 +1,7 @@
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Post } from './entities/post.entity';
-import { PostService } from './post.service';
+import { Post } from '../entities/post.entity';
+import { PostService } from '../post.service';
 import { Test } from '@nestjs/testing';
 import {
   InternalServerErrorException,

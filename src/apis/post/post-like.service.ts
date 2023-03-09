@@ -10,64 +10,82 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { PostLike } from './entities/post-like.entity';
+import { Post } from './entities/post.entity';
 
 @Injectable()
 export class PostLikeService {
   constructor(
     @InjectRepository(PostLike)
     private readonly postLikeRepository: Repository<PostLike>,
+    @InjectRepository(Post)
+    private readonly postRepository: Repository<Post>,
   ) {}
 
   /*
-                                          ### 23.03.08
-                                          ### 이드보라
-                                          ### 한개의 포스팅의 총 좋아요 수 불러오기
-                                          */
+                                                    ### 23.03.08
+                                                    ### 이드보라
+                                                    ### 한개의 포스팅의 총 좋아요 수 불러오기
+                                                    */
 
   async getLikesForPost(postId: number): Promise<number> {
-    const likes = await this.postLikeRepository
-      .createQueryBuilder('post_like')
-      .select('COUNT(post_like.post_id)', 'likes')
-      .where('post_like.post_id = :postId', { postId })
-      .getRawOne();
+    try {
+      const likes = await this.postLikeRepository
+        .createQueryBuilder('post_like')
+        .select('COUNT(post_like.post_id)', 'likes')
+        .where('post_like.post_id = :postId', { postId })
+        .getRawOne();
 
-    return likes.likes;
+      return likes.likes;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
 
   /*
-                                        ### 23.03.08
-                                        ### 이드보라
-                                        ### 모든 포스팅의 각 좋아요 수 불러오기
-                                        */
+                                                  ### 23.03.08
+                                                  ### 이드보라
+                                                  ### 모든 포스팅의 각 좋아요 수 불러오기
+                                                  */
 
   async getLikesForAllPosts(
     postIds: number[],
   ): Promise<{ postId: number; totalLikes: number }[]> {
-    console.log('postIds', postIds);
-    const postLikes = await this.postLikeRepository
-      .createQueryBuilder('post_like')
-      .select('post_like.post_id', 'post_id')
-      .addSelect('COUNT(*)', 'totalLikes')
-      .where('post_like.post_id IN (:...postIds)', { postIds })
-      .groupBy('post_like.post_id')
-      .getRawMany();
+    try {
+      const postLikes = await this.postLikeRepository
+        .createQueryBuilder('post_like')
+        .select('post_like.post_id', 'post_id')
+        .addSelect('COUNT(*)', 'totalLikes')
+        .where('post_like.post_id IN (:...postIds)', { postIds })
+        .groupBy('post_like.post_id')
+        .getRawMany();
 
-    return postLikes.map((postLike) => ({
-      postId: postLike.post_id,
-      totalLikes: postLike.totalLikes,
-    }));
+      return postLikes.map((postLike) => ({
+        postId: postLike.post_id,
+        totalLikes: postLike.totalLikes,
+      }));
+    } catch (err) {
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
 
   /*
-                                        ### 23.03.09
-                                        ### 이드보라
-                                        ### 포스트 하나 좋아요 하기
-                                        */
+                                                  ### 23.03.09
+                                                  ### 이드보라
+                                                  ### 포스트 하나 좋아요 하기
+                                                  */
 
   async likePost(postId, userId) {
     try {
-      if (!postId) {
-        throw new NotFoundException(`Post with id ${postId} not found.`);
+      const existingPost = await this.postRepository.findOne({
+        where: { id: postId },
+      });
+
+      if (!existingPost) {
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
       }
 
       const existLike = await this.postLikeRepository.findOne({
