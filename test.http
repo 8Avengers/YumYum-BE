@@ -2,7 +2,7 @@
 GET localhost:3000/posts
 
 ###포스팅 상세보기
-GET localhost:3000/posts/2
+GET localhost:3000/posts/55
 
 ###포스팅 작성
 POST localhost:3000/posts
@@ -28,7 +28,7 @@ Content-Type: application/json
 DELETE localhost:3000/posts/4
 
 ###포스팅 좋아요
-POST localhost:3000/posts/2/like
+POST localhost:3000/posts/55/like
 Content-Type: application/json
 
 {

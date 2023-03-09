@@ -37,6 +37,7 @@ export class PostLikeService {
 
       return likes.likes;
     } catch (err) {
+      console.error(err);
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',
       );
@@ -66,6 +67,7 @@ export class PostLikeService {
         totalLikes: postLike.totalLikes,
       }));
     } catch (err) {
+      console.error(err);
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',
       );
@@ -118,6 +120,7 @@ export class PostLikeService {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );

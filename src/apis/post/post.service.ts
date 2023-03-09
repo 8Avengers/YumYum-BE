@@ -61,6 +61,7 @@ export class PostService {
       if (err instanceof NotFoundException) {
         throw new HttpException(err.message, HttpStatus.NOT_FOUND);
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
@@ -103,6 +104,7 @@ export class PostService {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
@@ -124,6 +126,7 @@ export class PostService {
         visibility,
       });
     } catch (err) {
+      console.error(err);
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',
       );
@@ -156,6 +159,7 @@ export class PostService {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
@@ -178,6 +182,7 @@ export class PostService {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
