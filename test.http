@@ -2,26 +2,28 @@
 GET localhost:3000/posts
 
 ###포스팅 상세보기
-GET localhost:3000/posts/55
+GET localhost:3000/posts/2
 
 ###포스팅 작성
 POST localhost:3000/posts
 Content-Type: application/json
 
 {
-  "content": "아주 엄청난 맛집이군요",
+  "content": "리뷰2",
   "rating": 5,
   "img": "img_url",
-  "visibility": "public"
+  "visibility": "public",
+  "hashtagNames": ["해시태그 하나", "둘"]
 }
 
 ###포스팅 수정
-PUT localhost:3000/posts/4
+PUT localhost:3000/posts/2
 Content-Type: application/json
 
 {
-  "content": "아주 엄청난 맛집이군요",
-  "visibility": "private"
+  "content": "리뷰2",
+  "visibility": "public",
+  "hashtagNames": ["해시태그 하나", "세번째 추가"]
 }
 
 ###포스팅 삭제
