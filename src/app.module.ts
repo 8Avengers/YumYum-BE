@@ -5,8 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 import { PostModule } from './apis/post/post.module';
 import { CollectionModule } from './apis/collection/collection.module';
-import { BookmarkModule } from './apis/bookmark/bookmark.module';
-
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 
@@ -19,10 +17,9 @@ import { UserModule } from './apis/user/user.module';
 
     PostModule,
     CollectionModule,
-    BookmarkModule,
-
     UserModule, //
     AuthModule, //
+    
   ],
 })
 export class AppModule {}

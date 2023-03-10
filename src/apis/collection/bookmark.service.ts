@@ -3,12 +3,17 @@ import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Post } from '../post/entities/post.entity';
 import { CollectionItem } from './entities/collection-item.entity';
+import { Collection } from './entities/collection.entity';
+import { CreateCollectionDto } from './dto/create-collection.dto';
 
 @Injectable()
 export class BookmarkService {
   constructor(
+    @InjectRepository(Collection)
+    private bookmarkRepository: Repository<Collection>,
+    
     @InjectRepository(CollectionItem)
-    private bookmarkRepository: Repository<CollectionItem>,
+    private collectionRepository: Repository<CollectionItem>,
     @InjectRepository(Post) private postRepository: Repository<Post>,
   ) {}
 
@@ -19,7 +24,7 @@ export class BookmarkService {
     */
   async getBookmarks() {
     return await this.bookmarkRepository.find({
-      where: { deleted_at: null },
+      where: { deletedAt: null },
       // select: ['name'],
     });
   }
@@ -30,7 +35,7 @@ export class BookmarkService {
       */
   async getCollections(id: number) {
     return await this.bookmarkRepository.find({
-      where: { id, deleted_at: null },
+      where: { id, deletedAt: null },
       // select: ['name'],
     });
   }
@@ -39,18 +44,23 @@ export class BookmarkService {
       ### 표정훈
       ### 컬렉션 생성
       */
-  createCollection(name: string) {
-    return this.bookmarkRepository.insert({
-      name,
-    });
-  }
+      createCollection(data: CreateCollectionDto) {
+        return this.bookmarkRepository.insert({
+          type: data.type,
+          name: data.name,
+          description: data.description,
+          // img: data.img, //에러발생해서 일시적으로 빼둠
+          visibility: data.visibility,
+        });
+      }
+      
   /*
       ### 23.03.08
       ### 표정훈
       ### 컬렉션 수정
       */
   async updateCollection(id: number, name: string) {
-    return await this.bookmarkRepository.update({ id }, { name });
+      // return await this.bookmarkRepository.update({ id }, { name });
   }
   /*
       ### 23.03.08

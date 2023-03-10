@@ -7,10 +7,11 @@ import {
   Param,
   Delete,
   Put,
-  Get,
+  Get
 } from '@nestjs/common';
 
 import { BookmarkService } from './bookmark.service';
+import { CreateCollectionDto } from './dto/create-collection.dto';
 
 @Controller('bookmarks')
 export class BookmarkController {
@@ -44,8 +45,9 @@ export class BookmarkController {
       ### 컬렉션 생성
       */
   @Post()
-  createCollection(@Body() name: string) {
-    return this.bookmarkService.createCollection(name);
+  createCollection(
+    @Body() data:CreateCollectionDto) {
+    return this.bookmarkService.createCollection(data);
   }
 
   /*
@@ -134,7 +136,4 @@ export class BookmarkController {
       restaurantId,
     );
   }
-}
-function Get() {
-  throw new Error('Function not implemented.');
 }
