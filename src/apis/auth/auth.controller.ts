@@ -15,13 +15,9 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserService } from '../user/user.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { User } from '../user/entities/user.entity';
 import { Response } from 'express';
 import { AuthAccessGuard, AuthRefreshGuard } from './guards/auth.guards';
-
-interface IOAuthUser {
-  user: Pick<User, 'email' | 'password' | 'name' | 'gender' | 'birth'>;
-}
+import { OauthUserDto } from '../user/dto/oauth-user.dto';
 
 @Controller('/')
 export class AuthController {
@@ -30,6 +26,7 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  //TODO: 이미 소셜로그인 완료했는데, 이메일로 또 로그인하려는 경우 에러처리해야한다.
   @Post('/login')
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
@@ -57,35 +54,28 @@ export class AuthController {
     };
   }
 
-  //구글로그인
+  //소셜(구글)로회원가입 API
+  @Get('/signup/google')
+  @UseGuards(AuthGuard('google'))
+  async signupGoogle(
+    @CurrentUser() user: OauthUserDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    return this.authService.signupOauth({ user });
+  }
+
+  //소셜(구글)로로그인 API
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    this.authService.loginOauth({ req, res });
-  }
-
-  //네이버로그인
-  @Get('/login/naver')
-  @UseGuards(AuthGuard('naver'))
-  async loginNaver(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    this.authService.loginOauth({ req, res });
-  }
-
-  //카카오로그인
-  @Get('/login/kakao')
-  @UseGuards(AuthGuard('kakao'))
-  async loginKakao(
-    @Req() req: Request & IOAuthUser, //
-    @Res() res: Response,
-  ) {
-    // 1. 가입확인
-    this.authService.loginOauth({ req, res });
+    @CurrentUser() user: OauthUserDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> {
+    return this.authService.loginOauth({ user });
   }
 
   //AccessToken 재발급 API
@@ -99,13 +89,38 @@ export class AuthController {
   @UseGuards(AuthRefreshGuard)
   @Post('/restoreAccessToken')
   async restoreAccessToken(
-    @CurrentUser() currentUser: any, // @Req() req,
+    @CurrentUser() currentUser: any, // @Req() req, // @Request() req,//
   ) {
     // console.log('UseGuards통과한후 req::::::: 찍어보자 ', req.user);
     // console.log('currentUser::::::::::::::::::::', currentUser);
     // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
 
-    return this.authService.createAccessToken({ user: currentUser });
+    const accessToken = this.authService.createAccessToken({
+      user: currentUser,
+    });
+    return { accessToken };
+
     // return this.authService.createAccessToken({ user: req.user });
   }
 }
+
+// //네이버로그인
+// @Get('/login/naver')
+// @UseGuards(AuthGuard('naver'))
+// async loginNaver(
+//   @Req() req: Request & IOAuthUser, //
+//   // @Res() res: Response,
+// ) {
+//   return this.authService.loginOauth({ req });
+// }
+
+// //카카오로그인
+// @Get('/login/kakao')
+// @UseGuards(AuthGuard('kakao'))
+// async loginKakao(
+//   @Req() req: Request & IOAuthUser, //
+//   // @Res() res: Response,
+// ) {
+//   // 1. 가입확인
+//   return this.authService.loginOauth({ req });
+// }

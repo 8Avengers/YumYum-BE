@@ -39,37 +39,89 @@ export class AuthService {
     return refreshToken;
   }
 
-  async loginOauth({ req, res }) {
-    try {
-      // 1. 가입확인
-      let user = await this.userService.findOne({ email: req.user.email });
+  //소셜회원가입 API
+  async signupOauth({ user }) {
+    console.log('oauth 끝나면 나오는 유저찍어보자', user);
 
+    // 1. 가입확인
+    let existingUser = await this.userService.findOne({
+      email: user.email,
+    });
+
+    if (existingUser)
+      throw new ConflictException(
+        '이미 등록된 이메일입니다. 소셜로그인해주세요.',
+      );
+
+    try {
       // 2. 회원가입
-      if (!user) {
-        user = await this.userService.createUser({
-          email: req.user.email,
-          hashedPassword: req.user.password,
-          nickname: req.user.nickname,
-          name: req.user.name,
-          gender: req.user.gender,
-          birth: req.user.birth,
-          profileImage: req.user.profileImage,
-          phoneNumber: req.user.phoneNumber,
+      if (!existingUser) {
+        user = await this.userService.createOauthUser({
+          email: user.email,
+          nickname: user.nickname,
+          name: user.name,
         });
       }
     } catch (error) {
       if (error instanceof ConflictException) {
-        console.error(
-          `Error: The nickname is already in use: ${error.message}`,
-        );
-        // Handle the error here, for example by redirecting the user to a different page
+        console.error(`Error:  ${error.message}`);
       } else {
         throw error;
       }
     }
 
     // 3. 로그인
-    // this.createRefreshToken({ user, res }); //자기 자신의 리프레시 토큰을 가지고 오는 것이다.이제 req, res만 밖에서 받아오면 된다.
-    res.redirect('http://localhost:5500/frontend/social-login.html');
+    const accessToken = await this.createAccessToken({ user });
+    const refreshToken = await this.createRefreshToken({ user });
+
+    return {
+      refreshToken,
+      accessToken,
+    };
+  }
+
+  //소셜로그인 API
+  async loginOauth({ user }) {
+    console.log('oauth 끝나면 나오는 유저찍어보자', user);
+
+    try {
+      // 1. 가입확인
+      let existingUser = await this.userService.findOne({
+        email: user.email,
+      });
+
+      // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
+      if (!existingUser) {
+        user = await this.userService.createOauthUser({
+          email: user.email,
+          nickname: user.nickname,
+          name: user.name,
+
+          // email: req.user.email,
+          // hashedPassword: '',
+          // nickname: req.user.nickname,
+          // name: req.user.name,
+          // gender: '',
+          // birth: '',
+          // profileImage: '',
+          // phoneNumber: '',
+        });
+      }
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        console.error(`Error:  ${error.message}`);
+      } else {
+        throw error;
+      }
+    }
+
+    // 3. 로그인
+    const accessToken = await this.createAccessToken({ user });
+    const refreshToken = await this.createRefreshToken({ user });
+
+    return {
+      refreshToken,
+      accessToken,
+    };
   }
 }

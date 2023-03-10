@@ -5,7 +5,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 import { PostModule } from './apis/post/post.module';
- 
+import { Collection } from './apis/collection/entities/collection.entity';
 
 @Module({
   imports: [
@@ -13,12 +13,10 @@ import { PostModule } from './apis/post/post.module';
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
     }),
-
-    //TODO:  이곳이 차례차례 모듈을 넣어주세요.
+    Collection,
     PostModule,
     UserModule, //
-    AuthModule, 
- 
+    AuthModule, //
   ],
 })
 export class AppModule {}

@@ -19,7 +19,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
         return refreshToken;
       },
 
-      // secretOrKey: 'p3Fe&ZxtEUx2@9sM4T%i8CcX@oMy6D^N',
       secretOrKey:
         configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
     });

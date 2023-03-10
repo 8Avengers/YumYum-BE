@@ -1,5 +1,6 @@
 import { Post } from '../../post/entities/post.entity';
 import { User } from '../../user/entities/user.entity';
+
 import {
   Entity,
   Column,
@@ -47,11 +48,4 @@ export class Comment {
 
   @OneToMany((type) => CommentLike, (commentLikes) => commentLikes.comment)
   commentLikes: CommentLike[];
-
-  //TODO: 이부분 프리티어로 어떻게 해결할까?
 }
-
-/*
-ManyToOne 관계에서는 이렇게 써줘야 하는것인가? 
-ser_id를 통해서 nickname과 user_profile을 불러올 수 있을까? 
-*/
