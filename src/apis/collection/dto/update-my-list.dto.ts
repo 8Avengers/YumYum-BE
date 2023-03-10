@@ -1,15 +1,15 @@
 import { IsString } from 'class-validator';
 
-export class CreateMyListDto {
+export class UpdateMyListDto {
   @IsString()
   readonly name: string;
 
   @IsString()
-  readonly description: string;
+  readonly image?: string;
 
   @IsString()
-  readonly image: string;
+  readonly description?: string;
 
   @IsString()
-  readonly visibility: 'public' | 'private';
+  readonly visibility?: 'public' | 'private';
 }
