@@ -1,5 +1,12 @@
-import { CreateMyListDto } from './create-my-list.dto';
-import { PartialType } from '@nestjs/mapped-types';
-//create-my-list.dto.ts extendts
+import { IsString } from 'class-validator';
 
-export class UpdateMyListDto extends PartialType(CreateMyListDto) {}
+export class CreateMyListDto {
+  @IsString()
+  readonly name: string;
+
+  @IsString()
+  readonly description: string;
+
+  @IsString()
+  readonly img: string;
+}

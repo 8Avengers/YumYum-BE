@@ -2,12 +2,10 @@ import {
   Controller,
   Post,
   Body,
-  ValidationPipe,
-  UseGuards,
   Param,
   Delete,
   Put,
-  Get
+  Get,
 } from '@nestjs/common';
 
 import { BookmarkService } from './bookmark.service';
@@ -45,8 +43,7 @@ export class BookmarkController {
       ### 컬렉션 생성
       */
   @Post()
-  createCollection(
-    @Body() data:CreateCollectionDto) {
+  createCollection(@Body() data: CreateCollectionDto) {
     return this.bookmarkService.createCollection(data);
   }
 

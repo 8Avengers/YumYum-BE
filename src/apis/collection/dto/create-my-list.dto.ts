@@ -1,15 +1,6 @@
-/*
-
-1. 맛집id +
-
-2. 컬렉션에 대한 이름
-
-
-*/
-
 import { IsString } from 'class-validator';
 
-export class CreateMyListDto {
+export class UpdateMyListDto {
   @IsString()
   readonly name: string;
 
