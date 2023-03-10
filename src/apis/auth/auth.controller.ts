@@ -94,7 +94,12 @@ export class AuthController {
     // console.log('UseGuards통과한후 req::::::: 찍어보자 ', req.user);
     // console.log('currentUser::::::::::::::::::::', currentUser);
     // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
-    return this.authService.createAccessToken({ user: currentUser });
+
+    const accessToken = this.authService.createAccessToken({
+      user: currentUser,
+    });
+    return { accessToken };
+
     // return this.authService.createAccessToken({ user: req.user });
   }
 }
