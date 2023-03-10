@@ -8,5 +8,8 @@ export class CreateMyListDto {
   readonly description: string;
 
   @IsString()
-  readonly img: string;
+  readonly image: string;
+
+  @IsString()
+  readonly visibility: 'public' | 'private';
 }

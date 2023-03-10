@@ -1,4 +1,4 @@
-import { Collection as MyList } from './entities/collection.entity';
+import { Collection } from './entities/collection.entity';
 import {
   Injectable,
   InternalServerErrorException,
@@ -6,24 +6,37 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { User } from '../user/entities/user.entity';
+import { CollectionItem } from './entities/collection-item.entity';
+import { Post } from '../post/entities/post.entity';
 @Injectable()
 export class MyListService {
   constructor(
-    @InjectRepository(MyList) private myListRepository: Repository<MyList>,
+    @InjectRepository(Collection)
+    private collectionRepository: Repository<Collection>, //Collection,
+    @InjectRepository(CollectionItem)
+    private collectionItemRepository: Repository<CollectionItem>, // @InjectRepository(Post) // private postRepository: Repository<Post>,
   ) {}
   /*
     ### 23.03.09
     ### 최호인
-    ### MyList 불러오기
+    ### MyList 불러오기 (=> 포스트 가져오기)
     */
-  async getMyList(userId) {
+  async getMyList(userId: number) {
     try {
-      userId = Number(userId);
-      console.log(userId);
-      return await this.myListRepository.find({
-        where: { user: userId },
+      //유저의 아이디를 받아왔다. 해당 유저의 마이리스트를 보려고. 유즈가드받으면 필요없다.
+      //유저 1번의 정보를 받아서, 만들어둔 MyList들을 보여준다.
+      const myLists = await this.collectionRepository.find({
+        relations: {
+          collectionItems: true,
+          // post: true, //포스트를 가져오고 싶다!
+        },
       });
+      console.log('콘솔로그 :', myLists[0].collectionItems);
+
+      return await myLists;
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',
       );
@@ -35,13 +48,13 @@ export class MyListService {
     ### 최호인
     ### MyList 생성
     */
-  async createMyList(userId, name: string, description: string, img: string) {
+  async createMyList(userId, name: string, description: string, image: string) {
     try {
-      return this.myListRepository.insert({
+      return this.collectionRepository.insert({
         user: userId,
         name,
         description,
-        // img_url: img,
+        image,
       });
     } catch (err) {
       throw new InternalServerErrorException(
@@ -62,7 +75,7 @@ export class MyListService {
     img: string,
   ) {
     try {
-      return this.myListRepository.update(id, {
+      return this.collectionRepository.update(id, {
         name,
         description,
         // img_url: img,
@@ -80,7 +93,7 @@ export class MyListService {
 
   async deleteMyList(id: number) {
     try {
-      const result = await this.myListRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
+      const result = await this.collectionRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
       if (result.affected === 0) {
         throw new NotFoundException(`Post with id ${id} not found.`);
       }
