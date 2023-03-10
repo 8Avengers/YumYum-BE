@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, IsArray } from 'class-validator';
 
 export class CreatePostDto {
   @IsString()
@@ -11,4 +11,8 @@ export class CreatePostDto {
   readonly img: string;
 
   readonly visibility: 'public' | 'private';
+
+  @IsArray()
+  @IsString({ each: true })
+  readonly hashtagNames?: string[];
 }

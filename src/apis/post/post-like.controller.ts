@@ -16,7 +16,10 @@ export class PostLikeController {
   constructor(private readonly postLikeService: PostLikeService) {}
 
   @Post()
-  likePost(@Body() data: CreatePostLikeDto, @Param('postId') postId: number) {
-    this.postLikeService.likePost(postId, data.userId);
+  async likePost(
+    @Body() data: CreatePostLikeDto,
+    @Param('postId') postId: number,
+  ) {
+    await this.postLikeService.likePost(postId, data.userId);
   }
 }

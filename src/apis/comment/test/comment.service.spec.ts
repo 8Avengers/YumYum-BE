@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CommentService } from './comment.service';
+import { CommentService } from '../comment.service';
 import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PostService } from '../post/post.service';
+import { PostService } from '../../post/post.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Comment } from './entities/comment.entity';
+import { Comment } from '../entities/comment.entity';
 import { Repository } from 'typeorm';
 
 describe('CommentService', () => {
