@@ -1,5 +1,5 @@
-import { Post } from 'src/apis/post/entities/post.entity';
-import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
+import { Post } from '../../post/entities/post.entity';
+import { Restaurant } from '../../restaurant/entities/restaurant.entity';
 import {
   Entity,
   Column,

@@ -56,14 +56,14 @@ export class PostLikeService {
     try {
       const postLikes = await this.postLikeRepository
         .createQueryBuilder('post_like')
-        .select('post_like.post_id', 'post_id')
+        .select('post_like.post_id', 'postId')
         .addSelect('COUNT(*)', 'totalLikes')
         .where('post_like.post_id IN (:...postIds)', { postIds })
         .groupBy('post_like.post_id')
         .getRawMany();
 
       return postLikes.map((postLike) => ({
-        postId: postLike.post_id,
+        postId: postLike.postId,
         totalLikes: postLike.totalLikes,
       }));
     } catch (err) {
