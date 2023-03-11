@@ -29,6 +29,9 @@ export class Collection {
   @Column({ type: 'varchar', length: 255 })
   image: string;
 
+  @Column({ type: 'int' })
+  user_id: number;
+
   @Column({
     type: 'enum',
     enum: ['public', 'private'],

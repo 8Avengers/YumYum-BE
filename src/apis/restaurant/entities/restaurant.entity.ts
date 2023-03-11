@@ -25,10 +25,10 @@ export class Restaurant {
   @Column()
   category_group_name: string;
 
-  @Column()
+  @Column({ nullable: true })
   phone_number: string;
 
-  @Column()
+  @Column({ nullable: true })
   img_url: string;
 
   @Column()

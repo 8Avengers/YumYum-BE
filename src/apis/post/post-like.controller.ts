@@ -22,4 +22,10 @@ export class PostLikeController {
   ) {
     await this.postLikeService.likePost(postId, data.userId);
   }
+
+  @Delete()
+  async unlikePost(@Param('postId') postId: number) {
+    const userId = 1;
+    await this.postLikeService.unlikePost(postId, userId);
+  }
 }

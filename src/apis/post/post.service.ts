@@ -13,6 +13,8 @@ import { Post } from './entities/post.entity';
 import { PostLikeService } from './post-like.service';
 import { PostWithLikesDto } from './dto/post-with-likes.dto';
 import { PostHashtagService } from './post-hashtag.service';
+// import { PostUserTag } from './entities/post-usertag.entity';
+// import { PostUserTagService } from './post-user-tag.service';
 
 @Injectable()
 export class PostService {
@@ -20,7 +22,8 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
-  ) {}
+  ) // private readonly postUserTagService: PostUserTagService,
+  {}
 
   /*
                                           ### 23.03.08
@@ -119,9 +122,9 @@ export class PostService {
   }
 
   /*
-                                            ### 23.03.10
+                                            ### 23.03.11
                                             ### 이드보라
-                                            ### 포스팅 작성(해시태그 추가)
+                                            ### 포스팅 작성(사람 태그 추가)
                                             */
   async createPost(
     content: string,
@@ -129,6 +132,7 @@ export class PostService {
     img: string,
     visibility,
     hashtagNames: string[],
+    // usernames: string[],
   ) {
     try {
       const post = await this.postRepository.create({
@@ -144,7 +148,11 @@ export class PostService {
 
       post.hashtags = hashtags;
 
-      return await this.postRepository.save(post);
+      await this.postRepository.save(post);
+
+      // if (usernames && usernames.length > 0) {
+      //   await this.postUserTagService.tagUsersInPost(savedPost.id, usernames);
+      // }
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
