@@ -1,3 +1,4 @@
+
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -7,10 +8,7 @@ import { PostModule } from './apis/post/post.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
-import { ImagesModule } from './images/images.module';
-import { ImagesController } from './images/images.controller';
-import { ImagesService } from './images/images.service';
-import { UploadsModule } from './uploads/uploads.module';
+import { UploadsModule } from './apis/uploads/uploads.module';
 
 @Module({
   imports: [
@@ -23,10 +21,7 @@ import { UploadsModule } from './uploads/uploads.module';
     PostModule,
     UserModule,
     AuthModule,
-    ImagesModule,
-    UploadsModule,
+    UploadsModule
   ],
-  controllers: [ImagesController],
-  providers: [ImagesService],
 })
 export class AppModule {}
