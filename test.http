@@ -2,16 +2,18 @@
 GET localhost:3000/posts
 
 ###포스팅 상세보기
-GET localhost:3000/posts/2
+GET localhost:3000/posts/3
 
 ###포스팅 작성
 POST localhost:3000/posts
 Content-Type: application/json
 
 {
-  "content": "리뷰2",
+  "restaurantId": 1,
+  "myListId": 1,
+  "content": "리뷰3",
   "rating": 5,
-  "img": "img_url",
+  "image": ["img_url"],
   "visibility": "public",
   "hashtagNames": ["해시태그 하나", "둘"]
 }
@@ -67,5 +69,6 @@ POST localhost:3000/posts/2/comments/2/like
 
 ###댓글 좋아요 취소
 DELETE localhost:3000/posts/2/comments/2/like
+
 
 

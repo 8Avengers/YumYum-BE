@@ -11,8 +11,8 @@ import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { PostLikeService } from './post-like.service';
-import { PostWithLikesDto } from './dto/post-with-likes.dto';
 import { PostHashtagService } from './post-hashtag.service';
+import { MyListService } from '../collection/my-list.service';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -22,34 +22,21 @@ export class PostService {
     @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
-  ) // private readonly postUserTagService: PostUserTagService,
-  {}
+    private readonly myListService: MyListService, // private readonly postUserTagService: PostUserTagService,
+  ) {}
 
   /*
-                                          ### 23.03.08
-                                          ### 이드보라
-                                          ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
-                                          */
-  async getPosts(): Promise<PostWithLikesDto[]> {
+                                                              ### 23.03.12
+                                                              ### 이드보라
+                                                              ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
+                                                              */
+  async getPosts() {
     try {
-      const posts = await this.postRepository
-        .createQueryBuilder('post')
-        .leftJoinAndSelect('post.restaurant', 'restaurant')
-        .leftJoinAndSelect('post.user', 'user')
-        .leftJoinAndSelect('post.hashtags', 'hashtag')
-        .where('post.deleted_at IS NULL')
-        .andWhere('post.visibility = "public"')
-        .select([
-          'post.id',
-          'post.content',
-          'post.rating',
-          'post.img_url',
-          'post.updated_at',
-          'user.nickname',
-          'restaurant.name',
-          'hashtag.name',
-        ])
-        .getMany();
+      const posts = await this.postRepository.find({
+        where: { deleted_at: null, visibility: 'public' },
+        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
+        relations: ['user', 'restaurant', 'hashtags'],
+      });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
       }
@@ -57,13 +44,12 @@ export class PostService {
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
-      const postListWithLikes = posts.map((post) => {
+      return posts.map((post) => {
+        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
-        return { ...post, totalLikes: likes };
+        return { ...post, hashtags, totalLikes: likes };
       });
-
-      return postListWithLikes;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw new HttpException(err.message, HttpStatus.NOT_FOUND);
@@ -77,30 +63,17 @@ export class PostService {
   }
 
   /*
-                                            ### 23.03.10
-                                            ### 이드보라
-                                            ### 포스팅 상세보기.좋아요 기능 추가
-                                            */
+                                                                ### 23.03.12
+                                                                ### 이드보라
+                                                                ### 포스팅 상세보기.좋아요 기능 추가
+                                                                */
   async getPostById(id: number) {
     try {
-      const post = await this.postRepository
-        .createQueryBuilder('post')
-        .leftJoinAndSelect('post.restaurant', 'restaurant')
-        .leftJoinAndSelect('post.user', 'user')
-        .leftJoinAndSelect('post.hashtags', 'hashtag')
-        .where('post.id = :id', { id })
-        .andWhere('post.deleted_at IS NULL')
-        .andWhere('post.visibility = "public"')
-        .select([
-          'post.content',
-          'post.rating',
-          'post.img_url',
-          'post.updated_at',
-          'user.nickname',
-          'restaurant.name',
-          'hashtag.name',
-        ])
-        .getOne();
+      const post = await this.postRepository.find({
+        where: { id, deleted_at: null, visibility: 'public' },
+        select: ['content', 'rating', 'img_url', 'updated_at'],
+        relations: ['restaurant', 'user', 'hashtags'],
+      });
 
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
@@ -108,7 +81,9 @@ export class PostService {
 
       const totalLikes = await this.likeService.getLikesForPost(id);
 
-      return { ...post, totalLikes: totalLikes };
+      const hashtags = post[0].hashtags.map(({ name }) => ({ name }));
+
+      return { ...post[0], totalLikes, hashtags };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -122,11 +97,13 @@ export class PostService {
   }
 
   /*
-                                            ### 23.03.11
-                                            ### 이드보라
-                                            ### 포스팅 작성(사람 태그 추가)
-                                            */
+                                                                ### 23.03.11
+                                                                ### 이드보라
+                                                                ### 포스팅 작성
+                                                                */
   async createPost(
+    restaurantId: number,
+    myListId: number,
     content: string,
     rating: number,
     img: string,
@@ -136,6 +113,7 @@ export class PostService {
   ) {
     try {
       const post = await this.postRepository.create({
+        restaurant: { id: restaurantId },
         content,
         rating,
         img_url: img,
@@ -150,6 +128,10 @@ export class PostService {
 
       await this.postRepository.save(post);
 
+      const postId = post.id;
+
+      await this.myListService.myListPlusPosting(postId, myListId);
+
       // if (usernames && usernames.length > 0) {
       //   await this.postUserTagService.tagUsersInPost(savedPost.id, usernames);
       // }
@@ -162,12 +144,13 @@ export class PostService {
   }
 
   /*
-                                            ### 23.03.10
-                                            ### 이드보라
-                                            ### 포스팅 수정
-                                            */
+                                                                ### 23.03.10
+                                                                ### 이드보라
+                                                                ### 포스팅 수정
+                                                                */
   async updatePost(
     id: number,
+    restaurantId: number,
     content: string,
     rating: number,
     img: string,
@@ -181,6 +164,7 @@ export class PostService {
       }
 
       await this.postRepository.update(id, {
+        restaurant: { id: restaurantId },
         content,
         rating,
         img_url: img,
@@ -206,10 +190,10 @@ export class PostService {
   }
 
   /*
-                                            ### 23.03.06
-                                            ### 이드보라
-                                            ### 포스팅 삭제
-                                            */
+                                                                ### 23.03.06
+                                                                ### 이드보라
+                                                                ### 포스팅 삭제
+                                                                */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id);

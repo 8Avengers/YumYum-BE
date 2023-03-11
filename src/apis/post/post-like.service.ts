@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { PostLike } from './entities/post-like.entity';
 import { Post } from './entities/post.entity';
 
@@ -22,20 +22,20 @@ export class PostLikeService {
   ) {}
 
   /*
-                                                      ### 23.03.08
-                                                      ### 이드보라
-                                                      ### 한개의 포스팅의 총 좋아요 수 불러오기
-                                                      */
+                                                              ### 23.03.08
+                                                              ### 이드보라
+                                                              ### 한개의 포스팅의 총 좋아요 수 불러오기
+                                                              */
 
   async getLikesForPost(postId: number): Promise<number> {
     try {
-      const likes = await this.postLikeRepository
-        .createQueryBuilder('post_like')
-        .select('COUNT(post_like.post_id)', 'likes')
-        .where('post_like.post_id = :postId', { postId })
-        .getRawOne();
+      const postLikes = await this.postLikeRepository.findAndCount({
+        where: { post: { id: postId } },
+      });
 
-      return likes.likes;
+      const count = postLikes[1];
+
+      return count;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -45,27 +45,27 @@ export class PostLikeService {
   }
 
   /*
-                                                    ### 23.03.08
-                                                    ### 이드보라
-                                                    ### 모든 포스팅의 각 좋아요 수 불러오기
-                                                    */
+                                                            ### 23.03.08
+                                                            ### 이드보라
+                                                            ### 모든 포스팅의 각 좋아요 수 불러오기
+                                                            */
 
   async getLikesForAllPosts(
     postIds: number[],
   ): Promise<{ postId: number; totalLikes: number }[]> {
     try {
-      const postLikes = await this.postLikeRepository
-        .createQueryBuilder('post_like')
-        .select('post_like.post_id', 'postId')
-        .addSelect('COUNT(*)', 'totalLikes')
-        .where('post_like.post_id IN (:...postIds)', { postIds })
-        .groupBy('post_like.post_id')
-        .getRawMany();
+      const postLikes = await this.postLikeRepository.find({
+        select: ['id', 'post'],
+        where: { post: { id: In(postIds) } },
+        relations: ['post'],
+      });
 
-      return postLikes.map((postLike) => ({
-        postId: postLike.postId,
-        totalLikes: postLike.totalLikes,
+      const likes = postLikes.map(({ post }) => ({
+        postId: post.id,
+        totalLikes: postLikes.filter((pl) => pl.post.id === post.id).length,
       }));
+
+      return likes;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -75,10 +75,10 @@ export class PostLikeService {
   }
 
   /*
-                                                    ### 23.03.09
-                                                    ### 이드보라
-                                                    ### 포스트 하나 좋아요 하기
-                                                    */
+                                                            ### 23.03.09
+                                                            ### 이드보라
+                                                            ### 포스트 하나 좋아요 하기
+                                                            */
 
   async likePost(postId, userId) {
     try {
