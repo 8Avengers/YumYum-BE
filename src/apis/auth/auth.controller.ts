@@ -18,7 +18,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { AuthAccessGuard, AuthRefreshGuard } from './guards/auth.guards';
 import { OauthUserDto } from '../user/dto/oauth-user.dto';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('/')
 export class AuthController {
   constructor(
@@ -27,6 +34,22 @@ export class AuthController {
   ) {}
 
   //TODO: 이미 소셜로그인 완료했는데, 이메일로 또 로그인하려는 경우 에러처리해야한다.
+
+  @ApiOperation({ summary: '이메일로그인' })
+  @ApiResponse({
+    status: 200,
+    description: '성공',
+    //response할때 dto를 만들면된다.
+    type: LoginUserDto,
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Server Error',
+  })
+  @ApiResponse({
+    status: 400,
+    description: '요청이 올바르지 않아요',
+  })
   @Post('/login')
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
@@ -54,7 +77,7 @@ export class AuthController {
     };
   }
 
-  //소셜(구글)로회원가입 API
+  @ApiOperation({ summary: '구글회원가입' })
   @Get('/signup/google')
   @UseGuards(AuthGuard('google'))
   async signupGoogle(
@@ -66,7 +89,7 @@ export class AuthController {
     return this.authService.signupOauth({ user });
   }
 
-  //소셜(구글)로로그인 API
+  @ApiOperation({ summary: '구글로그인' })
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
@@ -85,9 +108,16 @@ export class AuthController {
   //useGuards가 전역에서 사용이 가능하도록 해야한다.
   //useGuards가 => 이걸 어떻게 전역에서 사용할 수 있을까?
 
+  @ApiOperation({ summary: '액세스토큰만료시 재발행 ' })
+  @ApiBearerAuth('refreshToken')
+  @ApiResponse({
+    status: 200,
+    description: 'Access token successfully recovered',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   // @UseGuards(AuthAccessGuard)
   @UseGuards(AuthRefreshGuard)
-  @Post('/restoreAccessToken')
+  @Post('/restore-access-token')
   async restoreAccessToken(
     @CurrentUser() currentUser: any, // @Req() req, // @Request() req,//
   ) {

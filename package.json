@@ -29,6 +29,7 @@
     "@nestjs/mapped-types": "^1.2.2",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.2.1",
     "@nestjs/typeorm": "^9.0.1",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
@@ -41,6 +42,7 @@
     "passport-naver": "^1.0.6",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
+    "swagger-ui-express": "^4.6.2",
     "typeorm": "^0.3.12",
     "typeorm-naming-strategies": "^4.1.0"
   },

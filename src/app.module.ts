@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmConfigService } from './common/config/typeorm.config.service';
+import { SearchModule } from './apis/search/search.module';
+import { PostModule } from './apis/post/post.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
-import { TypeOrmConfigService } from './common/config/typeorm.config.service';
-import { PostModule } from './apis/post/post.module';
-import { Collection } from './apis/collection/entities/collection.entity';
+import { CollectionModule } from './apis/collection/collection.module';
 
 @Module({
   imports: [
@@ -13,10 +14,11 @@ import { Collection } from './apis/collection/entities/collection.entity';
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
     }),
-    Collection,
+    CollectionModule,
+    SearchModule,
     PostModule,
-    UserModule, //
-    AuthModule, //
+    UserModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
