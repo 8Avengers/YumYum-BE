@@ -5,9 +5,9 @@ import { TypeOrmConfigService } from './common/config/typeorm.config.service';
 import { SearchModule } from './apis/search/search.module';
 import { PostModule } from './apis/post/post.module';
 import { CommentModule } from './apis/comment/comment.module';
-import { CollectionModule } from './apis/collection/collection.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
+import { CollectionModule } from './apis/collection/collection.module';
 
 
 @Module({
