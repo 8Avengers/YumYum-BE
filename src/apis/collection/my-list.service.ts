@@ -16,12 +16,12 @@ export class MyListService {
     ### 최호인
     ### MyList 불러오기
     */
-  async getMyList(userId) {
+  async getMyList(user) {
     try {
-      userId = Number(userId);
-      console.log(userId);
+      // userId = Number(userId);
+      // console.log(userId);
       return await this.myListRepository.find({
-        where: { user: userId },
+        where: { id: user.id },
       });
     } catch (err) {
       throw new InternalServerErrorException(
