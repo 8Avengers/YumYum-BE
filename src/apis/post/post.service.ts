@@ -151,6 +151,7 @@ export class PostService {
   async updatePost(
     id: number,
     restaurantId: number,
+    myListId: number,
     content: string,
     rating: number,
     img: string,
@@ -177,6 +178,10 @@ export class PostService {
 
       post.hashtags = [...hashtags];
       await this.postRepository.save(post);
+
+      const postId = post.id;
+
+      await this.myListService.myListPlusPosting(postId, myListId);
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

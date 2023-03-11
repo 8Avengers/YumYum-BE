@@ -74,6 +74,7 @@ export class PostController {
     return this.postService.updatePost(
       postId,
       data.restaurantId,
+      data.myListId,
       data.content,
       data.rating,
       data.image,
