@@ -49,12 +49,13 @@ export class PostController {
           */
   @Post()
   createPost(@Body() data: CreatePostDto) {
-    return this.postService.createPost(
+    this.postService.createPost(
       data.content,
       data.rating,
       data.img,
       data.visibility,
       data.hashtagNames,
+      // data.userNames,
     );
   }
 

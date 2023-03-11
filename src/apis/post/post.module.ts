@@ -8,6 +8,7 @@ import { PostLikeService } from './post-like.service';
 import { PostLike } from './entities/post-like.entity';
 import { Hashtag } from './entities/hashtag.entity';
 import { PostHashtagService } from './post-hashtag.service';
+// import { PostUserTagService } from './post-user-tag.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Post, PostLike, Hashtag])],

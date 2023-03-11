@@ -17,32 +17,35 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   /*
-    ### 23.03.07
-    ### 이드보라
-    ### 특정 포스팅에 해당하는 모든 댓글 불러오기
-   */
+      ### 23.03.07
+      ### 이드보라
+      ### 특정 포스팅에 해당하는 모든 댓글 불러오기
+     */
   @Get()
   async getAllComments(@Param('postId') postId: number) {
     return await this.commentService.getAllComments(postId);
   }
 
   /*
-    ### 23.03.07
-    ### 이드보라
-    ### 댓글 작성
-   */
+      ### 23.03.07
+      ### 이드보라
+      ### 댓글 작성
+     */
   @Post()
-  createPost(@Param('postId') postId: number, @Body() data: CreateCommentDto) {
+  createComment(
+    @Param('postId') postId: number,
+    @Body() data: CreateCommentDto,
+  ) {
     return this.commentService.createComment(postId, data.content);
   }
 
   /*
-    ### 23.03.07
-    ### 이드보라
-    ### 댓글 수정
-   */
+      ### 23.03.07
+      ### 이드보라
+      ### 댓글 수정
+     */
   @Put(':commentId')
-  async updateArticle(
+  async updateComment(
     @Param('postId') postId: number,
     @Param('commentId') commentId: number,
     @Body() data: UpdateCommentDto,
@@ -51,12 +54,12 @@ export class CommentController {
   }
 
   /*
-     ### 23.03.07
-     ### 이드보라
-     ###댓글 삭제
-   */
+       ### 23.03.07
+       ### 이드보라
+       ###댓글 삭제
+     */
   @Delete(':commentId')
-  async deleteArticle(
+  async deleteComment(
     @Param('postId') postId: number,
     @Param('commentId') commentId: number,
   ) {
