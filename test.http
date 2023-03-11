@@ -50,7 +50,7 @@ POST localhost:3000/posts/2/comments
 Content-Type: application/json
 
 {
-  "content": "아주 엄청난 맛집이군요"
+  "content": "존맛"
 }
 
 ###댓글 수정
@@ -62,7 +62,7 @@ Content-Type: application/json
 }
 
 ###댓글 삭제
-DELETE localhost:3000/posts/1/comments/8
+DELETE localhost:3000/posts/1/comments/3
 
 ###댓글 좋아요
 POST localhost:3000/posts/2/comments/2/like

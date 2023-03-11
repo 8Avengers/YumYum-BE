@@ -36,7 +36,8 @@ export class CommentController {
     @Param('postId') postId: number,
     @Body() data: CreateCommentDto,
   ) {
-    return this.commentService.createComment(postId, data.content);
+    const userId = 1;
+    return this.commentService.createComment(postId, userId, data.content);
   }
 
   /*

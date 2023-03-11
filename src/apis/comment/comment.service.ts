@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
-import { CommentWithLikesDto } from './dto/comment-with-likes.dto';
 import { CommentLikeService } from './comment-like.service';
 import { Post } from '../post/entities/post.entity';
 
@@ -22,11 +21,11 @@ export class CommentService {
   ) {}
 
   /*
-                                ### 23.03.07
-                                ### 이드보라
-                                ### 특정 포스팅에 해당하는 모든 댓글 불러오기
-                               */
-  async getAllComments(postId: number): Promise<CommentWithLikesDto[]> {
+                                  ### 23.03.07
+                                  ### 이드보라
+                                  ### 특정 포스팅에 해당하는 모든 댓글 불러오기
+                                 */
+  async getAllComments(postId: number) {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
@@ -35,32 +34,32 @@ export class CommentService {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
       }
 
-      const comments = await this.commentRepository
-        .createQueryBuilder('comment')
-        .leftJoinAndSelect('comment.user', 'user')
-        .leftJoinAndSelect('comment.post', 'post')
-        .where('comment.deleted_at IS NULL')
-        .andWhere('post.id = :postId', { postId })
-        .select(['comment.id', 'comment.content', 'user.nickname'])
-        .getMany();
+      const comments = await this.commentRepository.find({
+        where: { deleted_at: null, post: { id: postId } },
+        select: ['id', 'content'],
+        relations: ['user'],
+      });
 
       const commentIds = comments.map((comment) => comment.id);
       const commentLikes = await this.commentLikeService.getLikesForAllComments(
         commentIds,
       );
 
-      const commentListWithLikes = comments.map((comment) => {
+      return comments.map((comment) => {
+        const {
+          user: { nickname },
+          ...rest
+        } = comment;
         const likes =
           commentLikes.find((like) => like.commentId === comment.id)
             ?.totalLikes || 0;
-        return { ...comment, totalLikes: likes };
+        return { ...comment, user: nickname, totalLikes: likes };
       });
-
-      return commentListWithLikes;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
@@ -99,11 +98,11 @@ export class CommentService {
   // }
 
   /*
-                                    ### 23.03.07
-                                    ### 이드보라
-                                    ### 댓글 작성
-                                    */
-  async createComment(postId: number, content: string) {
+                                      ### 23.03.07
+                                      ### 이드보라
+                                      ### 댓글 작성
+                                      */
+  async createComment(postId: number, userId: number, content: string) {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
@@ -115,12 +114,14 @@ export class CommentService {
       return await this.commentRepository.insert({
         // user: { id: userId },
         post: { id: postId },
+        user: { id: userId },
         content,
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
@@ -129,10 +130,10 @@ export class CommentService {
   }
 
   /*
-                                    ### 23.03.07
-                                    ### 이드보라
-                                    ### 댓글 수정
-                                    */
+                                      ### 23.03.07
+                                      ### 이드보라
+                                      ### 댓글 수정
+                                      */
   async updateComment(postId: number, commentId: number, content: string) {
     try {
       const existPost = await this.postRepository.findOne({
@@ -152,6 +153,7 @@ export class CommentService {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
@@ -160,10 +162,10 @@ export class CommentService {
   }
 
   /*
-                                    ### 23.03.07
-                                    ### 이드보라
-                                    ### 댓글 삭제
-                                    */
+                                      ### 23.03.07
+                                      ### 이드보라
+                                      ### 댓글 삭제
+                                      */
   async deleteComment(postId: number, commentId: number) {
     try {
       const existPost = await this.postRepository.findOne({
@@ -181,6 +183,7 @@ export class CommentService {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );
