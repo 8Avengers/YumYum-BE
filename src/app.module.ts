@@ -7,6 +7,10 @@ import { PostModule } from './apis/post/post.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
+import { ImagesModule } from './images/images.module';
+import { ImagesController } from './images/images.controller';
+import { ImagesService } from './images/images.service';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import { CollectionModule } from './apis/collection/collection.module';
     PostModule,
     UserModule,
     AuthModule,
+    ImagesModule,
+    UploadsModule,
   ],
+  controllers: [ImagesController],
+  providers: [ImagesService],
 })
 export class AppModule {}
