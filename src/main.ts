@@ -38,7 +38,6 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(8080);
 
   app.enableCors({
     origin: true, //어떤 프론트엔드사이트라도 모두 접근가능.
