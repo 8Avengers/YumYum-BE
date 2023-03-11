@@ -3,7 +3,6 @@ import { AuthGuard } from '@nestjs/passport';
 import {
   ApiOperation,
   ApiResponse,
-  ApiHeader,
   ApiBearerAuth,
   ApiOAuth2,
 } from '@nestjs/swagger';

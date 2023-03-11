@@ -45,6 +45,7 @@ export class AuthController {
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
     @Req() req, //
+    // @Res() res, // res 를 써주지 않으면 무한로딩한다.
   ) {
     const { email, password } = loginUserDto;
     const user = await this.userService.findOne({ email });
