@@ -49,7 +49,9 @@ export class PostController {
             */
   @Post()
   createPost(@Body() data: CreatePostDto) {
+    const userId = 1;
     this.postService.createPost(
+      userId,
       data.restaurantId,
       data.myListId,
       data.content,

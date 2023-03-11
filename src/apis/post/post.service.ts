@@ -26,10 +26,10 @@ export class PostService {
   ) {}
 
   /*
-                                                              ### 23.03.12
-                                                              ### 이드보라
-                                                              ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
-                                                              */
+                                                                ### 23.03.12
+                                                                ### 이드보라
+                                                                ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
+                                                                */
   async getPosts() {
     try {
       const posts = await this.postRepository.find({
@@ -63,10 +63,10 @@ export class PostService {
   }
 
   /*
-                                                                ### 23.03.12
-                                                                ### 이드보라
-                                                                ### 포스팅 상세보기.좋아요 기능 추가
-                                                                */
+                                                                  ### 23.03.12
+                                                                  ### 이드보라
+                                                                  ### 포스팅 상세보기.좋아요 기능 추가
+                                                                  */
   async getPostById(id: number) {
     try {
       const post = await this.postRepository.find({
@@ -97,11 +97,12 @@ export class PostService {
   }
 
   /*
-                                                                ### 23.03.11
-                                                                ### 이드보라
-                                                                ### 포스팅 작성
-                                                                */
+                                                                  ### 23.03.11
+                                                                  ### 이드보라
+                                                                  ### 포스팅 작성
+                                                                  */
   async createPost(
+    userId: number,
     restaurantId: number,
     myListId: number,
     content: string,
@@ -113,6 +114,7 @@ export class PostService {
   ) {
     try {
       const post = await this.postRepository.create({
+        user: { id: userId },
         restaurant: { id: restaurantId },
         content,
         rating,
@@ -144,10 +146,10 @@ export class PostService {
   }
 
   /*
-                                                                ### 23.03.10
-                                                                ### 이드보라
-                                                                ### 포스팅 수정
-                                                                */
+                                                                  ### 23.03.10
+                                                                  ### 이드보라
+                                                                  ### 포스팅 수정
+                                                                  */
   async updatePost(
     id: number,
     restaurantId: number,
@@ -195,10 +197,10 @@ export class PostService {
   }
 
   /*
-                                                                ### 23.03.06
-                                                                ### 이드보라
-                                                                ### 포스팅 삭제
-                                                                */
+                                                                  ### 23.03.06
+                                                                  ### 이드보라
+                                                                  ### 포스팅 삭제
+                                                                  */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id);
