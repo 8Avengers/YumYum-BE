@@ -4,15 +4,23 @@ import { InjectRepository } from '@nestjs/typeorm'; //데이터들어갈떄
 import { ConflictException } from '@nestjs/common';
 import { User } from './entities/user.entity'; //데이터들어갈떄
 import { Collection } from '../collection/entities/collection.entity';
-
+import { AuthService } from '../auth/auth.service';
+import { Follow } from './entities/follow.entity';
+ 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) //데이터들어갈떄
     private readonly userRepository: Repository<User>, //데이터들어갈떄
 
+    @InjectRepository(Follow)
+    private FollowRepository: Repository<Follow>,
+
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
+
+
+
   ) {}
 
   async findOne({ email }) {
@@ -26,6 +34,8 @@ export class UserService {
       const user = await this.userRepository.findOne({
         where: { id },
       });
+
+     console.log("getUserById의 id는?", id)
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -117,4 +127,80 @@ export class UserService {
       throw error;
     }
   }
+
+
+
+  // public async getUserByUserId(userId: string): Promise<User> {
+  //   return await this.userRepository.findOne({ where: { id } });
+  // }
+
+  /**
+   * create a user-user follow pairing
+   */
+  public async createUserFollowRelation(
+    follower: User,
+    followingId: string,
+  ) {
+    console.log("서비스의 follower, follwingId", follower.id, followingId)
+
+    const following = await this.getUserById(followingId);
+    console.log("service에서 following의 값은", following);
+
+    if (!following) {
+      throw new NotFoundException('User not found');
+    }
+    const newFollow = await this.FollowRepository.save({
+      follower,
+      following,
+    });
+    return newFollow.following;
+  }
+
+  /**
+   * delete a user-user follow pairing
+   */
+  public async deleteUserFollowRelation(
+    follower: User,
+    followingId: string,
+  ) {
+    const id = followingId;
+    const following = await this.getUserById(id);
+    console.log("following반환값", following); // 여기까지는 옴 
+    console.log("서비스의 follower, followingID", follower, id); // 여기까지는 옴 
+
+    if (!following) {
+      throw new NotFoundException('User not found');
+    }
+    console.log("여기오나1") 
+
+    const follow = await this.FollowRepository.findOne({
+      where: { follower, following },
+    });
+
+    console.log("follow 테이블의 id는?", follow)
+
+    console.log("여기오나2")
+
+    if (follow) {
+      await this.FollowRepository.delete(follow.id);
+      // TODO: future: show show that I do not follow them anymore in the response
+      return following;
+    } else {
+      throw new NotFoundException('No follow relationship found');
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
