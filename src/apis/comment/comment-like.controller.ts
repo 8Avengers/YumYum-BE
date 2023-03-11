@@ -9,17 +9,20 @@ import {
 } from '@nestjs/common';
 
 import { CommentLikeService } from './comment-like.service';
-import { CreateCommentLikeDto } from './dto/create-comment-like.dto';
 
 @Controller('posts/:postId/comments/:commentId/like')
 export class CommentLikeController {
   constructor(private readonly commentLikeService: CommentLikeService) {}
 
   @Post()
-  async likeComment(
-    @Body() data: CreateCommentLikeDto,
-    @Param('commentId') commentId: number,
-  ) {
-    return this.commentLikeService.likeComment(commentId, data.userId);
+  async likeComment(@Param('commentId') commentId: number) {
+    const userId = 1;
+    return this.commentLikeService.likeComment(commentId, userId);
+  }
+
+  @Delete()
+  async unlikeComment(@Param('commentId') commentId: number) {
+    const userId = 1;
+    return this.commentLikeService.unlikeComment(commentId, userId);
   }
 }

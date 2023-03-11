@@ -8,67 +8,136 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { CommentLike } from './entities/comment-like.entity';
+import { Comment } from './entities/comment.entity';
 
 @Injectable()
 export class CommentLikeService {
   constructor(
     @InjectRepository(CommentLike)
     private readonly commentLikeRepository: Repository<CommentLike>,
+    @InjectRepository(Comment)
+    private readonly commentRepository: Repository<Comment>,
   ) {}
 
   /*
-                                  ### 23.03.09
-                                  ### 이드보라
-                                  ### 한개의 댓글의 총 좋아요 수 불러오기
-                                  */
+                                                  ### 23.03.09
+                                                  ### 이드보라
+                                                  ### 한개의 댓글의 총 좋아요 수 불러오기(사용하지 않음)
+                                                  */
 
   async getLikesForComment(commentId: number): Promise<number> {
-    const likes = await this.commentLikeRepository
-      .createQueryBuilder('comment_like')
-      .select('COUNT(comment_like.id)', 'likes')
-      .where('comment_like.comment_id = :id', { commentId })
-      .getRawOne();
+    try {
+      const likes = await this.commentLikeRepository.findAndCount({
+        where: { comment: { id: commentId } },
+      });
 
-    return likes.length;
+      const count = likes[1];
+
+      return count;
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
   }
 
   /*
-                                ### 23.03.09
-                                ### 이드보라
-                                ### 모든 댓글의 각 좋아요 수 불러오기
-                                */
+                                                ### 23.03.09
+                                                ### 이드보라
+                                                ### 모든 댓글의 각 좋아요 수 불러오기
+                                                */
 
   async getLikesForAllComments(
     commentIds: number[],
   ): Promise<{ commentId: number; totalLikes: number }[]> {
-    console.log('commentIds', commentIds);
+    try {
+      const commentLikes = await this.commentLikeRepository.find({
+        where: { comment: { id: In(commentIds) } },
+        select: ['id', 'comment'],
+        relations: ['comment'],
+      });
 
-    const commentLikes = await this.commentLikeRepository
-      .createQueryBuilder('comment_like')
-      .select('comment_like.comment_id', 'comment_id')
-      .addSelect('COUNT(*)', 'totalLikes')
-      .where('comment_like.comment_id IN (:...commentIds)', { commentIds })
-      .groupBy('comment_like.comment_id')
-      .getRawMany();
+      const likes = commentLikes.map(({ comment }) => ({
+        commentId: comment.id,
+        totalLikes: commentLikes.filter((cl) => cl.comment.id === comment.id)
+          .length,
+      }));
 
-    return commentLikes.map((commentLike) => ({
-      commentId: commentLike.comment_id,
-      totalLikes: commentLike.totalLikes,
-    }));
+      return likes;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
 
   /*
-                                ### 23.03.09
-                                ### 이드보라
-                                ### 댓글 하나 좋아요 하기
-                                */
+                                                ### 23.03.09
+                                                ### 이드보라
+                                                ### 댓글 하나 좋아요 하기
+                                                */
 
   async likeComment(commentId, userId) {
     try {
-      if (!commentId) {
-        throw new NotFoundException(`Post with id ${commentId} not found.`);
+      const existComment = await this.commentRepository.findOne({
+        where: {
+          id: commentId,
+        },
+      });
+
+      if (!existComment) {
+        throw new NotFoundException('존재하지 않는 댓글입니다.');
+      }
+
+      const existLike = await this.commentLikeRepository.findOne({
+        where: {
+          comment: { id: commentId },
+          user: { id: userId },
+        },
+        withDeleted: true,
+      });
+
+      if (existLike && existLike.deleted_at !== null) {
+        await this.commentLikeRepository.restore({
+          comment: { id: commentId },
+          user: { id: userId },
+        });
+      } else {
+        await this.commentLikeRepository.insert({
+          comment: { id: commentId },
+          user: { id: userId },
+        });
+      }
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
+  async unlikeComment(commentId, userId) {
+    try {
+      const existComment = await this.commentRepository.findOne({
+        where: {
+          id: commentId,
+        },
+      });
+
+      if (!existComment) {
+        throw new NotFoundException('존재하지 않는 댓글입니다.');
       }
 
       const existLike = await this.commentLikeRepository.findOne({
@@ -84,23 +153,13 @@ export class CommentLikeService {
           comment: { id: commentId },
           user: { id: userId },
         });
-      } else {
-        if (existLike && existLike.deleted_at !== null) {
-          await this.commentLikeRepository.restore({
-            comment: { id: commentId },
-            user: { id: userId },
-          });
-        } else {
-          await this.commentLikeRepository.insert({
-            comment: { id: commentId },
-            user: { id: userId },
-          });
-        }
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
       } else {
+        console.error(err);
+
         throw new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         );

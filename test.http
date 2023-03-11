@@ -63,10 +63,9 @@ Content-Type: application/json
 DELETE localhost:3000/posts/1/comments/8
 
 ###댓글 좋아요
-POST localhost:3000/posts/2/comments/5/like
-Content-Type: application/json
+POST localhost:3000/posts/2/comments/2/like
 
-{
-  "userId": 1
-}
+###댓글 좋아요 취소
+DELETE localhost:3000/posts/2/comments/2/like
+
 

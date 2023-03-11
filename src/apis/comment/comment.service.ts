@@ -9,26 +9,31 @@ import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { Comment } from './entities/comment.entity';
-import { PostService } from '../post/post.service';
 import { CommentWithLikesDto } from './dto/comment-with-likes.dto';
 import { CommentLikeService } from './comment-like.service';
+import { Post } from '../post/entities/post.entity';
 
 @Injectable()
 export class CommentService {
   constructor(
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
-    @Inject(PostService) private postService: PostService,
+    @InjectRepository(Post) private postRepository: Repository<Post>,
     private readonly commentLikeService: CommentLikeService,
   ) {}
 
   /*
-                            ### 23.03.07
-                            ### 이드보라
-                            ### 특정 포스팅에 해당하는 모든 댓글 불러오기
-                           */
+                                ### 23.03.07
+                                ### 이드보라
+                                ### 특정 포스팅에 해당하는 모든 댓글 불러오기
+                               */
   async getAllComments(postId: number): Promise<CommentWithLikesDto[]> {
     try {
-      await this.postService.getPostById(postId);
+      const existPost = await this.postRepository.findOne({
+        where: { id: postId },
+      });
+      if (!existPost) {
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
+      }
 
       const comments = await this.commentRepository
         .createQueryBuilder('comment')
@@ -38,10 +43,6 @@ export class CommentService {
         .andWhere('post.id = :postId', { postId })
         .select(['comment.id', 'comment.content', 'user.nickname'])
         .getMany();
-
-      if (!comments || comments.length === 0) {
-        throw new NotFoundException('No comments found.');
-      }
 
       const commentIds = comments.map((comment) => comment.id);
       const commentLikes = await this.commentLikeService.getLikesForAllComments(
@@ -98,13 +99,18 @@ export class CommentService {
   // }
 
   /*
-                                ### 23.03.07
-                                ### 이드보라
-                                ### 댓글 작성
-                                */
+                                    ### 23.03.07
+                                    ### 이드보라
+                                    ### 댓글 작성
+                                    */
   async createComment(postId: number, content: string) {
     try {
-      await this.postService.getPostById(postId);
+      const existPost = await this.postRepository.findOne({
+        where: { id: postId },
+      });
+      if (!existPost) {
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
+      }
 
       return await this.commentRepository.insert({
         // user: { id: userId },
@@ -123,19 +129,24 @@ export class CommentService {
   }
 
   /*
-                                ### 23.03.07
-                                ### 이드보라
-                                ### 댓글 수정
-                                */
+                                    ### 23.03.07
+                                    ### 이드보라
+                                    ### 댓글 수정
+                                    */
   async updateComment(postId: number, commentId: number, content: string) {
     try {
-      await this.postService.getPostById(postId);
+      const existPost = await this.postRepository.findOne({
+        where: { id: postId },
+      });
+      if (!existPost) {
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
+      }
 
       const result = await this.commentRepository.update(commentId, {
         content,
       });
       if (result.affected === 0) {
-        throw new NotFoundException(`Comment with id ${commentId} not found.`);
+        throw new NotFoundException(`존재하지 않는 댓글입니다.`);
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -149,17 +160,22 @@ export class CommentService {
   }
 
   /*
-                                ### 23.03.07
-                                ### 이드보라
-                                ### 댓글 삭제
-                                */
+                                    ### 23.03.07
+                                    ### 이드보라
+                                    ### 댓글 삭제
+                                    */
   async deleteComment(postId: number, commentId: number) {
     try {
-      await this.postService.getPostById(postId);
+      const existPost = await this.postRepository.findOne({
+        where: { id: postId },
+      });
+      if (!existPost) {
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
+      }
 
       const result = await this.commentRepository.softDelete(commentId);
       if (result.affected === 0) {
-        throw new NotFoundException(`Comment with id ${commentId} not found.`);
+        throw new NotFoundException(`존재하지 않는 댓글입니다.`);
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
