@@ -11,7 +11,7 @@ import {
 import { BookmarkService } from './bookmark.service';
 import { CreateCollectionDto } from './dto/create-collection.dto';
 
-@Controller('bookmarks')
+@Controller('bookmark')
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 

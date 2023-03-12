@@ -23,9 +23,15 @@ export class MyListService {
     ### 표정훈
     ### MyList 전체조회(해당 유저의 맛집리스트만 불러오기)
     */
+  //  🔥평점이 없다? 추가할 방법 고민🔥 relations쓰면 가져오긴 rating가져오긴함
   async getMyList(userId: number) {
     try {
       const myLists = await this.collectionRepository.find({
+        relations: {
+          collectionItems: {
+            post: true,
+          },
+        },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
         select: { name: true, description: true, image: true },
       });
@@ -42,15 +48,16 @@ export class MyListService {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 생성(이름)
+    ### MyList 생성
     */
-  async createMyList(userId, name, type) {
+  async createMyList(userId: number, name: string, type: 'myList') {
     try {
-      return this.collectionRepository.insert({
+      const myLists = await this.collectionRepository.insert({
         user_id: userId,
         name,
         type: 'myList',
       });
+      return myLists;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
