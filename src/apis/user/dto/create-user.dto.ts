@@ -97,7 +97,6 @@ export class CreateUserDto {
     description: 'gender M or F 이넘으로 데이터베이스에 들어옵니다!',
     required: true,
   })
-  //TODO: 회원가입시 성별 입력값을 어떻게 받을까?
   @IsEnum(['M', 'F'])
   gender: 'M' | 'F';
 
@@ -107,18 +106,6 @@ export class CreateUserDto {
       'birth라서 920913은 DB에서 에러가 납니다. 19920913 또는 1992-09-13 이렇게는 DB에서 입력받을 수 있습니다.',
     required: true,
   })
-  //TODO: 회원가입시 birth: 입력값을 어떻게 받을까? 920913은 안된다. 19920913 또는 1992-09-13
   @IsDateString()
   birth: Date;
-
-  //TODO: 회원가입시 profileImage는 Default 이미지를 넣어야 하는데 어떻게 할까
-
-  @ApiProperty({
-    example: 'imageurl',
-    description: '회원가입과 동시에 디폴트이미지가 자동으로 DB에 저장됩니다.',
-    required: true,
-  })
-  @IsOptional()
-  @IsString()
-  profileImage: string;
 }

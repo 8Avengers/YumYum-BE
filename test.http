@@ -4,9 +4,14 @@ GET localhost:3000/posts
 ###포스팅 상세보기
 GET localhost:3000/posts/3
 
+#### Authorization by token, part 2. Use token to authorize.
+#GET https://httpbin.org/headers
+#Authorization: Bearer {{accessToken}}
+
 ###포스팅 작성
-POST localhost:3000/posts
+POST localhost:8080/posts
 Content-Type: application/json
+Authorization: Bearer {{auth_token}}
 
 {
   "restaurantId": 1,
@@ -46,15 +51,15 @@ DELETE localhost:3000/posts/2/like
 GET localhost:3000/posts/2/comments
 
 ###댓글 작성
-POST localhost:3000/posts/2/comments
+POST localhost:8080/posts/3/comments
 Content-Type: application/json
 
 {
-  "content": "존맛"
+  "content": "우왕"
 }
 
 ###댓글 수정
-PUT localhost:3000/posts/1/comments/1
+PUT localhost:8080/posts/1/comments/1
 Content-Type: application/json
 
 {
@@ -70,5 +75,31 @@ POST localhost:3000/posts/2/comments/2/like
 ###댓글 좋아요 취소
 DELETE localhost:3000/posts/2/comments/2/like
 
+###회원가입
+POST localhost:8080/signup
+Content-Type: application/json
+
+{
+"name": "이드봉",
+"email": "email99@naver.com",
+"password": "Abcd1234!",
+"confirmPassword": "Abcd1234!",
+"nickname": "debdeb",
+"gender": "F",
+"birth": "19920913",
+"phoneNumber":"01072721789",
+"profileImage":"프로필 이미지"
+}
+
+###로그인
+POST localhost:8080/login
+Content-Type: application/json
+
+{
+"email": "email99@naver.com",
+"password": "Abcd1234!"
+}
+
+> {% client.global.set("auth_token", response.body.accessToken); %}
 
 
