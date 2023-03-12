@@ -7,6 +7,7 @@ import {
   UseGuards,
   Param,
   Get,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import * as bcrypt from 'bcrypt';
@@ -21,16 +22,8 @@ export class UserController {
 
   @Post('/signup')
   async signUp(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    const {
-      email,
-      password,
-      nickname,
-      name,
-      gender,
-      birth,
-      phoneNumber,
-      profileImage,
-    } = createUserDto;
+    const { email, password, nickname, name, gender, birth, phoneNumber } =
+      createUserDto;
     console.log(createUserDto);
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -43,7 +36,6 @@ export class UserController {
       gender,
       birth,
       phoneNumber,
-      profileImage,
     });
   }
 
