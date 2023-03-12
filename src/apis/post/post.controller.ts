@@ -13,6 +13,7 @@ import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('posts')
 export class PostController {
@@ -50,10 +51,17 @@ export class PostController {
             ### 포스팅 작성
             */
   @Post()
-  createPost(@Body() data: CreatePostDto) {
-    const userId = 1;
+  @UseGuards(AuthAccessGuard)
+  createPost(
+    @Body() data: CreatePostDto, //
+    @CurrentUser() currentUser: any,
+  ) {
+    console.log(data);
+
+    console.log(currentUser);
+
     this.postService.createPost(
-      userId,
+      currentUser.id,
       data.restaurantId,
       data.myListId,
       data.content,
