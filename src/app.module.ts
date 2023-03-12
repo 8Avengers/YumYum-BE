@@ -8,6 +8,7 @@ import { CommentModule } from './apis/comment/comment.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
+import { RestaurantModule } from './apis/restaurant/restaurant.module';
 
 @Module({
   imports: [
@@ -19,8 +20,9 @@ import { CollectionModule } from './apis/collection/collection.module';
     SearchModule,
     PostModule,
     CommentModule,
-    UserModule, //
-    AuthModule, //
+    UserModule,
+    AuthModule,
+    RestaurantModule,
   ],
 })
 export class AppModule {}
