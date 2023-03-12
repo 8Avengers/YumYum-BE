@@ -48,3 +48,5 @@ export class Follow {
   // @DeleteDateColumn({ name: 'deleted_at' })
   // deleted_at: Date;
 }
+
+ 
