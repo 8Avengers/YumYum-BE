@@ -46,14 +46,10 @@ export class CommentService {
       );
 
       return comments.map((comment) => {
-        const {
-          user: { nickname },
-          ...rest
-        } = comment;
         const likes =
           commentLikes.find((like) => like.commentId === comment.id)
             ?.totalLikes || 0;
-        return { ...comment, user: nickname, totalLikes: likes };
+        return { ...comment, totalLikes: likes };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
