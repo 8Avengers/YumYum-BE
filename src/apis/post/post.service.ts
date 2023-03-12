@@ -117,7 +117,7 @@ export class PostService {
   async createPost(
     userId: number,
     restaurantId: number,
-    myListId: number,
+    myListIds: number[],
     content: string,
     rating: number,
     img: string,
@@ -145,7 +145,7 @@ export class PostService {
 
       const postId = post.id;
 
-      await this.myListService.myListPlusPosting(postId, myListId);
+      await this.myListService.myListPlusPosting(postId, myListIds);
 
       return { postId: postId };
 
@@ -168,7 +168,7 @@ export class PostService {
   async updatePost(
     id: number,
     restaurantId: number,
-    myListId: number,
+    myListId: number[],
     content: string,
     rating: number,
     img: string,
