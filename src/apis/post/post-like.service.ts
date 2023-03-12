@@ -22,10 +22,10 @@ export class PostLikeService {
   ) {}
 
   /*
-                                                              ### 23.03.08
-                                                              ### 이드보라
-                                                              ### 한개의 포스팅의 총 좋아요 수 불러오기
-                                                              */
+                                                                          ### 23.03.08
+                                                                          ### 이드보라
+                                                                          ### 한개의 포스팅의 총 좋아요 수 불러오기
+                                                                          */
 
   async getLikesForPost(postId: number): Promise<number> {
     try {
@@ -45,10 +45,10 @@ export class PostLikeService {
   }
 
   /*
-                                                            ### 23.03.08
-                                                            ### 이드보라
-                                                            ### 모든 포스팅의 각 좋아요 수 불러오기
-                                                            */
+                                                                        ### 23.03.08
+                                                                        ### 이드보라
+                                                                        ### 모든 포스팅의 각 좋아요 수 불러오기
+                                                                        */
 
   async getLikesForAllPosts(
     postIds: number[],
@@ -75,10 +75,67 @@ export class PostLikeService {
   }
 
   /*
-                                                            ### 23.03.09
-                                                            ### 이드보라
-                                                            ### 포스트 하나 좋아요 하기
-                                                            */
+              ### 23.03.12
+                                                                        ### 이드보라
+                                                                        ### 사용자가 그 포스트를 좋아요 했는지 알아보기
+                                                                        */
+  async getLikedStatusforOnePost(postId: number, userId: number) {
+    try {
+      const postliked = await this.postLikeRepository.findOne({
+        where: { post: { id: postId }, user: { id: userId } },
+      });
+
+      console.log('postLiked', postliked);
+
+      return {
+        isLiked: postliked ? 'True' : 'False',
+      };
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+              ### 23.03.12
+                                                                        ### 이드보라
+                                                                        ### 사용자가 그 포스트를 좋아요 했는지 알아보기(모든 포스트에서)
+                                                                        */
+
+  async getLikedStatusforAllPosts(postIds, userId) {
+    try {
+      const postLikes = await this.postLikeRepository.find({
+        where: {
+          post: { id: In(postIds) },
+          user: { id: userId },
+        },
+        relations: ['post'],
+      });
+
+      const likedStatuses = postIds.map((postId) => {
+        const isLiked = postLikes.some((like) => like.post.id === postId);
+        return {
+          postId,
+          isLiked: isLiked ? 'True' : 'False',
+        };
+      });
+
+      return likedStatuses;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+                                                                        ### 23.03.09
+                                                                        ### 이드보라
+                                                                        ### 포스트 하나 좋아요 하기
+                                                                        */
 
   async likePost(postId, userId) {
     try {
