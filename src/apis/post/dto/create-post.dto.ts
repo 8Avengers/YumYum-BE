@@ -4,8 +4,9 @@ export class CreatePostDto {
   @IsNumber()
   readonly restaurantId: number;
 
-  @IsNumber()
-  readonly myListId: number;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  readonly myListId: number[];
 
   @IsString()
   readonly content: string;

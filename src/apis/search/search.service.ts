@@ -14,6 +14,7 @@ export class SearchService {
     private restaurantRepository: Repository<Restaurant>,
     @InjectRepository(Hashtag) private hashtagRepository: Repository<Hashtag>,
   ) {}
+
   /*
       ### 23.03.06
       ### 최호인
@@ -25,6 +26,7 @@ export class SearchService {
     });
     return userSearchResult;
   }
+
   /*
       ### 23.03.06
       ### 최호인
@@ -36,6 +38,7 @@ export class SearchService {
     });
     return restaurantSearchResult;
   }
+
   /*
       ### 23.03.06
       ### 최호인
@@ -53,7 +56,6 @@ export class SearchService {
       ### 최호인
       ### 해시태그를 기반으로 포스팅 불러오기
     */
-
   async getPostSearchByHashtag(hashtag: string) {
     const postSearchByHashtagResult = await this.hashtagRepository.find({
       relations: ['posts'],

@@ -6,11 +6,14 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 
 import { CommentService } from './comment.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { AuthAccessGuard } from '../auth/guards/auth.guards';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('posts/:postId/comments')
 export class CommentController {
@@ -22,8 +25,12 @@ export class CommentController {
       ### 특정 포스팅에 해당하는 모든 댓글 불러오기
      */
   @Get()
-  async getAllComments(@Param('postId') postId: number) {
-    return await this.commentService.getAllComments(postId);
+  @UseGuards(AuthAccessGuard)
+  async getAllComments(
+    @Param('postId') postId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.commentService.getAllComments(postId, currentUser.id);
   }
 
   /*
@@ -32,12 +39,17 @@ export class CommentController {
       ### 댓글 작성
      */
   @Post()
+  @UseGuards(AuthAccessGuard)
   createComment(
     @Param('postId') postId: number,
     @Body() data: CreateCommentDto,
+    @CurrentUser() currentUser: any,
   ) {
-    const userId = 1;
-    return this.commentService.createComment(postId, userId, data.content);
+    return this.commentService.createComment(
+      postId,
+      currentUser.id,
+      data.content,
+    );
   }
 
   /*
@@ -46,6 +58,7 @@ export class CommentController {
       ### 댓글 수정
      */
   @Put(':commentId')
+  @UseGuards(AuthAccessGuard)
   async updateComment(
     @Param('postId') postId: number,
     @Param('commentId') commentId: number,
@@ -60,6 +73,7 @@ export class CommentController {
        ###댓글 삭제
      */
   @Delete(':commentId')
+  @UseGuards(AuthAccessGuard)
   async deleteComment(
     @Param('postId') postId: number,
     @Param('commentId') commentId: number,

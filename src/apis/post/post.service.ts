@@ -30,7 +30,7 @@ export class PostService {
                                                                 ### 이드보라
                                                                 ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
                                                                 */
-  async getPosts() {
+  async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
@@ -44,11 +44,19 @@ export class PostService {
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
+      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+        postIds,
+        userId,
+      );
+
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
-        return { ...post, hashtags, totalLikes: likes };
+        const isLiked =
+          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+          'False';
+        return { ...post, hashtags, totalLikes: likes, isLiked };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -67,7 +75,7 @@ export class PostService {
                                                                   ### 이드보라
                                                                   ### 포스팅 상세보기.좋아요 기능 추가
                                                                   */
-  async getPostById(id: number) {
+  async getPostById(id: number, userId: number) {
     try {
       const post = await this.postRepository.find({
         where: { id, deleted_at: null, visibility: 'public' },
@@ -83,7 +91,12 @@ export class PostService {
 
       const hashtags = post[0].hashtags.map(({ name }) => ({ name }));
 
-      return { ...post[0], totalLikes, hashtags };
+      const { isLiked } = await this.likeService.getLikedStatusforOnePost(
+        id,
+        userId,
+      );
+
+      return { ...post[0], totalLikes, hashtags, isLiked };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -104,7 +117,7 @@ export class PostService {
   async createPost(
     userId: number,
     restaurantId: number,
-    myListId: number,
+    myListIds: number[],
     content: string,
     rating: number,
     img: string,
@@ -132,7 +145,9 @@ export class PostService {
 
       const postId = post.id;
 
-      await this.myListService.myListPlusPosting(postId, myListId);
+      await this.myListService.myListPlusPosting(postId, myListIds);
+
+      return { postId: postId };
 
       // if (usernames && usernames.length > 0) {
       //   await this.postUserTagService.tagUsersInPost(savedPost.id, usernames);
@@ -153,7 +168,7 @@ export class PostService {
   async updatePost(
     id: number,
     restaurantId: number,
-    myListId: number,
+    myListId: number[],
     content: string,
     rating: number,
     img: string,
@@ -184,6 +199,8 @@ export class PostService {
       const postId = post.id;
 
       await this.myListService.myListPlusPosting(postId, myListId);
+
+      return { postId: postId };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

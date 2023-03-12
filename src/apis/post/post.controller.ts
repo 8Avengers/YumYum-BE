@@ -25,8 +25,12 @@ export class PostController {
             ### 포스팅 상세보기
             */
   @Get('/:postId')
-  async getPostById(@Param('postId') postId: number) {
-    return await this.postService.getPostById(postId);
+  @UseGuards(AuthAccessGuard)
+  async getPostById(
+    @Param('postId') postId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.postService.getPostById(postId, currentUser.id);
   }
 
   /*
@@ -35,8 +39,9 @@ export class PostController {
             ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
             */
   @Get()
-  async getPosts() {
-    const posts = await this.postService.getPosts();
+  @UseGuards(AuthAccessGuard)
+  async getPosts(@CurrentUser() currentUser: any) {
+    const posts = await this.postService.getPosts(currentUser.id);
     return posts;
   }
 
@@ -56,11 +61,7 @@ export class PostController {
     @Body() data: CreatePostDto, //
     @CurrentUser() currentUser: any,
   ) {
-    console.log(data);
-
-    console.log(currentUser);
-
-    this.postService.createPost(
+    return this.postService.createPost(
       currentUser.id,
       data.restaurantId,
       data.myListId,
@@ -79,6 +80,7 @@ export class PostController {
             ### 포스팅 수정
             */
   @Put('/:postId')
+  @UseGuards(AuthAccessGuard)
   async updateArticle(
     @Param('postId') postId: number,
     @Body() data: UpdatePostDto,
@@ -101,6 +103,7 @@ export class PostController {
             ### 포스팅 삭제
             */
   @Delete('/:postId')
+  @UseGuards(AuthAccessGuard)
   async deletePost(@Param('postId') postId: number) {
     return this.postService.deletePost(postId);
   }
