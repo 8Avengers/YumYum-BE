@@ -14,40 +14,18 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { User } from './entities/user.entity';
-import { UserDto } from './dto/user.dto';
+import { signUpEmail } from './user.decorators';
 
 @ApiTags('User')
 @Controller('/')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiOperation({ summary: '이메일회원가입' })
-  @ApiResponse({
-    status: 201,
-    description: '성공',
-    //response할때 dto를 만들면된다.
-    type: UserDto,
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Server Error',
-  })
-  @ApiResponse({
-    status: 400,
-    description: '요청이 올바르지 않아요',
-  })
+  @signUpEmail()
   @Post('/signup')
-  async signUp(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    const {
-      email,
-      password,
-      nickname,
-      name,
-      gender,
-      birth,
-      phoneNumber,
-      profileImage,
-    } = createUserDto;
+  async signUpEmail(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+    const { email, password, nickname, name, gender, birth, phoneNumber } =
+      createUserDto;
     console.log(createUserDto);
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -60,7 +38,6 @@ export class UserController {
       gender,
       birth,
       phoneNumber,
-      profileImage,
     });
   }
 

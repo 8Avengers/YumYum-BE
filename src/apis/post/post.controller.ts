@@ -6,36 +6,36 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { AuthAccessGuard } from '../auth/guards/auth.guards';
 
 @Controller('posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
   /*
-    ### 23.03.03
-    ### 이드보라
-    ### 포스팅 상세보기
-    */
+            ### 23.03.03
+            ### 이드보라
+            ### 포스팅 상세보기
+            */
   @Get('/:postId')
   async getPostById(@Param('postId') postId: number) {
     return await this.postService.getPostById(postId);
   }
 
   /*
-    ### 23.03.03
-    ### 이드보라
-    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
-    */
+            ### 23.03.03
+            ### 이드보라
+            ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
+            */
   @Get()
   async getPosts() {
-    console.log('아무거나');
     const posts = await this.postService.getPosts();
-    console.log('**********', posts);
     return posts;
   }
 
@@ -45,28 +45,31 @@ export class PostController {
   // }
 
   /*
-    ### 23.03.03
-    ### 이드보라
-    ### 포스팅 작성
-    */
-  @Post('/:restaurantId')
-  createPost(
-    @Param('restaurantId') restaurantId: number,
-    @Body() data: CreatePostDto,
-  ) {
-    return this.postService.createPost(
-      restaurantId,
+            ### 23.03.03
+            ### 이드보라
+            ### 포스팅 작성
+            */
+  @Post()
+  createPost(@Body() data: CreatePostDto) {
+    const userId = 1;
+    this.postService.createPost(
+      userId,
+      data.restaurantId,
+      data.myListId,
       data.content,
       data.rating,
-      data.img,
+      data.image,
+      data.visibility,
+      data.hashtagNames,
+      // data.userNames,
     );
   }
 
   /*
-    ### 23.03.03
-    ### 이드보라
-    ### 포스팅 수정
-    */
+            ### 23.03.03
+            ### 이드보라
+            ### 포스팅 수정
+            */
   @Put('/:postId')
   async updateArticle(
     @Param('postId') postId: number,
@@ -74,17 +77,21 @@ export class PostController {
   ) {
     return this.postService.updatePost(
       postId,
+      data.restaurantId,
+      data.myListId,
       data.content,
       data.rating,
-      data.img,
+      data.image,
+      data.visibility,
+      data.hashtagNames,
     );
   }
 
   /*
-    ### 23.03.07
-    ### 이드보라
-    ### 포스팅 삭제
-    */
+            ### 23.03.07
+            ### 이드보라
+            ### 포스팅 삭제
+            */
   @Delete('/:postId')
   async deletePost(@Param('postId') postId: number) {
     return this.postService.deletePost(postId);

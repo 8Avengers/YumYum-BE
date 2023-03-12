@@ -1,12 +1,29 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, IsArray } from 'class-validator';
 
 export class CreatePostDto {
+  @IsNumber()
+  readonly restaurantId: number;
+
+  @IsNumber()
+  readonly myListId: number;
+
   @IsString()
   readonly content: string;
 
   @IsNumber()
   readonly rating: number;
 
-  @IsString()
-  readonly img: string;
+  @IsArray()
+  @IsString({ each: true })
+  readonly image: string;
+
+  readonly visibility: 'public' | 'private';
+
+  @IsArray()
+  @IsString({ each: true })
+  readonly hashtagNames?: string[];
+
+  // @IsArray()
+  // @IsString({ each: true })
+  // readonly userNames?: string[];
 }

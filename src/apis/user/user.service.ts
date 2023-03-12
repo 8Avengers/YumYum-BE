@@ -44,7 +44,6 @@ export class UserService {
     name,
     gender,
     birth,
-    profileImage,
     phoneNumber,
   }) {
     try {
@@ -69,7 +68,6 @@ export class UserService {
         gender,
         birth,
         phone_number: phoneNumber,
-        profile_image: profileImage,
       });
 
       const collection = new Collection();
