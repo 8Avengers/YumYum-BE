@@ -6,23 +6,32 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 
 import { PostLikeService } from './post-like.service';
+import { AuthAccessGuard } from '../auth/guards/auth.guards';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('posts/:postId/like')
 export class PostLikeController {
   constructor(private readonly postLikeService: PostLikeService) {}
 
   @Post()
-  async likePost(@Param('postId') postId: number) {
-    const userId = 1;
-    await this.postLikeService.likePost(postId, userId);
+  @UseGuards(AuthAccessGuard)
+  async likePost(
+    @Param('postId') postId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    await this.postLikeService.likePost(postId, currentUser.id);
   }
 
   @Delete()
-  async unlikePost(@Param('postId') postId: number) {
-    const userId = 1;
-    await this.postLikeService.unlikePost(postId, userId);
+  @UseGuards(AuthAccessGuard)
+  async unlikePost(
+    @Param('postId') postId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    await this.postLikeService.unlikePost(postId, currentUser.id);
   }
 }
