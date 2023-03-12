@@ -56,11 +56,7 @@ export class PostController {
     @Body() data: CreatePostDto, //
     @CurrentUser() currentUser: any,
   ) {
-    console.log(data);
-
-    console.log(currentUser);
-
-    this.postService.createPost(
+    return this.postService.createPost(
       currentUser.id,
       data.restaurantId,
       data.myListId,

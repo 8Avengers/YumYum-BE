@@ -134,6 +134,8 @@ export class PostService {
 
       await this.myListService.myListPlusPosting(postId, myListId);
 
+      return { postId: postId };
+
       // if (usernames && usernames.length > 0) {
       //   await this.postUserTagService.tagUsersInPost(savedPost.id, usernames);
       // }
@@ -184,6 +186,8 @@ export class PostService {
       const postId = post.id;
 
       await this.myListService.myListPlusPosting(postId, myListId);
+
+      return { postId: postId };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
