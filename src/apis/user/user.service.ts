@@ -139,7 +139,7 @@ export class UserService {
    */
   public async createUserFollowRelation(
     follower: User,
-    followingId: string,
+    followingId: number,
   ) {
     console.log("서비스의 follower, follwingId", follower.id, followingId)
 
@@ -161,46 +161,81 @@ export class UserService {
    */
   public async deleteUserFollowRelation(
     follower: User,
-    followingId: string,
+    followingId: number,
   ) {
-    const id = followingId;
+    const id : number = followingId;
     const following = await this.getUserById(id);
     console.log("following반환값", following); // 여기까지는 옴 
-    console.log("서비스의 follower, followingID", follower, id); // 여기까지는 옴 
+    console.log("서비스의 follower, followingID", follower, followingId); // 여기까지는 옴 
 
     if (!following) {
       throw new NotFoundException('User not found');
     }
     console.log("여기오나1") 
 
-    const follow = await this.FollowRepository.findOne({
-      where: { follower, following },
-    });
+    // const follow = await this.FollowRepository.findOne({
+    //   where: { follower, following },
+    // });
+
+    // const follow = await this.FollowRepository.findOne({
+    //   where: { follower: follower, following: { id: followingId } },
+    // });
+    
+
+    const follow = await this.FollowRepository.query(
+      'SELECT * FROM follow WHERE follower_id = ? AND following_id = ?',
+      [follower.id, Number(followingId)]
+    );
+    
 
     console.log("follow 테이블의 id는?", follow)
 
     console.log("여기오나2")
 
     if (follow) {
-      await this.FollowRepository.delete(follow.id);
-      // TODO: future: show show that I do not follow them anymore in the response
-      return following;
+      const result = await this.FollowRepository.query(
+        'DELETE FROM follow WHERE id = ?',
+        [follow[0].id]
+      );
+      if (result.affectedRows === 1) {
+        // TODO: future: show show that I do not follow them anymore in the response
+        return following;
+      } else {
+        throw new Error('Failed to delete follow relationship');
+      }
     } else {
       throw new NotFoundException('No follow relationship found');
     }
+    
+    // if (follow) {
+    //   await this.FollowRepository.delete(follow.id);
+    //   // TODO: future: show show that I do not follow them anymore in the response
+    //   return following;
+    // } else {
+    //   throw new NotFoundException('No follow relationship found');
+    // }
   }
 
 
 
+  async getFollowers(userId: number): Promise<User[]> {
+    const follows = await this.FollowRepository.find({
+      where: { following: { id: userId } },
+      relations: ['follower'],
+    });
+    return follows.map((follow) => follow.follower);
+  }
+  
 
 
-
-
-
-
-
-
-
-
+  async getFollowings(userId: number): Promise<User[]> {
+    const follows = await this.FollowRepository.find({
+      where: { follower: { id: userId } },
+      relations: ['following'],
+    });
+    return follows.map((follow) => follow.following);
+  }
+   
+ 
 
 }

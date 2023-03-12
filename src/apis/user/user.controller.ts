@@ -69,7 +69,7 @@ import {
     @Post('/:userid/follow')
     async followUser(
       @CurrentUser() follower: User, // current-user.decorator.ts 현재 유저를 req.user로 찍어준다. {email: 'email@naver.com', id: 4, profileImage: 'sadasdsads'}
-      @Param('userid') followingId: string,
+      @Param('userid') followingId: number,
     ): Promise<User> {
 
       console.log("컨트롤러의 follower, follwingId", follower.id, followingId)
@@ -88,7 +88,7 @@ import {
     @Delete('/:userid/follow')
     async unfollowUser(
       @CurrentUser() follower: User,
-      @Param('userid') followingId: string,
+      @Param('userid') followingId: number,
     ): Promise<User> {
       const unfollowedUser = await this.userService.deleteUserFollowRelation(
         follower,
@@ -99,18 +99,31 @@ import {
     }
   
     // @FollowApi()
-    @UseGuards(AuthAccessGuard)
+    // @UseGuards(AuthAccessGuard)
+    // @Get('/:userid/followers')
+    // async getFollowersOfUser(): Promise<User[]> {
+    //   return [];
+    // }
+
     @Get('/:userid/followers')
-    async getFollowersOfUser(): Promise<User[]> {
-      return [];
-    }
+      async getFollowersOfUser(@Param('userid') userId: number): Promise<User[]> {
+        return this.userService.getFollowers(userId);
+      }
+
+
   
-    // @FollowApi()
-    @UseGuards(AuthAccessGuard)
-    @Put('/:userid/followings')
-    async getfollowingsOfUser(): Promise<User[]> {
-      return [];
+    // // @FollowApi()
+    // @UseGuards(AuthAccessGuard)
+    // @Put('/:userid/followings')
+    // async getfollowingsOfUser(): Promise<User[]> {
+    //   return [];
+    // }
+
+    @Get('/:userid/followings')
+    async getFollowingsOfUser(@Param('userid') userId: number): Promise<User[]> {
+      return this.userService.getFollowings(userId);
     }
+
 
 
   }
