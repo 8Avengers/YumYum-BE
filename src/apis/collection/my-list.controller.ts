@@ -7,6 +7,7 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { CreateCollectionPostingDto } from './dto/create-collection-posting.dto';
 import { CreateMyListDto } from './dto/create-my-list.dto';
 import { UpdateMyListDto } from './dto/update-my-list.dto';
 import { MyListService } from './my-list.service';
@@ -87,12 +88,19 @@ export class MyListController {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  @Post('/collections/:collectionId')
+  @Post('/collections/posting/')
   @ApiOperation({ summary: 'MyList 포스팅 추가' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 추가 성공' })
   @ApiResponse({ status: 400, description: 'MyList 포스팅 추가 실패' })
-  async myListPlusPosting(@Param('collectionId') collectionId: number) {
+  async myListPlusPosting(@Body() data: CreateCollectionPostingDto) {
     const postId = 1;
-    return this.myListService.myListPlusPosting(postId, collectionId);
+    return this.myListService.myListPlusPosting(postId, data.collectionId);
   }
 }
+
+//일단 이거 커밋해서 푸쉬해야함
+
+//1번문제 배열로 collectionId 받는거 해결🔥
+//2번문제 collectionId가 없는 경우 에러문구 발생 해결🔥
+//3번문제 전체조회에서 레스토랑 아이디를 가져오는 방법은 해결🔥(알아서 가져가신다함)
+//4번문제 나의 맛집리스트 전체보기 PAGE 1페이지에서 최근 추가한 게시물 3개만 보여주세요.
