@@ -25,7 +25,7 @@ export class CommentService {
                                   ### 이드보라
                                   ### 특정 포스팅에 해당하는 모든 댓글 불러오기
                                  */
-  async getAllComments(postId: number) {
+  async getAllComments(postId: number, userId: number) {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
@@ -45,11 +45,20 @@ export class CommentService {
         commentIds,
       );
 
+      const likedStatuses =
+        await this.commentLikeService.getLikedStatusforAllComments(
+          commentIds,
+          userId,
+        );
+
       return comments.map((comment) => {
         const likes =
           commentLikes.find((like) => like.commentId === comment.id)
             ?.totalLikes || 0;
-        return { ...comment, totalLikes: likes };
+        const isLiked =
+          likedStatuses.find((status) => status.commentId === comment.id)
+            ?.isLiked || 'False';
+        return { ...comment, totalLikes: likes, isLiked };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
