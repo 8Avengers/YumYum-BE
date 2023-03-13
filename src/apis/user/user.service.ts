@@ -6,7 +6,7 @@ import { User } from './entities/user.entity'; //데이터들어갈떄
 import { Collection } from '../collection/entities/collection.entity';
 import { AuthService } from '../auth/auth.service';
 import { Follow } from './entities/follow.entity';
- 
+
 @Injectable()
 export class UserService {
   constructor(
@@ -18,9 +18,6 @@ export class UserService {
 
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
-
-
-
   ) {}
 
   async findOne({ email }) {
@@ -35,7 +32,7 @@ export class UserService {
         where: { id },
       });
 
-     console.log("getUserById의 id는?", id)
+      console.log('getUserById의 id는?', id);
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -126,23 +123,45 @@ export class UserService {
     }
   }
 
+  //유저프로필 수정하기
+  async updateUserProfile({
+    UpdateUserProfileDto,
+    user,
+    //file
+  }) {
+    const existUser = await this.userRepository.findOne({
+      where: { id: user.id },
+    });
 
+    if (existUser) {
+      existUser.nickname = UpdateUserProfileDto.nickname;
+      existUser.introduce = UpdateUserProfileDto.introduce;
+      // file
+      //   ? (existUser.profileImage = file.location)
+      //   : (existUser.profileImage = existUser.profileImage);
+      await this.userRepository.save(existUser);
+      return existUser;
+    }
+  }
 
-  // public async getUserByUserId(userId: string): Promise<User> {
-  //   return await this.userRepository.findOne({ where: { id } });
-  // }
+  //유저 탈퇴하기
+  async deleteUser(user) {
+    const existUser = await this.userRepository.findOne({
+      where: { id: user.id },
+    });
 
-  /**
-   * create a user-user follow pairing
-   */
-  public async createUserFollowRelation(
-    follower: User,
-    followingId: number,
-  ) {
-    console.log("서비스의 follower, follwingId", follower.id, followingId)
+    const result = await this.userRepository.softDelete(user.id);
+    if (result.affected === 0) {
+      throw new NotFoundException('존재하지 않는 유저입니다..');
+    }
+  }
+
+  //팔로팔로
+  public async createUserFollowRelation(follower: User, followingId: number) {
+    console.log('서비스의 follower, follwingId', follower.id, followingId);
 
     const following = await this.getUserById(followingId);
-    console.log("service에서 following의 값은", following);
+    console.log('service에서 following의 값은', following);
 
     if (!following) {
       throw new NotFoundException('User not found');
@@ -154,22 +173,16 @@ export class UserService {
     return newFollow.following;
   }
 
-  /**
-   * delete a user-user follow pairing
-   */
-  public async deleteUserFollowRelation(
-    follower: User,
-    followingId: number,
-  ) {
-    const id : number = followingId;
+  public async deleteUserFollowRelation(follower: User, followingId: number) {
+    const id: number = followingId;
     const following = await this.getUserById(id);
-    console.log("following반환값", following); // 여기까지는 옴 
-    console.log("서비스의 follower, followingID", follower, followingId); // 여기까지는 옴 
+    console.log('following반환값', following); // 여기까지는 옴
+    console.log('서비스의 follower, followingID', follower, followingId); // 여기까지는 옴
 
     if (!following) {
       throw new NotFoundException('User not found');
     }
-    console.log("여기오나1") 
+    console.log('여기오나1');
 
     // const follow = await this.FollowRepository.findOne({
     //   where: { follower, following },
@@ -178,22 +191,20 @@ export class UserService {
     // const follow = await this.FollowRepository.findOne({
     //   where: { follower: follower, following: { id: followingId } },
     // });
-    
 
     const follow = await this.FollowRepository.query(
       'SELECT * FROM follow WHERE follower_id = ? AND following_id = ?',
-      [follower.id, Number(followingId)]
+      [follower.id, Number(followingId)],
     );
-    
 
-    console.log("follow 테이블의 id는?", follow)
+    console.log('follow 테이블의 id는?', follow);
 
-    console.log("여기오나2")
+    console.log('여기오나2');
 
     if (follow) {
       const result = await this.FollowRepository.query(
         'DELETE FROM follow WHERE id = ?',
-        [follow[0].id]
+        [follow[0].id],
       );
       if (result.affectedRows === 1) {
         // TODO: future: show show that I do not follow them anymore in the response
@@ -204,7 +215,7 @@ export class UserService {
     } else {
       throw new NotFoundException('No follow relationship found');
     }
-    
+
     // if (follow) {
     //   await this.FollowRepository.delete(follow.id);
     //   // TODO: future: show show that I do not follow them anymore in the response
@@ -214,8 +225,6 @@ export class UserService {
     // }
   }
 
-
-
   async getFollowers(userId: number): Promise<User[]> {
     const follows = await this.FollowRepository.find({
       where: { following: { id: userId } },
@@ -223,8 +232,6 @@ export class UserService {
     });
     return follows.map((follow) => follow.follower);
   }
-  
-
 
   async getFollowings(userId: number): Promise<User[]> {
     const follows = await this.FollowRepository.find({
@@ -233,9 +240,4 @@ export class UserService {
     });
     return follows.map((follow) => follow.following);
   }
-   
- 
-
 }
-
- 

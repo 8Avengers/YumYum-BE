@@ -1,4 +1,4 @@
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Post,
@@ -8,6 +8,7 @@ import {
   Param,
   Get,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +16,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { User } from './entities/user.entity';
+import { DeleteUser, UpdateUserProfile } from './user.decorators';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
+@ApiTags('User')
 @Controller('/')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -44,10 +48,33 @@ export class UserController {
   async me(@CurrentUser() user: User) {
     return user;
   }
-  @Get('/:id')
+  @Get('/profile/:id')
   async view(@Param('id') id: string) {
     const user = await this.userService.getUserById(id);
     return user;
+  }
+
+  //유저프로필 수정하기
+  @Put('/profile')
+  @UpdateUserProfile()
+  // @UseInterceptors(FileInterceptor('profileImage'))
+  async UpdateUserProfile(
+    @CurrentUser() user: any,
+    // @UploadedFile() file: Express.MulterS3.File,
+    @Body() UpdateUserProfileDto: UpdateUserProfileDto,
+  ) {
+    return await this.userService.updateUserProfile({
+      UpdateUserProfileDto,
+      user,
+      // file,
+    });
+  }
+
+  //유저 탈퇴하기(소프트딜리트)
+  @Put('/user/delete')
+  @DeleteUser()
+  async deleteBusinessUser(@CurrentUser() user: any) {
+    return await this.userService.deleteUser(user);
   }
 
   // @FollowApi()
