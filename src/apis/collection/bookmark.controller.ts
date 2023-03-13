@@ -7,48 +7,67 @@ import {
   Put,
   Get,
 } from '@nestjs/common';
-
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BookmarkService } from './bookmark.service';
-import { CreateCollectionDto } from './dto/create-collection.dto';
+import { CreateCollectionDto } from './dto/create-bookmark.dto';
 
-@Controller('bookmark')
+@Controller('bookmarks')
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
+  //현재 컬렉션 전체보기와 컬렉션 생성 완성 나머지 해야댐
+
   /*
-    ### 23.03.08
+    ### 23.03.13
     ### 표정훈
-    ### 컬렉션 전체 보기
+    ### 컬렉션 전체 보기🔥
     */
-  @Get()
+
+  // @UseGuards(AuthGuard('local'))
+  @Get('/collections')
+  @ApiOperation({ summary: '북마크 전체조회' })
+  @ApiResponse({ status: 200, description: '북마크 전체조회 성공' })
+  @ApiResponse({ status: 400, description: '북마크 전체조회 실패' })
   async getBookmarks() {
-    const bookmarks = await this.bookmarkService.getBookmarks();
+    const userId = 2;
+    const bookmarks = await this.bookmarkService.getBookmarks(userId);
     return await bookmarks;
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션 상세 보기
       */
-  @Get('/:collectionId')
+  @Get('/collections/:collectionId')
+  @ApiOperation({ summary: '북마크 상세조회' })
+  @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
+  @ApiResponse({ status: 400, description: '북마크 상세조회 실패' })
   async getCollections(@Param('collectionId') collectionId: number) {
     const collections = await this.bookmarkService.getCollections(collectionId);
     return await collections;
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
-      ### 컬렉션 생성
+      ### 컬렉션 생성🔥
       */
-  @Post()
-  createCollection(@Body() data: CreateCollectionDto) {
-    return this.bookmarkService.createCollection(data);
+  @Post('/collections')
+  @ApiOperation({ summary: '북마크 컬렉션 생성' })
+  @ApiResponse({ status: 200, description: '북마크 컬렉션 생성 성공' })
+  @ApiResponse({ status: 400, description: '북마크 컬렉션 생성 실패' })
+  async createCollection(@Body() data: CreateCollectionDto) {
+    const userId = 1;
+    return await this.bookmarkService.createCollection(
+      userId,
+      data.name,
+      data.type,
+    );
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션 수정
       */
@@ -61,7 +80,7 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션 삭제
       */

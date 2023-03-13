@@ -7,7 +7,8 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CreateCollectionPostingDto } from './dto/create-collection-posting.dto';
+import { CreateCollectionPostingDto } from './dto/add-bookmark-posting.dto';
+
 import { CreateMyListDto } from './dto/create-my-list.dto';
 import { UpdateMyListDto } from './dto/update-my-list.dto';
 import { MyListService } from './my-list.service';
@@ -20,13 +21,13 @@ export class MyListController {
     ### 표정훈
     ### MyList 전체조회(해당 유저의 맛집리스트만 불러오기)
     */
+  // 이름만 생성한 경우 어찌해야되지? 1개이상 들어가 있어야만 보여주게 해야하나
   // @UseGuards(AuthGuard('local'))
-  @Get('/collections')
+  @Get('/collections/:userId')
   @ApiOperation({ summary: 'MyList 전체조회' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회 실패' })
-  async getMyLists() {
-    const userId = 1;
+  async getMyLists(@Param('userId') userId: number) {
     const myLists = await this.myListService.getMyList(userId);
     return await myLists;
   }
@@ -88,12 +89,14 @@ export class MyListController {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  @Post('/collections/posting/')
+  @Post('/collections/addPost/:postId')
   @ApiOperation({ summary: 'MyList 포스팅 추가' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 추가 성공' })
   @ApiResponse({ status: 400, description: 'MyList 포스팅 추가 실패' })
-  async myListPlusPosting(@Body() data: CreateCollectionPostingDto) {
-    const postId = 1;
+  async myListPlusPosting(
+    @Param('postId') postId: number,
+    @Body() data: CreateCollectionPostingDto,
+  ) {
     return this.myListService.myListPlusPosting(postId, data.collectionId);
   }
 }
@@ -101,6 +104,7 @@ export class MyListController {
 //일단 이거 커밋해서 푸쉬해야함
 
 //1번문제 배열로 collectionId 받는거 해결🔥
-//2번문제 collectionId가 없는 경우 에러문구 발생 해결🔥
-//3번문제 전체조회에서 레스토랑 아이디를 가져오는 방법은 해결🔥(알아서 가져가신다함)
-//4번문제 나의 맛집리스트 전체보기 PAGE 1페이지에서 최근 추가한 게시물 3개만 보여주세요.
+//2번문제 collectionId가 없는 경우 에러문구 발생 해결(일단 제외)
+//3번문제 마이리스트 내껏만 아니라 남도 조회해야하니, params추가 해결🔥
+//4번문제 전체조회에서 레스토랑 아이디를 가져오는 방법 해결 (대량조회)🔥
+//5번문제 나의 맛집리스트 전체보기 PAGE 1페이지에서 최근 추가한 게시물 3개만 보여주세요.

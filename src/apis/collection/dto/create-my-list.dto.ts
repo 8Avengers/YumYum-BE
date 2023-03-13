@@ -1,18 +1,22 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateMyListDto {
   @IsString()
   readonly name: string;
 
   @IsString()
-  readonly type: 'myList';
+  @IsOptional()
+  readonly type?: 'myList';
 
   @IsString()
+  @IsOptional()
   readonly description?: string;
 
   @IsString()
+  @IsOptional()
   readonly image?: string;
 
   @IsString()
+  @IsOptional()
   readonly visibility?: 'public' | 'private';
 }

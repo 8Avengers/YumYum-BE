@@ -1,32 +1,58 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Post } from '../post/entities/post.entity';
-import { CollectionItem } from './entities/collection-item.entity';
 import { Collection } from './entities/collection.entity';
-import { CreateCollectionDto } from './dto/create-collection.dto';
+import { CollectionItem } from './entities/collection-item.entity';
 
 @Injectable()
 export class BookmarkService {
   constructor(
     @InjectRepository(Collection)
-    private bookmarkRepository: Repository<Collection>,
-    
+    private collectionRepository: Repository<Collection>,
     @InjectRepository(CollectionItem)
-    private collectionRepository: Repository<CollectionItem>,
-    @InjectRepository(Post) private postRepository: Repository<Post>,
+    private collectionItemRepository: Repository<CollectionItem>,
   ) {}
+
+  // async getMyList(userId: number) {
+  //   try {
+  //     const myLists = await this.collectionRepository.find({
+  //       relations: {
+  //         collectionItems: {
+  //           post: true,
+  //           restaurant: true,
+  //         },
+  //       },
+  //       where: { user_id: userId, deletedAt: null, type: 'myList' },
+  //       select: { name: true, description: true, image: true },
+  //     });
+
+  //     return myLists;
+  //   }
 
   /*
     ### 23.03.08
     ### 표정훈
     ### 컬렉션 전체 보기
     */
-  async getBookmarks() {
-    return await this.bookmarkRepository.find({
-      where: { deletedAt: null },
-      // select: ['name'],
-    });
+  async getBookmarks(userId: number) {
+    try {
+      const bookmarks = await this.collectionRepository.find({
+        relations: {
+          collectionItems: {
+            post: true,
+          },
+        },
+        where: { user_id: userId, deletedAt: null, type: 'bookmark' },
+        select: { name: true, image: true },
+      });
+      return bookmarks;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
   /*
       ### 23.03.08
@@ -34,33 +60,31 @@ export class BookmarkService {
       ### 컬렉션 상세 보기
       */
   async getCollections(id: number) {
-    return await this.bookmarkRepository.find({
+    return await this.collectionRepository.find({
       where: { id, deletedAt: null },
       // select: ['name'],
     });
   }
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션 생성
       */
-      createCollection(data: CreateCollectionDto) {
-        return this.bookmarkRepository.insert({
-          type: data.type,
-          name: data.name,
-          description: data.description,
-          // img: data.img, //에러발생해서 일시적으로 빼둠
-          visibility: data.visibility,
-        });
-      }
-      
+  createCollection(userId: number, name: string, type: string) {
+    return this.collectionRepository.insert({
+      user_id: userId,
+      name: name,
+      type: 'bookmark',
+    });
+  }
+
   /*
       ### 23.03.08
       ### 표정훈
       ### 컬렉션 수정
       */
   async updateCollection(id: number, name: string) {
-      // return await this.bookmarkRepository.update({ id }, { name });
+    // return await this.bookmarkRepository.update({ id }, { name });
   }
   /*
       ### 23.03.08
@@ -68,16 +92,18 @@ export class BookmarkService {
       ### 컬렉션 삭제
       */
   async deleteCollection(id: number) {
-    return await this.bookmarkRepository.softDelete(id);
+    return await this.collectionRepository.softDelete(id);
   }
 
   async collectionPlusPosting(collectionId: number, postId: number) {
-    const newBookmark = await this.postRepository.findOneBy({ id: postId });
-    const collection = await this.bookmarkRepository.findOneBy({
+    const newBookmark = await this.collectionRepository.findOneBy({
+      id: postId,
+    });
+    const collection = await this.collectionRepository.findOneBy({
       id: collectionId,
     });
     console.log('나는 콘솔', newBookmark, collection);
-    await this.bookmarkRepository.save(collection);
+    await this.collectionRepository.save(collection);
 
     // return await this.bookmarkRepository.insert({
     //   id,
