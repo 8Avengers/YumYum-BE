@@ -10,6 +10,7 @@ import { Hashtag } from './entities/hashtag.entity';
 import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
 import { CollectionModule } from '../collection/collection.module';
+import { MyFeedController } from './post-myfeed.controller';
 
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -18,7 +19,7 @@ import { CollectionModule } from '../collection/collection.module';
     TypeOrmModule.forFeature([Post, PostLike, Hashtag]),
     CollectionModule,
   ],
-  controllers: [PostController, PostLikeController],
+  controllers: [PostController, PostLikeController, MyFeedController],
   providers: [PostService, PostLikeService, PostHashtagService],
   exports: [PostService, TypeOrmModule],
 })

@@ -235,4 +235,44 @@ export class PostService {
       }
     }
   }
+
+  async getMyPosts(userId: number) {
+    try {
+      const posts = await this.postRepository.find({
+        where: { deleted_at: null, visibility: 'public', user: { id: userId } },
+        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
+        relations: ['user', 'restaurant', 'hashtags'],
+      });
+      if (!posts || posts.length === 0) {
+        throw new NotFoundException('No posts found.');
+      }
+      const postIds = posts.map((post) => post.id);
+
+      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+
+      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+        postIds,
+        userId,
+      );
+
+      return posts.map((post) => {
+        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
+        const likes =
+          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+        const isLiked =
+          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+          'False';
+        return { ...post, hashtags, totalLikes: likes, isLiked };
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 }
