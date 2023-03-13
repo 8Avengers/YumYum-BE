@@ -37,6 +37,10 @@ export class RestaurantService {
     y: string,
   ) {
     try {
+      const restaurant = this.getRestaurant(kakao_place_id);
+      if (restaurant) {
+        return restaurant;
+      }
       return this.restaurantRepository.insert({
         address_name,
         category_group_code,
