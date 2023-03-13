@@ -1,5 +1,5 @@
 import { minusCollectionPostingDto } from './dto/minus-bookmark-posting.dto';
-import { addCollectionPostingDto } from './dto/add-bookmark-posting.dto';
+
 import { Controller, Post, Get, Put, Delete } from '@nestjs/common';
 import { Body, Param, UseGuards } from '@nestjs/common/decorators';
 import {
@@ -12,6 +12,7 @@ import {
 import { CreateMyListDto } from './dto/create-my-list.dto';
 import { UpdateMyListDto } from './dto/update-my-list.dto';
 import { MyListService } from './my-list.service';
+import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
 
 @Controller('my-list')
 export class MyListController {

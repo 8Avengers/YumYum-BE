@@ -21,7 +21,7 @@ export class BookmarkService {
   /*
     ### 23.03.08
     ### 표정훈
-    ### 컬렉션 전체 보기
+    ### 컬렉션 전체 보기🔥
     */
   async getBookmarks(userId: number) {
     try {
@@ -46,7 +46,7 @@ export class BookmarkService {
   /*
       ### 23.03.08
       ### 표정훈
-      ### 컬렉션 상세 보기
+      ### 컬렉션 상세 보기🔥
       */
   async getCollections(collectionId: number) {
     try {
@@ -73,7 +73,7 @@ export class BookmarkService {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 생성
+      ### 컬렉션 생성🔥
       */
   createCollection(userId: number, name: string, type: string) {
     return this.collectionRepository.insert({
@@ -86,7 +86,7 @@ export class BookmarkService {
   /*
       ### 23.03.08
       ### 표정훈
-      ### 컬렉션 수정
+      ### 컬렉션 수정🔥
       */
   async updateCollection(collectionId: number, name: string) {
     try {
@@ -107,12 +107,11 @@ export class BookmarkService {
         );
       }
     }
-    // return await this.bookmarkRepository.update({ id }, { name });
   }
   /*
       ### 23.03.08
       ### 표정훈
-      ### 컬렉션 삭제
+      ### 컬렉션 삭제🔥
       */
   async deleteCollection(collectionId: number) {
     try {
@@ -135,35 +134,92 @@ export class BookmarkService {
   /*
     ### 23.03.13
     ### 표정훈
-    ### 컬렉션에 포스팅 더하기
+    ### 컬렉션에 포스팅 더하기🔥
     */
-  //   async myListPlusPosting(postId: number, collectionId: number[]) {
-  //     try {
-  //       for (let i = 0; i < collectionId.length; i++) {
-  //         let item = collectionId[i];
+  async collectionPlusPosting(collectionId: number, postId: number) {
+    try {
+      await this.collectionItemRepository.insert({
+        collection: { id: collectionId },
+        post: { id: postId },
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 
-  //         await this.collectionItemRepository.insert({
-  //           post: { id: postId },
-  //           collection: { id: item },
-  //         });
-  //       }
-  //     } catch (err) {
-  //       if (err instanceof NotFoundException) {
-  //         throw err;
-  //       } else {
-  //         console.error(err);
-  //         throw new InternalServerErrorException(
-  //           'Something went wrong while processing your request. Please try again later.',
-  //         );
-  //       }
-  //     }
-  //   }
-  // }
-
-  async collectionPlusPosting(collectionId: number, postId: number) {}
-  async collectionPlusRestaurant(id: number, restaurantId: number) {}
-  collectionMinusPosting(id: number, postId: number) {}
-  collectionMinusRestaurant(id: number, restaurantId: number) {}
+  /*
+    ### 23.03.13
+    ### 표정훈
+    ### 컬렉션에 포스팅 빼기🔥
+    */
+  async collectionMinusPosting(collectionId: number, postId: number) {
+    try {
+      await this.collectionItemRepository.delete({
+        collection: { id: collectionId },
+        post: { id: postId },
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+  /*
+    ### 23.03.13
+    ### 표정훈
+    ### 컬렉션에 맛집 더하기🔥
+    */
+  async collectionPlusRestaurant(collectionId: number, restaurantId: number) {
+    try {
+      await this.collectionItemRepository.insert({
+        collection: { id: collectionId },
+        restaurant: { id: restaurantId },
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+  /*
+    ### 23.03.13
+    ### 표정훈
+    ### 컬렉션에 맛집 빼기🔥
+    */
+  async collectionMinusRestaurant(collectionId: number, restaurantId: number) {
+    try {
+      await this.collectionItemRepository.delete({
+        collection: { id: collectionId },
+        restaurant: { id: restaurantId },
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 }
 
 /*
