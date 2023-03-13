@@ -147,7 +147,7 @@ export class MyListService {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  // 컬렉션아이디 에다가 포스팅 정보를 넘겨야함
+  // 중복된 포스팅이 못들어가도록 추가기능구현해야함
   async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
       for (let i = 0; i < collectionId.length; i++) {
@@ -157,6 +157,35 @@ export class MyListService {
           post: { id: postId },
           collection: { id: item },
         });
+      }
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
+  /*
+    ### 23.03.10
+    ### 표정훈
+    ### MyList 포스팅 삭제
+    */
+
+  //해당 collectionId일때 일치하는 postId만 삭제하는 기능
+  async myListMinusPosting(postId: number, collectionId: number) {
+    try {
+      if (collectionId) {
+        await this.collectionItemRepository.delete({
+          collection: { id: collectionId },
+          post: { id: postId },
+        });
+      } else {
+        throw new NotFoundException('해당 컬렉션은 없습니다.');
       }
     } catch (err) {
       if (err instanceof NotFoundException) {

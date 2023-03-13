@@ -37,7 +37,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 상세 보기
+      ### 컬렉션 상세 보기🔥
       */
   @Get('/collections/:collectionId')
   @ApiOperation({ summary: '북마크 상세조회' })
@@ -58,7 +58,7 @@ export class BookmarkController {
   @ApiResponse({ status: 200, description: '북마크 컬렉션 생성 성공' })
   @ApiResponse({ status: 400, description: '북마크 컬렉션 생성 실패' })
   async createCollection(@Body() data: CreateCollectionDto) {
-    const userId = 1;
+    const userId = 2;
     return await this.bookmarkService.createCollection(
       userId,
       data.name,
@@ -69,9 +69,10 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 수정
+      ### 컬렉션 수정🔥
       */
-  @Put('/:collectionId')
+
+  @Put('/collections/:collectionId')
   async updateCollection(
     @Param('collectionId') collectionId: number,
     @Body() name: string,
@@ -82,19 +83,19 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 삭제
+      ### 컬렉션 삭제🔥
       */
-  @Delete('/:collectionId')
+  @Delete('/collections/:collectionId')
   async deleteCollection(@Param('collectionId') collectionId: number) {
     return await this.bookmarkService.deleteCollection(collectionId);
   }
 
   /*
-    ### 23.03.08
+    ### 23.03.13
     ### 표정훈
     ### 컬렉션에 포스팅 더하기
     */
-  @Post('/:collectionId/:postId')
+  @Post('/collections/:collectionId')
   async collectionPlusPosting(
     @Param('collectionId') collectionId: number,
     @Param('postId') postId: number,
@@ -106,7 +107,7 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션에 맛집 더하기
       */
@@ -122,7 +123,7 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션에 포스팅 빼기
       */
@@ -138,7 +139,7 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.08
+      ### 23.03.13
       ### 표정훈
       ### 컬렉션에 맛집 빼기
       */

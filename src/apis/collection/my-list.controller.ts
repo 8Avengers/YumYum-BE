@@ -1,3 +1,5 @@
+import { minusCollectionPostingDto } from './dto/minus-bookmark-posting.dto';
+import { addCollectionPostingDto } from './dto/add-bookmark-posting.dto';
 import { Controller, Post, Get, Put, Delete } from '@nestjs/common';
 import { Body, Param, UseGuards } from '@nestjs/common/decorators';
 import {
@@ -7,8 +9,6 @@ import {
   ApiResponse,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CreateCollectionPostingDto } from './dto/add-bookmark-posting.dto';
-
 import { CreateMyListDto } from './dto/create-my-list.dto';
 import { UpdateMyListDto } from './dto/update-my-list.dto';
 import { MyListService } from './my-list.service';
@@ -89,15 +89,34 @@ export class MyListController {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  @Post('/collections/addPost/:postId')
+  @Post('/collections/add/:postId')
   @ApiOperation({ summary: 'MyList 포스팅 추가' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 추가 성공' })
   @ApiResponse({ status: 400, description: 'MyList 포스팅 추가 실패' })
   async myListPlusPosting(
     @Param('postId') postId: number,
-    @Body() data: CreateCollectionPostingDto,
+    @Body() data: addCollectionPostingDto,
   ) {
     return this.myListService.myListPlusPosting(postId, data.collectionId);
+  }
+
+  /*
+    ### 23.03.13
+    ### 표정훈
+    ### MyList 포스팅 삭제
+    */
+  @Delete('/collections/minus/:postId')
+  @ApiOperation({ summary: 'MyList 포스팅 삭제' })
+  @ApiResponse({ status: 200, description: 'MyList 포스팅 삭제 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 포스팅 삭제 실패' })
+  async myListMinusPosting(
+    @Param('postId') postId: number,
+    @Body() data: minusCollectionPostingDto,
+  ) {
+    return await this.myListService.myListMinusPosting(
+      postId,
+      data.collectionId,
+    );
   }
 }
 
