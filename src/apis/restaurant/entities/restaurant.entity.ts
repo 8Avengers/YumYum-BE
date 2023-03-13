@@ -17,34 +17,34 @@ export class Restaurant {
   id: number;
 
   @Column()
-  name: string;
+  address_name: string;
+
+  @Column()
+  category_group_code: string;
+
+  @Column()
+  category_group_name: string;
 
   @Column()
   category_name: string;
 
   @Column()
-  category_group_name: string;
-
-  @Column({ nullable: true })
-  phone_number: string;
-
-  @Column({ nullable: true })
-  img_url: string;
-
-  @Column()
   kakao_place_id: string;
 
-  @Column({ type: 'double' })
-  latitude: number;
-
-  @Column({ type: 'double' })
-  longitude: number;
+  @Column({ nullable: true })
+  phone: string;
 
   @Column()
-  number_address: string;
+  place_name: string;
 
   @Column()
-  road_address: string;
+  road_address_name: string;
+
+  @Column()
+  x: string;
+
+  @Column()
+  y: string;
 
   //TODO: 베이스엔티티로 바꾸기
   @CreateDateColumn({ name: 'created_at' })
