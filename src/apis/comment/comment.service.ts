@@ -52,13 +52,19 @@ export class CommentService {
         );
 
       return comments.map((comment) => {
+        const { id, nickname, profile_image } = comment.user;
         const likes =
           commentLikes.find((like) => like.commentId === comment.id)
             ?.totalLikes || 0;
         const isLiked =
           likedStatuses.find((status) => status.commentId === comment.id)
             ?.isLiked || 'False';
-        return { ...comment, totalLikes: likes, isLiked };
+        return {
+          ...comment,
+          user: { id, nickname, profile_image },
+          totalLikes: likes,
+          isLiked,
+        };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
