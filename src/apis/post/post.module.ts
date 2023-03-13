@@ -8,16 +8,16 @@ import { PostLikeService } from './post-like.service';
 import { PostLike } from './entities/post-like.entity';
 import { Hashtag } from './entities/hashtag.entity';
 import { PostHashtagService } from './post-hashtag.service';
-import { MyListService } from '../collection/my-list.service';
 import { CollectionModule } from '../collection/collection.module';
 import { Comment } from '../comment/entities/comment.entity';
+import { RestaurantModule} from "../restaurant/restaurant.module";
 
 // import { PostUserTagService } from './post-user-tag.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment]),
-    CollectionModule,
+    CollectionModule, RestaurantModule
   ],
   controllers: [PostController, PostLikeController],
   providers: [PostService, PostLikeService, PostHashtagService],
