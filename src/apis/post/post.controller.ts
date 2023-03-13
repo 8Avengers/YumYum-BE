@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Patch,
   UseGuards,
 } from '@nestjs/common';
 
@@ -20,10 +21,10 @@ export class PostController {
   constructor(private readonly postService: PostService) {}
 
   /*
-            ### 23.03.03
-            ### 이드보라
-            ### 포스팅 상세보기
-            */
+              ### 23.03.03
+              ### 이드보라
+              ### 포스팅 상세보기
+              */
   @Get('/:postId')
   @UseGuards(AuthAccessGuard)
   async getPostById(
@@ -34,10 +35,10 @@ export class PostController {
   }
 
   /*
-            ### 23.03.03
-            ### 이드보라
-            ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
-            */
+              ### 23.03.03
+              ### 이드보라
+              ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지)
+              */
   @Get()
   @UseGuards(AuthAccessGuard)
   async getPosts(@CurrentUser() currentUser: any) {
@@ -51,10 +52,10 @@ export class PostController {
   // }
 
   /*
-            ### 23.03.03
-            ### 이드보라
-            ### 포스팅 작성
-            */
+              ### 23.03.03
+              ### 이드보라
+              ### 포스팅 작성
+              */
   @Post()
   @UseGuards(AuthAccessGuard)
   createPost(
@@ -75,15 +76,15 @@ export class PostController {
   }
 
   /*
-            ### 23.03.03
-            ### 이드보라
-            ### 포스팅 수정
-            */
-  @Put('/:postId')
+              ### 23.03.03
+              ### 이드보라
+              ### 포스팅 수정
+              */
+  @Patch('/:postId')
   @UseGuards(AuthAccessGuard)
   async updateArticle(
     @Param('postId') postId: number,
-    @Body() data: UpdatePostDto,
+    @Body() data: Partial<UpdatePostDto>,
   ) {
     return this.postService.updatePost(
       postId,
@@ -98,10 +99,10 @@ export class PostController {
   }
 
   /*
-            ### 23.03.07
-            ### 이드보라
-            ### 포스팅 삭제
-            */
+              ### 23.03.07
+              ### 이드보라
+              ### 포스팅 삭제
+              */
   @Delete('/:postId')
   @UseGuards(AuthAccessGuard)
   async deletePost(@Param('postId') postId: number) {

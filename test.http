@@ -15,7 +15,7 @@ Authorization: Bearer {{auth_token}}
 
 {
   "restaurantId": 1,
-  "myListId": 1,
+  "myListId": [1],
   "content": "리뷰3",
   "rating": 5,
   "image": ["img_url"],
