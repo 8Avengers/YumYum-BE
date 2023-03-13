@@ -77,6 +77,12 @@ export class AuthService {
     return {
       refreshToken,
       accessToken,
+      user: {
+        userId: user.id,
+        nickname: user.nickname,
+        email: user.email,
+        profileImage: user.profile_image,
+      },
     };
   }
 
@@ -122,6 +128,12 @@ export class AuthService {
     return {
       refreshToken,
       accessToken,
+      user: {
+        userId: user.id,
+        nickname: user.nickname,
+        email: user.email,
+        profileImage: user.profile_image,
+      },
     };
   }
 }

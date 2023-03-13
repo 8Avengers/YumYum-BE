@@ -1,4 +1,3 @@
-
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -10,6 +9,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
 import { UploadsModule } from './apis/uploads/uploads.module';
+import { RestaurantModule } from './apis/restaurant/restaurant.module';
 
 @Module({
   imports: [
@@ -25,6 +25,9 @@ import { UploadsModule } from './apis/uploads/uploads.module';
     AuthModule,
     UploadsModule,
     CommentModule,
+    UserModule,
+    AuthModule,
+    RestaurantModule,
   ],
 })
 export class AppModule {}

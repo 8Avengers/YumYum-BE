@@ -44,7 +44,7 @@ export class AuthController {
   @Post('/login')
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
-    @Req() req, //
+    // @Req() req, //
     // @Res() res, // res 를 써주지 않으면 무한로딩한다.
   ) {
     const { email, password } = loginUserDto;
@@ -65,6 +65,12 @@ export class AuthController {
     return {
       refreshToken,
       accessToken,
+      user: {
+        userId: user.id,
+        nickname: user.nickname,
+        email: user.email,
+        profileImage: user.profile_image,
+      },
     };
   }
 

@@ -10,6 +10,7 @@ import { User } from '../user/entities/user.entity';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
 import { CreateMyListDto } from './dto/create-my-list.dto';
+import { In } from 'typeorm';
 @Injectable()
 export class MyListService {
   constructor(
@@ -23,14 +24,33 @@ export class MyListService {
     ### 표정훈
     ### MyList 전체조회(해당 유저의 맛집리스트만 불러오기)
     */
+
   async getMyList(userId: number) {
     try {
       const myLists = await this.collectionRepository.find({
+        relations: {
+          collectionItems: {
+            post: true,
+            restaurant: true,
+          },
+        },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
         select: { name: true, description: true, image: true },
       });
 
-      return myLists;
+      // for (let i = 0; i < myLists.length; i++) {
+      //   return [
+      //     myLists,
+      //     myLists[i].collectionItems[i].post.rating,
+      //     myLists[i].collectionItems[i].restaurant.name,
+      //   ];
+      // }
+      // console.log(myLists[0]);
+      return [
+        myLists,
+        // myLists[0].collectionItems[0].post.rating,
+        // myLists[0].collectionItems[0].restaurant.name,
+      ];
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -42,15 +62,16 @@ export class MyListService {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 생성(이름)
+    ### MyList 생성
     */
-  async createMyList(userId, name, type) {
+  async createMyList(userId: number, name: string, type: 'myList') {
     try {
-      return this.collectionRepository.insert({
+      const myLists = await this.collectionRepository.insert({
         user_id: userId,
         name,
         type: 'myList',
       });
+      return myLists;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -136,12 +157,16 @@ export class MyListService {
     ### MyList 포스팅 추가
     */
   // 컬렉션아이디 에다가 포스팅 정보를 넘겨야함
-  async myListPlusPosting(postId: number, collectionId: number) {
+  async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
-      await this.collectionItemRepository.insert({
-        post: { id: postId },
-        collection: { id: collectionId },
-      });
+      for (let i = 0; i < collectionId.length; i++) {
+        let item = collectionId[i];
+
+        await this.collectionItemRepository.insert({
+          post: { id: postId },
+          collection: { id: item },
+        });
+      }
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

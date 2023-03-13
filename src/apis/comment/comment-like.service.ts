@@ -22,10 +22,10 @@ export class CommentLikeService {
   ) {}
 
   /*
-                                                  ### 23.03.09
-                                                  ### 이드보라
-                                                  ### 한개의 댓글의 총 좋아요 수 불러오기(사용하지 않음)
-                                                  */
+                                                    ### 23.03.09
+                                                    ### 이드보라
+                                                    ### 한개의 댓글의 총 좋아요 수 불러오기(사용하지 않음)
+                                                    */
 
   async getLikesForComment(commentId: number): Promise<number> {
     try {
@@ -49,10 +49,10 @@ export class CommentLikeService {
   }
 
   /*
-                                                ### 23.03.09
-                                                ### 이드보라
-                                                ### 모든 댓글의 각 좋아요 수 불러오기
-                                                */
+                                                  ### 23.03.09
+                                                  ### 이드보라
+                                                  ### 모든 댓글의 각 좋아요 수 불러오기
+                                                  */
 
   async getLikesForAllComments(
     commentIds: number[],
@@ -80,10 +80,45 @@ export class CommentLikeService {
   }
 
   /*
-                                                ### 23.03.09
-                                                ### 이드보라
-                                                ### 댓글 하나 좋아요 하기
-                                                */
+                ### 23.03.12
+                                                                          ### 이드보라
+                                                                          ### 사용자가 그 댓글을 좋아요 했는지 알아보기(모든 댓글에서)
+                                                                          */
+
+  async getLikedStatusforAllComments(commentIds, userId) {
+    try {
+      const commentLikes = await this.commentLikeRepository.find({
+        where: {
+          comment: { id: In(commentIds) },
+          user: { id: userId },
+        },
+        relations: ['comment'],
+      });
+
+      const likedStatuses = commentIds.map((commentId) => {
+        const isLiked = commentLikes.some(
+          (like) => like.comment.id === commentId,
+        );
+        return {
+          commentId,
+          isLiked: isLiked ? 'True' : 'False',
+        };
+      });
+
+      return likedStatuses;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+                                                  ### 23.03.09
+                                                  ### 이드보라
+                                                  ### 댓글 하나 좋아요 하기
+                                                  */
 
   async likeComment(commentId, userId) {
     try {
