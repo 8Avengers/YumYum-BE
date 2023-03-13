@@ -24,7 +24,7 @@ export class RestaurantService {
     });
   }
 
-  createRestaurant(
+  async createRestaurant(
     address_name: string,
     category_group_code: string,
     category_group_name: string,
@@ -37,8 +37,8 @@ export class RestaurantService {
     y: string,
   ) {
     try {
-      const restaurant = this.getRestaurant(kakao_place_id);
-      if (restaurant) {
+      const restaurant = await this.getRestaurant(kakao_place_id);
+      if (restaurant.length > 0) {
         return restaurant;
       }
       return this.restaurantRepository.insert({
@@ -60,7 +60,7 @@ export class RestaurantService {
     }
   }
 
-  updateRestaurant(
+  async updateRestaurant(
     address_name: string,
     category_group_code: string,
     category_group_name: string,
@@ -72,23 +72,30 @@ export class RestaurantService {
     x: string,
     y: string,
   ) {
-    try {
-      return this.restaurantRepository.update(
-        { kakao_place_id: kakao_place_id },
-        {
-          address_name,
-          category_group_code,
-          category_group_name,
-          category_name,
-          kakao_place_id,
-          phone,
-          place_name,
-          road_address_name,
-          x,
-          y,
-        },
-      );
-    } catch (err) {
+    const restaurant = await this.getRestaurant(kakao_place_id);
+    if (restaurant.length < 1) {
+      throw new NotFoundException('없는 가게 정보 입니다.');
+    }
+    return this.restaurantRepository.update(
+      { kakao_place_id: kakao_place_id },
+      {
+        address_name,
+        category_group_code,
+        category_group_name,
+        category_name,
+        kakao_place_id,
+        phone,
+        place_name,
+        road_address_name,
+        x,
+        y,
+      },
+    );
+  }
+  catch(err) {
+    if (err instanceof NotFoundException) {
+      throw err;
+    } else {
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',
       );
