@@ -13,6 +13,7 @@ import { Post } from './entities/post.entity';
 import { PostLikeService } from './post-like.service';
 import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
+import { Comment } from '../comment/entities/comment.entity';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -20,22 +21,23 @@ import { MyListService } from '../collection/my-list.service';
 export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService, // private readonly postUserTagService: PostUserTagService,
   ) {}
 
   /*
-                                                                ### 23.03.12
-                                                                ### 이드보라
-                                                                ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).좋아요 기능 추가
-                                                                */
+                                                                  ### 23.03.13
+                                                                  ### 이드보라
+                                                                  ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).댓글 총 갯수도 불러오기
+                                                                  */
   async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
         select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags'],
+        relations: ['user', 'restaurant', 'hashtags', 'comments'],
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -56,7 +58,8 @@ export class PostService {
         const isLiked =
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
-        return { ...post, hashtags, totalLikes: likes, isLiked };
+        const totalComments = post.comments ? post.comments.length : 0;
+        return { ...post, hashtags, totalLikes: likes, isLiked, totalComments };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -71,10 +74,10 @@ export class PostService {
   }
 
   /*
-                                                                  ### 23.03.12
-                                                                  ### 이드보라
-                                                                  ### 포스팅 상세보기.좋아요 기능 추가
-                                                                  */
+                                                                    ### 23.03.13
+                                                                    ### 이드보라
+                                                                    ### 포스팅 상세보기.좋아요 기능 추가.댓글 총 갯수도 불러오기
+                                                                    */
   async getPostById(id: number, userId: number) {
     try {
       const post = await this.postRepository.find({
@@ -96,7 +99,11 @@ export class PostService {
         userId,
       );
 
-      return { ...post[0], totalLikes, hashtags, isLiked };
+      const totalComments = await this.commentRepository.count({
+        where: { deleted_at: null, post: { id } },
+      });
+
+      return { ...post[0], totalLikes, hashtags, isLiked, totalComments };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -110,10 +117,10 @@ export class PostService {
   }
 
   /*
-                                                                  ### 23.03.11
-                                                                  ### 이드보라
-                                                                  ### 포스팅 작성
-                                                                  */
+                                                                    ### 23.03.11
+                                                                    ### 이드보라
+                                                                    ### 포스팅 작성
+                                                                    */
   async createPost(
     userId: number,
     restaurantId: number,
@@ -161,10 +168,10 @@ export class PostService {
   }
 
   /*
-                                                                  ### 23.03.10
-                                                                  ### 이드보라
-                                                                  ### 포스팅 수정
-                                                                  */
+                                                                    ### 23.03.10
+                                                                    ### 이드보라
+                                                                    ### 포스팅 수정
+                                                                    */
   async updatePost(
     id: number,
     restaurantId: number,
@@ -214,10 +221,10 @@ export class PostService {
   }
 
   /*
-                                                                  ### 23.03.06
-                                                                  ### 이드보라
-                                                                  ### 포스팅 삭제
-                                                                  */
+                                                                    ### 23.03.06
+                                                                    ### 이드보라
+                                                                    ### 포스팅 삭제
+                                                                    */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id);
