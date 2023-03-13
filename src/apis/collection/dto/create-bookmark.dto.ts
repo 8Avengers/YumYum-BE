@@ -1,17 +1,22 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreateCollectionDto {
   @IsString()
-  readonly type: string;
+  @IsOptional()
+  readonly type?: 'bookmark';
 
   @IsString()
   readonly name: string;
 
   @IsString()
+  @IsOptional()
   readonly description: string;
 
   @IsString()
-  readonly img: string;
+  @IsOptional()
+  readonly image: string;
 
+  @IsString()
+  @IsOptional()
   visibility: 'public' | 'private';
 }
