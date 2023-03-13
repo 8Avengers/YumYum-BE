@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BookmarkService } from './bookmark.service';
+import { BookmarPostDto } from './dto/bookmark-post.dto';
+import { BookmarRastaurantDto } from './dto/bookmark-restaurant.dto';
 import { CreateCollectionDto } from './dto/create-bookmark.dto';
 
 @Controller('bookmarks')
@@ -73,6 +75,9 @@ export class BookmarkController {
       */
 
   @Put('/collections/:collectionId')
+  @ApiOperation({ summary: '북마크 컬렉션 수정' })
+  @ApiResponse({ status: 200, description: '북마크 컬렉션 수정 성공' })
+  @ApiResponse({ status: 400, description: '북마크 컬렉션 수정 실패' })
   async updateCollection(
     @Param('collectionId') collectionId: number,
     @Body() name: string,
@@ -86,6 +91,9 @@ export class BookmarkController {
       ### 컬렉션 삭제🔥
       */
   @Delete('/collections/:collectionId')
+  @ApiOperation({ summary: '북마크 컬렉션 삭제' })
+  @ApiResponse({ status: 200, description: '북마크 컬렉션 삭제 성공' })
+  @ApiResponse({ status: 400, description: '북마크 컬렉션 삭제 실패' })
   async deleteCollection(@Param('collectionId') collectionId: number) {
     return await this.bookmarkService.deleteCollection(collectionId);
   }
@@ -93,15 +101,18 @@ export class BookmarkController {
   /*
     ### 23.03.13
     ### 표정훈
-    ### 컬렉션에 포스팅 더하기
+    ### 컬렉션에 포스팅 더하기🔥
     */
-  @Post('/collections/:collectionId')
+  @Post('/collections/add/post/:postId')
+  @ApiOperation({ summary: '북마크 포스팅 추가' })
+  @ApiResponse({ status: 200, description: '북마크 포스팅 추가 성공' })
+  @ApiResponse({ status: 400, description: '북마크 포스팅 추가 실패' })
   async collectionPlusPosting(
-    @Param('collectionId') collectionId: number,
     @Param('postId') postId: number,
+    @Body() data: BookmarPostDto,
   ) {
     return await this.bookmarkService.collectionPlusPosting(
-      collectionId,
+      data.collectionId,
       postId,
     );
   }
@@ -109,47 +120,57 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션에 맛집 더하기
+      ### 컬렉션에 포스팅 빼기🔥
       */
-  @Post('/:collectionId/:restaurantId')
+  @Delete('/collections/minus/post/:postId')
+  @ApiOperation({ summary: '북마크 포스팅 삭제' })
+  @ApiResponse({ status: 200, description: '북마크 포스팅 삭제 성공' })
+  @ApiResponse({ status: 400, description: '북마크 포스팅 삭제 실패' })
+  async collectionMinusPosting(
+    @Param('postId') postId: number,
+    @Body() data: BookmarPostDto,
+  ) {
+    return await this.bookmarkService.collectionMinusPosting(
+      data.collectionId,
+      postId,
+    );
+  }
+
+  /*
+      ### 23.03.13
+      ### 표정훈
+      ### 컬렉션에 맛집 더하기🔥
+      */
+
+  @Post('/collections/add/restaurant/:restaurantId')
+  @ApiOperation({ summary: '북마크 맛집 추가' })
+  @ApiResponse({ status: 200, description: '북마크 맛집 추가 성공' })
+  @ApiResponse({ status: 400, description: '북마크 맛집 추가 실패' })
   async collectionPlusRestaurant(
-    @Param('collectionId') collectionId: number,
     @Param('restaurantId') restaurantId: number,
+    @Body() data: BookmarRastaurantDto,
   ) {
     return await this.bookmarkService.collectionPlusRestaurant(
-      collectionId,
+      data.collectionId,
       restaurantId,
     );
   }
 
   /*
-      ### 23.03.13
-      ### 표정훈
-      ### 컬렉션에 포스팅 빼기
-      */
-  @Delete('/:collectionId/:postId')
-  async collectionMinusPosting(
-    @Param('collectionId') collectionId: number,
-    @Param('postId') postId: number,
-  ) {
-    return await this.bookmarkService.collectionMinusPosting(
-      collectionId,
-      postId,
-    );
-  }
-
-  /*
-      ### 23.03.13
-      ### 표정훈
-      ### 컬렉션에 맛집 빼기
-      */
-  @Delete('/:collectionId/:restaurantId')
+        ### 23.03.13
+        ### 표정훈
+        ### 컬렉션에 맛집 빼기
+        */
+  @Delete('/collections/minus/restaurant/:restaurantId')
+  @ApiOperation({ summary: '북마크 맛집 삭제' })
+  @ApiResponse({ status: 200, description: '북마크 맛집 삭제 성공' })
+  @ApiResponse({ status: 400, description: '북마크 맛집 삭제 실패' })
   async collectionMinusRestaurant(
-    @Param('collectionId') collectionId: number,
     @Param('restaurantId') restaurantId: number,
+    @Body() data: BookmarRastaurantDto,
   ) {
     return await this.bookmarkService.collectionMinusRestaurant(
-      collectionId,
+      data.collectionId,
       restaurantId,
     );
   }
