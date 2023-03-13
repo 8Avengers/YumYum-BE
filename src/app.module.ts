@@ -8,8 +8,8 @@ import { CommentModule } from './apis/comment/comment.module';
 import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
-import { UploadsModule } from './apis/uploads/uploads.module';
 import { RestaurantModule } from './apis/restaurant/restaurant.module';
+import { UploadModule } from './apis/upload/upload.module';
 
 @Module({
   imports: [
@@ -23,11 +23,11 @@ import { RestaurantModule } from './apis/restaurant/restaurant.module';
 
     UserModule,
     AuthModule,
-    UploadsModule,
     CommentModule,
     UserModule,
     AuthModule,
     RestaurantModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
