@@ -36,7 +36,7 @@ export class CommentService {
 
       const comments = await this.commentRepository.find({
         where: { deleted_at: null, post: { id: postId } },
-        select: ['id', 'content'],
+        select: ['id', 'content', 'updated_at'],
         relations: ['user'],
       });
 
