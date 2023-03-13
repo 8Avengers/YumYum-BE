@@ -13,6 +13,7 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { CreateRestaurantDto } from "../restaurant/dto/create-restaurant.dto";
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -59,12 +60,22 @@ export class PostController {
   @Post()
   @UseGuards(AuthAccessGuard)
   createPost(
-    @Body() data: CreatePostDto, //
+    @Body() data: CreatePostDto,
+    @Body() restaurantData: CreateRestaurantDto,
     @CurrentUser() currentUser: any,
   ) {
     return this.postService.createPost(
       currentUser.id,
-      data.restaurantId,
+      restaurantData.address_name,
+      restaurantData.category_group_code,
+      restaurantData.category_group_name,
+      restaurantData.category_name,
+      restaurantData.kakao_place_id,
+      restaurantData.phone,
+      restaurantData.place_name,
+      restaurantData.road_address_name,
+      restaurantData.x,
+      restaurantData.y,
       data.myListId,
       data.content,
       data.rating,
@@ -85,10 +96,20 @@ export class PostController {
   async updateArticle(
     @Param('postId') postId: number,
     @Body() data: Partial<UpdatePostDto>,
+    @Body() restaurantData: CreateRestaurantDto,
   ) {
     return this.postService.updatePost(
       postId,
-      data.restaurantId,
+      restaurantData.address_name,
+      restaurantData.category_group_code,
+      restaurantData.category_group_name,
+      restaurantData.category_name,
+      restaurantData.kakao_place_id,
+      restaurantData.phone,
+      restaurantData.place_name,
+      restaurantData.road_address_name,
+      restaurantData.x,
+      restaurantData.y,
       data.myListId,
       data.content,
       data.rating,

@@ -1,9 +1,6 @@
 import { IsNumber, IsString, IsArray } from 'class-validator';
 
 export class CreatePostDto {
-  @IsNumber()
-  readonly restaurantId: number;
-
   @IsArray()
   @IsNumber({}, { each: true })
   readonly myListId: number[];

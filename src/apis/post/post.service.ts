@@ -14,6 +14,7 @@ import { PostLikeService } from './post-like.service';
 import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
 import { Comment } from '../comment/entities/comment.entity';
+import { RestaurantService } from '../restaurant/restaurant.service';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -24,7 +25,8 @@ export class PostService {
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
-    private readonly myListService: MyListService, // private readonly postUserTagService: PostUserTagService,
+    private readonly myListService: MyListService,
+    private readonly restaurantService: RestaurantService, // private readonly postUserTagService: PostUserTagService,
   ) {}
 
   /*
@@ -140,7 +142,16 @@ export class PostService {
                                                                                     */
   async createPost(
     userId: number,
-    restaurantId: number,
+    address_name: string,
+    category_group_code: string,
+    category_group_name: string,
+    category_name: string,
+    kakao_place_id: string,
+    phone: string,
+    place_name: string,
+    road_address_name: string,
+    x: string,
+    y: string,
     myListIds: number[],
     content: string,
     rating: number,
@@ -150,6 +161,21 @@ export class PostService {
     // usernames: string[],
   ) {
     try {
+      const createdRestaurant = await this.restaurantService.createRestaurant(
+        address_name,
+        category_group_code,
+        category_group_name,
+        category_name,
+        kakao_place_id,
+        phone,
+        place_name,
+        road_address_name,
+        x,
+        y,
+      );
+
+      const restaurantId = createdRestaurant;
+
       const post = await this.postRepository.create({
         user: { id: userId },
         restaurant: { id: restaurantId },
@@ -191,7 +217,16 @@ export class PostService {
                                                                                     */
   async updatePost(
     id: number,
-    restaurantId: number,
+    address_name: string,
+    category_group_code: string,
+    category_group_name: string,
+    category_name: string,
+    kakao_place_id: string,
+    phone: string,
+    place_name: string,
+    road_address_name: string,
+    x: string,
+    y: string,
     myListId: number[],
     content: string,
     rating: number,
@@ -200,10 +235,25 @@ export class PostService {
     hashtagNames: string[],
   ) {
     try {
-      const post = await this.postRepository.findOne({ where: { id } });
+      const post = await this.postRepository.findOne({ where: { id }, relations: ['hashtags'] });
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
+
+      const createdRestaurant = await this.restaurantService.createRestaurant(
+        address_name,
+        category_group_code,
+        category_group_name,
+        category_name,
+        kakao_place_id,
+        phone,
+        place_name,
+        road_address_name,
+        x,
+        y,
+      );
+
+      const restaurantId = createdRestaurant;
 
       const updateData: any = {};
       if (restaurantId) {
@@ -225,10 +275,13 @@ export class PostService {
         const hashtags = await this.postHashtagService.createOrUpdateHashtags(
           hashtagNames,
         );
-        updateData.hashtags = [...hashtags];
+        updateData.hashtags = hashtags;
       }
 
-      await this.postRepository.update(id, updateData);
+      await this.postRepository.save({
+  ...post,
+  ...updateData
+}, { reload: true });
 
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
