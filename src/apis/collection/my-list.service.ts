@@ -22,6 +22,39 @@ export class MyListService {
   /*
     ### 23.03.14
     ### 표정훈
+    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
+    */
+
+  async getMyListsDetail(userId: number, collectionId: number) {
+    try {
+      const myLists = await this.collectionRepository.find({
+        relations: {
+          collectionItems: {
+            post: true,
+            restaurant: true,
+          },
+        },
+        where: {
+          user_id: userId,
+          deletedAt: null,
+          type: 'myList',
+          id: collectionId,
+        },
+        select: { name: true, description: true, image: true },
+      });
+
+      return myLists;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+    ### 23.03.14
+    ### 표정훈
     ### MyList 이름조회(내꺼) 👍
     */
 
