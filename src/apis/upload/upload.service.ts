@@ -28,7 +28,7 @@ export class UploadService {
     key: string;
     s3Object: PromiseResult<AWS.S3.PutObjectOutput, AWS.AWSError>;
     contentType: string;
-    postImages: string;
+    postImage: string;
   }> {
     try {
       const sharp = require('sharp');
@@ -63,9 +63,9 @@ export class UploadService {
         .promise();
 
       console.log('s3Object가 뭘까?::', s3Object);
-      const postImages = `https://${this.S3_BUCKET_NAME}.s3.${this.awsS3.config.region}.amazonaws.com/${key}`;
+      const postImage = `https://${this.S3_BUCKET_NAME}.s3.${this.awsS3.config.region}.amazonaws.com/${key}`;
 
-      return { key, s3Object, contentType: file.mimetype, postImages };
+      return { key, s3Object, contentType: file.mimetype, postImage };
     } catch (error) {
       throw new BadRequestException(`File upload failed : ${error}`);
     }
