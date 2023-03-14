@@ -13,47 +13,109 @@ import { CreateMyListDto } from './dto/create-my-list.dto';
 import { UpdateMyListDto } from './dto/update-my-list.dto';
 import { MyListService } from './my-list.service';
 import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
+import { AuthAccessGuard } from '../auth/guards/auth.guards';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('my-list')
 export class MyListController {
   constructor(private readonly myListService: MyListService) {}
+
+  /*
+    ### 23.03.14
+    ### 표정훈
+    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
+    */
+  @Get('/collections/datail/:collectionId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
+  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
+  async getMyListsDetail(
+    @Param('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    const myLists = await this.myListService.getMyListsDetail(
+      currentUser.id,
+      collectionId,
+    );
+    return await myLists;
+  }
+
+  /*
+    ### 23.03.14
+    ### 표정훈
+    ### MyList 이름조회(내꺼) 👍
+    */
+
+  @Get('/collections/name')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 이름조회(내꺼)' })
+  @ApiResponse({ status: 200, description: 'MyList 이름조회(내꺼) 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 이름조회(내꺼) 실패' })
+  async getMyListsName(@CurrentUser() currentUser: any) {
+    const myLists = await this.myListService.getMyListsName(currentUser.id);
+    return await myLists;
+  }
+
+  /*
+    ### 23.03.14
+    ### 표정훈
+    ### MyList 전체조회(내꺼) 👍
+    */
+
+  @Get('/collections')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
+  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
+  async getMyListsMe(@CurrentUser() currentUser: any) {
+    const myLists = await this.myListService.getMyListsMe(currentUser.id);
+    return await myLists;
+  }
+
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 전체조회(해당 유저의 맛집리스트만 불러오기)
+    ### MyList 전체조회(남의 전체조회) 👍
     */
-  // 이름만 생성한 경우 어찌해야되지? 1개이상 들어가 있어야만 보여주게 해야하나
-  // @UseGuards(AuthGuard('local'))
+
   @Get('/collections/:userId')
   @ApiOperation({ summary: 'MyList 전체조회' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회 실패' })
-  async getMyLists(@Param('userId') userId: number) {
-    const myLists = await this.myListService.getMyList(userId);
+  async getMyListsAll(@Param('userId') userId: number) {
+    const myLists = await this.myListService.getMyListsAll(userId);
     return await myLists;
   }
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 생성
+    ### MyList 생성 👍
     */
-  // @UseGuards(AuthGuard('local'))
   @Post('/collections')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 생성' })
   @ApiResponse({ status: 200, description: 'MyList 생성 성공' })
   @ApiResponse({ status: 400, description: 'MyList 생성 실패' })
-  async createMyList(@Body() data: CreateMyListDto) {
-    const userId = 1;
-    return await this.myListService.createMyList(userId, data.name, data.type);
+  async createMyList(
+    @Body() data: CreateMyListDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.myListService.createMyList(
+      currentUser.id,
+      data.name,
+      data.type,
+    );
   }
 
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 수정
+    ### MyList 수정 👍
     */
 
   @Put('/collections/:collectionId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 수정' })
   @ApiResponse({ status: 200, description: 'MyList 수정 성공' })
   @ApiResponse({ status: 400, description: 'MyList 수정 실패' })
@@ -61,10 +123,10 @@ export class MyListController {
     // @Param('userId') userId: number,
     @Param('collectionId') collectionId: number,
     @Body() data: UpdateMyListDto,
+    @CurrentUser() currentUser: any,
   ) {
-    const userId = 1;
     return this.myListService.updateMyList(
-      userId,
+      currentUser,
       collectionId,
       data.name,
       data.image,
@@ -75,22 +137,27 @@ export class MyListController {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 삭제
+    ### MyList 삭제 👍
     */
   @Delete('/collections/:collectionId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 삭제' })
   @ApiResponse({ status: 200, description: 'MyList 삭제 성공' })
   @ApiResponse({ status: 400, description: 'MyList 삭제 실패' })
-  async deleteMyList(@Param('collectionId') collectionId: number) {
-    return this.myListService.deleteMyList(collectionId);
+  async deleteMyList(
+    @Param('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.myListService.deleteMyList(currentUser, collectionId);
   }
 
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 포스팅 추가
+    ### MyList 포스팅 추가 👍
     */
-  @Post('/collections/add/:postId')
+  @Post('/collections/plus/:postId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 포스팅 추가' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 추가 성공' })
   @ApiResponse({ status: 400, description: 'MyList 포스팅 추가 실패' })
@@ -104,15 +171,17 @@ export class MyListController {
   /*
     ### 23.03.13
     ### 표정훈
-    ### MyList 포스팅 삭제
+    ### MyList 포스팅 삭제 👍
     */
   @Delete('/collections/minus/:postId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 포스팅 삭제' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 삭제 성공' })
   @ApiResponse({ status: 400, description: 'MyList 포스팅 삭제 실패' })
   async myListMinusPosting(
     @Param('postId') postId: number,
     @Body() data: minusCollectionPostingDto,
+    @CurrentUser() currentUser: any,
   ) {
     return await this.myListService.myListMinusPosting(
       postId,

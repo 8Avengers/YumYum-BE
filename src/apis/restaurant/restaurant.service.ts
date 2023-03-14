@@ -18,7 +18,7 @@ export class RestaurantService {
         ### 최호인  
         ### 음식점 상세정보 가져오기 작성
         */
-  async getRestaurant(kakao_place_id: string) {
+  async getRestaurantDetails(kakao_place_id: string) {
     return await this.restaurantRepository.findBy({
       kakao_place_id: kakao_place_id,
     });
@@ -37,7 +37,7 @@ export class RestaurantService {
     y: string,
   ) {
     try {
-      const restaurant = await this.getRestaurant(kakao_place_id);
+      const restaurant = await this.getRestaurantDetails(kakao_place_id);
       if (restaurant.length > 0) {
         return restaurant[0].id;
       }
@@ -74,7 +74,7 @@ export class RestaurantService {
     x: string,
     y: string,
   ) {
-    const restaurant = await this.getRestaurant(kakao_place_id);
+    const restaurant = await this.getRestaurantDetails(kakao_place_id);
     if (restaurant.length < 1) {
       throw new NotFoundException('없는 가게 정보 입니다.');
     }

@@ -17,10 +17,10 @@ import { RestaurantService } from './restaurant.service';
 export class RestaurantController {
   constructor(private readonly restaurantService: RestaurantService) {}
 
-  @ApiOperation({ summary: '가게 데이터 받기' })
+  @ApiOperation({ summary: '가게 상세 데이터 받기' })
   @Get('/:kakao_place_id')
   async getRestaurantDetails(@Param('kakao_place_id') kakao_place_id: string) {
-    const restaurantDetails = await this.restaurantService.getRestaurant(
+    const restaurantDetails = await this.restaurantService.getRestaurantDetails(
       kakao_place_id,
     );
 
@@ -35,7 +35,7 @@ export class RestaurantController {
       data.category_group_code,
       data.category_group_name,
       data.category_name,
-      data.kakao_place_id,
+      data.id,
       data.phone,
       data.place_name,
       data.road_address_name,
@@ -52,7 +52,7 @@ export class RestaurantController {
       data.category_group_code,
       data.category_group_name,
       data.category_name,
-      data.kakao_place_id,
+      data.id,
       data.phone,
       data.place_name,
       data.road_address_name,

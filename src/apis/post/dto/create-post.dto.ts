@@ -13,7 +13,7 @@ export class CreatePostDto {
 
   @IsArray()
   @IsString({ each: true })
-  readonly image: string;
+  readonly image: string[];
 
   readonly visibility: 'public' | 'private';
 
