@@ -10,7 +10,6 @@ import {
 import { Repository } from 'typeorm'; //데이터들어갈떄
 import { InjectRepository } from '@nestjs/typeorm'; //데이터들어갈떄
 import { User } from './entities/user.entity'; //데이터들어갈떄
-import { Collection } from '../collection/entities/collection.entity';
 import { Follow } from './entities/follow.entity';
 
 @Injectable()
@@ -84,21 +83,30 @@ export class UserProfileService {
       existUser.nickname = updateUserProfileDto.nickname;
       existUser.introduce = updateUserProfileDto.introduce;
       if (file) {
-        const uploadedFile = await this.uploadService.uploadFileToS3(
-          'yumyumdb', //AmazonS3의 저장되는 폴더명
+        const uploadedFile = await this.uploadService.uploadProfileImageToS3(
+          'yumyumdb-profile', //AmazonS3의 저장되는 폴더명
           file,
         );
-        existUser.profile_image = uploadedFile.key; //filePath=Key
+
+        console.log(
+          'uploadProfileImageToS3의 리턴값 uploadedFile',
+          uploadedFile,
+        );
+
+        console.log('existUser::::', existUser);
+
+        existUser.profile_image = uploadedFile.profileImage; //업데이트
       } else {
-        existUser.profile_image = existUser.profile_image;
+        existUser.profile_image = existUser.profile_image; //노 업데이트
       }
+
       const updatedUserProfile = await this.userRepository.save(existUser);
       console.log('업데이트완료후!updatedUserProfile::', updatedUserProfile);
 
       return {
         nickname: updatedUserProfile.nickname,
         introduce: updatedUserProfile.introduce,
-        profile_image: updatedUserProfile.profile_image,
+        profileImage: updatedUserProfile.profile_image,
       };
     }
   }
