@@ -59,11 +59,13 @@ export class UserProfileController {
     console.log(file);
     //포스트맨으로 하면, 사진 자체가 받아지지 않는다. 뭐가 문제일까?
 
-    return await this.userService.updateUserProfile({
+    const updatedUserProfile = await this.userService.updateUserProfile({
       user,
       UpdateUserProfileDto,
       file,
     });
+
+    return updatedUserProfile;
   }
 
   //유저 탈퇴하기(소프트딜리트)

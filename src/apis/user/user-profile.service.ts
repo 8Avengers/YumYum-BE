@@ -72,14 +72,19 @@ export class UserProfileService {
       where: { id: user.id },
     });
 
+    console.log(existUser);
+
     if (existUser) {
       existUser.nickname = UpdateUserProfileDto.nickname;
       existUser.introduce = UpdateUserProfileDto.introduce;
       file
         ? (existUser.profile_image = file.location)
         : (existUser.profile_image = existUser.profile_image);
-      await this.userRepository.save(existUser);
-      return existUser;
+      const updatedUserProfile = await this.userRepository.save(existUser);
+
+      console.log(updatedUserProfile);
+
+      return updatedUserProfile;
     }
   }
 
