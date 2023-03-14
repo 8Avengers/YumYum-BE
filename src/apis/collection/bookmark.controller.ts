@@ -110,7 +110,7 @@ export class BookmarkController {
     ### 표정훈
     ### 컬렉션에 포스팅 더하기🔥
     */
-  @Post('/collections/add/post/:postId')
+  @Post('/collections/plus/post/:postId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 포스팅 추가' })
   @ApiResponse({ status: 200, description: '북마크 포스팅 추가 성공' })
@@ -151,7 +151,7 @@ export class BookmarkController {
       ### 컬렉션에 맛집 더하기🔥
       */
 
-  @Post('/collections/add/restaurant/:restaurantId')
+  @Post('/collections/plus/restaurant/:restaurantId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 맛집 추가' })
   @ApiResponse({ status: 200, description: '북마크 맛집 추가 성공' })

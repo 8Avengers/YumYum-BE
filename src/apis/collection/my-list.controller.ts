@@ -119,7 +119,7 @@ export class MyListController {
     ### 표정훈
     ### MyList 포스팅 추가 👍
     */
-  @Post('/collections/add/:postId')
+  @Post('/collections/plus/:postId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 포스팅 추가' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 추가 성공' })
@@ -127,7 +127,6 @@ export class MyListController {
   async myListPlusPosting(
     @Param('postId') postId: number,
     @Body() data: addCollectionPostingDto,
-    @CurrentUser() currentUser: any,
   ) {
     return this.myListService.myListPlusPosting(postId, data.collectionId);
   }
