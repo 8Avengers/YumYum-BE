@@ -18,16 +18,19 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { User } from './entities/user.entity';
 import { DeleteUser, UpdateUserProfile } from './user.decorators';
-import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+ 
+ 
 import { UploadService } from '../upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+
 
 @ApiTags('유저프로필/팔로우/팔로잉')
 @Controller('/profile')
 export class UserProfileController {
   constructor(
     private readonly userService: UserProfileService, //
-    private readonly uploadService: UploadService, //
+    private readonly uploadService: UploadService //
   ) {}
 
   //나의프로필 보기 얘는 항상 제일 위에 있어야 한다. 아니면 이상한 에러나온다.
@@ -46,7 +49,33 @@ export class UserProfileController {
   //   console.log(file);
   // }
 
-  //유저프로필 수정하기
+  // //유저프로필 수정하기
+  // @Put('/me')
+  // @UpdateUserProfile()
+  // @UseGuards(AuthAccessGuard)
+  // @UseInterceptors(FileInterceptor('file')) //포스트맨의 키값과 일치
+  // async updateMyProfile(
+  //   @CurrentUser() user: any,
+  //   @UploadedFile() file: Express.MulterS3.File,
+  //   @Body() updateUserProfileDto: UpdateUserProfileDto,
+  // ) {
+  //   console.log("file", file);
+  //   //포스트맨으로 하면, 사진 자체가 받아지지 않는다. 뭐가 문제일까?
+
+  //   const updatedUserProfile = await this.userService.updateUserProfile({
+  //     user,
+  //     updateUserProfileDto,
+  //     file,
+  //   });
+
+  //   console.log("updatedUserProfile/////", updatedUserProfile)
+
+  //   return await this.userService.updateUserProfileWithS3('yumyumdb',   file,);
+
+  //   // return updatedUserProfile;
+  // }
+
+  
   @Put('/me')
   @UpdateUserProfile()
   @UseGuards(AuthAccessGuard)
@@ -54,19 +83,27 @@ export class UserProfileController {
   async updateMyProfile(
     @CurrentUser() user: any,
     @UploadedFile() file: Express.MulterS3.File,
-    @Body() UpdateUserProfileDto: UpdateUserProfileDto,
+    @Body() updateUserProfileDto: UpdateUserProfileDto,
   ) {
-    console.log(file);
-    //포스트맨으로 하면, 사진 자체가 받아지지 않는다. 뭐가 문제일까?
+    const { key } = await this.uploadService.uploadFileToS3('user_profile_image', file);
+
+   // Update the user's profile picture in the database with the S3 object key
+    updateUserProfileDto.profileImage = key;
 
     const updatedUserProfile = await this.userService.updateUserProfile({
       user,
-      UpdateUserProfileDto,
+      updateUserProfileDto,
       file,
     });
+  
+    console.log('key value', key);
+    console.log('The value of updatedUserProfile is', updatedUserProfile);
 
     return updatedUserProfile;
   }
+
+
+
 
   //유저 탈퇴하기(소프트딜리트)
   @DeleteUser()

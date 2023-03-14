@@ -1,47 +1,42 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { Repository } from 'typeorm'; //데이터들어갈떄
-import { InjectRepository } from '@nestjs/typeorm'; //데이터들어갈떄
-import { User } from './entities/user.entity'; //데이터들어갈떄
-import { Collection } from '../collection/entities/collection.entity';
+import { Injectable, InternalServerErrorException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';  //데이터들어갈떄
+import { User } from './entities/user.entity';  //데이터들어갈떄
+import { Collection } from '../collection/entities/collection.entity';  //데이터들어갈떄
 import { Follow } from './entities/follow.entity';
+ 
 
 @Injectable()
 export class UserProfileService {
   constructor(
     @InjectRepository(User) //데이터들어갈떄
-    private readonly userRepository: Repository<User>, //데이터들어갈떄
+    private readonly userRepository: Repository<User>,  //데이터들어갈떄
 
     @InjectRepository(Follow)
-    private FollowRepository: Repository<Follow>,
+    private readonly FollowRepository: Repository<Follow>,
 
     @InjectRepository(Collection)
     private readonly collectionRepository: Repository<Collection>,
   ) {}
 
-  //유저이메일로 찾기
+    //유저이메일로 찾기
   async findByEmail({ email }) {
     return await this.userRepository.findOne({
       where: { email },
     });
   }
 
-  //유저아이디로 찾기
-  async getUserById(id) {
+    //유저아이디로 찾기
+  async getUserById(id: number): Promise<User> {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
       });
 
-      console.log('getUserById의 id는?', id);
-
       if (!user) {
-        throw new NotFoundException('존재하지 않는 유저입니다.');
+        throw new NotFoundException('User not found');
       }
+
       return user;
     } catch (error) {
       throw error;
@@ -49,78 +44,74 @@ export class UserProfileService {
   }
 
   //유저닉네임으로 찾기
-  async getUserByNickname(nickname: string) {
+  async getUserByNickname(nickname: string): Promise<User> {
     try {
       const user = await this.userRepository.findOne({
         where: { nickname },
       });
 
-      console.log('getUserById의 id는?', nickname);
-
       if (!user) {
         throw new NotFoundException('User not found');
       }
+
       return user;
     } catch (error) {
       throw error;
     }
   }
 
+  
   //유저프로필 수정하기
-  async updateUserProfile({ UpdateUserProfileDto, user, file }) {
-    const existUser = await this.userRepository.findOne({
-      where: { id: user.id },
-    });
-
-    console.log(existUser);
-
-    if (existUser) {
-      existUser.nickname = UpdateUserProfileDto.nickname;
-      existUser.introduce = UpdateUserProfileDto.introduce;
-      file
-        ? (existUser.profile_image = file.location)
-        : (existUser.profile_image = existUser.profile_image);
-      const updatedUserProfile = await this.userRepository.save(existUser);
-
-      console.log(updatedUserProfile);
-
-      return updatedUserProfile;
-    }
-  }
-
-  //유저 탈퇴하기 TypeORM이 제공하는 SoftDelete
-  async deleteUser(user) {
+  async updateUserProfile ({ user, updateUserProfileDto, file }): Promise<User> {
     const existingUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
 
     if (!existingUser) {
-      throw new UnprocessableEntityException('존재하지 않는 유저입니다..');
+      throw new NotFoundException('User not found');
     }
+
+    existingUser.nickname = updateUserProfileDto.nickname;
+    existingUser.introduce = updateUserProfileDto.introduce;
+    existingUser.profile_image = updateUserProfileDto.profileImage || existingUser.profile_image || '';
+    
+    const updatedUserProfile = await this.userRepository.save(existingUser);
+    
+    return updatedUserProfile;
+
+ 
+  }
+
+    //유저 탈퇴하기 TypeORM이 제공하는 SoftDelete
+
+  async deleteUser(user: User): Promise<boolean> {
+    const existingUser = await this.userRepository.findOne({
+      where: { id: user.id },
+    });
+
+    if (!existingUser) {
+      throw new UnprocessableEntityException('User not found');
+    }
+
     const result = await this.userRepository.softDelete({ id: user.id });
-    console.log(result);
+
     return result.affected ? true : false;
   }
 
   //팔로우하기
-  public async createUserFollowRelation(follower: User, followingId: number) {
+  async createUserFollowRelation(follower: User, followingId: number): Promise<User> {
     try {
-      console.log(
-        'follower of the service, follwingId',
-        follower.id,
-        followingId,
-      );
-
       const following = await this.getUserById(followingId);
-      console.log('The value of following in service is', following);
 
       if (!following) {
         throw new NotFoundException('User not found');
       }
+
       const newFollow = await this.FollowRepository.save({
         follower,
         following,
       });
+
       return newFollow.following;
     } catch (error) {
       console.error(error);
