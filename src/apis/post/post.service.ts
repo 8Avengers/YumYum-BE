@@ -37,6 +37,7 @@ export class PostService {
                                                                                     ### 이드보라
                                                                                     ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
                                                                                     */
+
   async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
