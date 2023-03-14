@@ -6,8 +6,12 @@ import {
   Delete,
   Put,
   Get,
+  UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { BookmarkService } from './bookmark.service';
 import { BookmarPostDto } from './dto/bookmark-post.dto';
 import { BookmarRastaurantDto } from './dto/bookmark-restaurant.dto';
@@ -17,22 +21,19 @@ import { CreateCollectionDto } from './dto/create-bookmark.dto';
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
-  //현재 컬렉션 전체보기와 컬렉션 생성 완성 나머지 해야댐
-
   /*
     ### 23.03.13
     ### 표정훈
     ### 컬렉션 전체 보기🔥
     */
 
-  // @UseGuards(AuthGuard('local'))
   @Get('/collections')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 전체조회' })
   @ApiResponse({ status: 200, description: '북마크 전체조회 성공' })
   @ApiResponse({ status: 400, description: '북마크 전체조회 실패' })
-  async getBookmarks() {
-    const userId = 2;
-    const bookmarks = await this.bookmarkService.getBookmarks(userId);
+  async getBookmarks(@CurrentUser() currentUser: any) {
+    const bookmarks = await this.bookmarkService.getBookmarks(currentUser.id);
     return await bookmarks;
   }
 
@@ -42,6 +43,7 @@ export class BookmarkController {
       ### 컬렉션 상세 보기🔥
       */
   @Get('/collections/:collectionId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 상세조회' })
   @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
   @ApiResponse({ status: 400, description: '북마크 상세조회 실패' })
@@ -56,13 +58,16 @@ export class BookmarkController {
       ### 컬렉션 생성🔥
       */
   @Post('/collections')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 컬렉션 생성' })
   @ApiResponse({ status: 200, description: '북마크 컬렉션 생성 성공' })
   @ApiResponse({ status: 400, description: '북마크 컬렉션 생성 실패' })
-  async createCollection(@Body() data: CreateCollectionDto) {
-    const userId = 2;
+  async createCollection(
+    @Body() data: CreateCollectionDto,
+    @CurrentUser() currentUser: any,
+  ) {
     return await this.bookmarkService.createCollection(
-      userId,
+      currentUser.id,
       data.name,
       data.type,
     );
@@ -75,12 +80,13 @@ export class BookmarkController {
       */
 
   @Put('/collections/:collectionId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 컬렉션 수정' })
   @ApiResponse({ status: 200, description: '북마크 컬렉션 수정 성공' })
   @ApiResponse({ status: 400, description: '북마크 컬렉션 수정 실패' })
   async updateCollection(
     @Param('collectionId') collectionId: number,
-    @Body() name: string,
+    @Body('name') name: string,
   ) {
     return await this.bookmarkService.updateCollection(collectionId, name);
   }
@@ -91,6 +97,7 @@ export class BookmarkController {
       ### 컬렉션 삭제🔥
       */
   @Delete('/collections/:collectionId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 컬렉션 삭제' })
   @ApiResponse({ status: 200, description: '북마크 컬렉션 삭제 성공' })
   @ApiResponse({ status: 400, description: '북마크 컬렉션 삭제 실패' })
@@ -104,6 +111,7 @@ export class BookmarkController {
     ### 컬렉션에 포스팅 더하기🔥
     */
   @Post('/collections/add/post/:postId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 포스팅 추가' })
   @ApiResponse({ status: 200, description: '북마크 포스팅 추가 성공' })
   @ApiResponse({ status: 400, description: '북마크 포스팅 추가 실패' })
@@ -123,6 +131,7 @@ export class BookmarkController {
       ### 컬렉션에 포스팅 빼기🔥
       */
   @Delete('/collections/minus/post/:postId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 포스팅 삭제' })
   @ApiResponse({ status: 200, description: '북마크 포스팅 삭제 성공' })
   @ApiResponse({ status: 400, description: '북마크 포스팅 삭제 실패' })
@@ -143,6 +152,7 @@ export class BookmarkController {
       */
 
   @Post('/collections/add/restaurant/:restaurantId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 맛집 추가' })
   @ApiResponse({ status: 200, description: '북마크 맛집 추가 성공' })
   @ApiResponse({ status: 400, description: '북마크 맛집 추가 실패' })
@@ -162,6 +172,7 @@ export class BookmarkController {
         ### 컬렉션에 맛집 빼기🔥
         */
   @Delete('/collections/minus/restaurant/:restaurantId')
+  @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 맛집 삭제' })
   @ApiResponse({ status: 200, description: '북마크 맛집 삭제 성공' })
   @ApiResponse({ status: 400, description: '북마크 맛집 삭제 실패' })

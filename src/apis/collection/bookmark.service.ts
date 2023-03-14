@@ -93,7 +93,7 @@ export class BookmarkService {
       const bookmarkUpdate = await this.collectionRepository.update(
         { id: collectionId },
         {
-          name,
+          name: name,
         },
       );
       return bookmarkUpdate;
