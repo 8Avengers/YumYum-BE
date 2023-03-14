@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNumberString,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class UpdateUserProfileDto {
   @ApiProperty({
@@ -25,10 +31,13 @@ export class UpdateUserProfileDto {
     example: 'profielImage',
     description: '프로필이미지',
   })
-  // @IsString()
-  profileImage: string;
-
-  // @ApiProperty({ example: 'img', description: '프로필 이미지', required: true })
-  // @IsString()
-  // profileImage: string = 'img';
+  // @IsNumberString()
+  // profileImage: string;
+  @ApiProperty({
+    example: 'file',
+    description: '프로필 이미지',
+    required: true,
+  })
+  @IsString()
+  profileImage: string = 'file';
 }
