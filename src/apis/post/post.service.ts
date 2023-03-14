@@ -44,6 +44,7 @@ export class PostService {
         where: { deleted_at: null, visibility: 'public' },
         select: ['id', 'content', 'rating', 'updated_at'],
         relations: ['user', 'restaurant', 'hashtags', 'comments', 'images'],
+        order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -396,6 +397,7 @@ export class PostService {
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
         select: ['id', 'content', 'rating', 'updated_at'],
         relations: ['user', 'restaurant', 'hashtags', 'images'],
+        order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('작성하신 포스트가 없습니다.');
