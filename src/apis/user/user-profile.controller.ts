@@ -35,8 +35,13 @@ export class UserProfileController {
   @UseGuards(AuthAccessGuard)
   async getMyProfile(@CurrentUser() user: User) {
     const myProfile = await this.userService.getUserById(user.id);
+    console.log(myProfile);
 
-    return myProfile;
+    return {
+      id: myProfile.id,
+      nickname: myProfile.nickname,
+      profile_image: myProfile.profile_image,
+    };
   }
 
   //유저프로필 수정하기
