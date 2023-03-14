@@ -42,8 +42,8 @@ export class PostService {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
-        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags', 'comments'],
+        select: ['id', 'content', 'rating', 'updated_at'],
+        relations: ['user', 'restaurant', 'hashtags', 'comments', 'image'],
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -99,8 +99,8 @@ export class PostService {
     try {
       const post = await this.postRepository.find({
         where: { id: postId, deleted_at: null, visibility: 'public' },
-        select: ['content', 'rating', 'img_url', 'updated_at'],
-        relations: ['restaurant', 'user', 'hashtags'],
+        select: ['content', 'rating', 'updated_at'],
+        relations: ['restaurant', 'user', 'hashtags', 'images'],
       });
 
       if (!post) {
@@ -361,15 +361,21 @@ export class PostService {
     }
   }
 
-  async getMyPosts(userId: number) {
+  /*
+                                                                                      ### 23.03.14
+                                                                                      ### 장승윤
+                                                                                      ### 내 포스트만 불러오기
+                                                                                      */
+
+  async getPostsByUserId(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
-        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
+        select: ['id', 'content', 'rating', 'updated_at'],
         relations: ['user', 'restaurant', 'hashtags'],
       });
       if (!posts || posts.length === 0) {
-        throw new NotFoundException('No posts found.');
+        throw new NotFoundException('작성하신 포스트가 없습니다.');
       }
       const postIds = posts.map((post) => post.id);
 
@@ -381,13 +387,25 @@ export class PostService {
       );
 
       return posts.map((post) => {
+        const user: UserInterface | undefined = post.user;
+        const id = user?.id || null;
+        const nickname = user?.nickname || null;
+        const profile_image = user?.profile_image || null;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
         const isLiked =
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
-        return { ...post, hashtags, totalLikes: likes, isLiked };
+        const totalComments = post.comments ? post.comments.length : 0;
+        return {
+          ...post,
+          user: { id, nickname, profile_image },
+          hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+        };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
