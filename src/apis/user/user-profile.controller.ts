@@ -53,7 +53,7 @@ export class UserProfileController {
   @UseInterceptors(FileInterceptor('file')) //포스트맨의 키값과 일치
   async updateMyProfile(
     @CurrentUser() user: any,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.MulterS3.File,
     @Body() UpdateUserProfileDto: UpdateUserProfileDto,
   ) {
     console.log(file);
