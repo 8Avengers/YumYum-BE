@@ -6,18 +6,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { User } from '../user/entities/user.entity';
 import { CollectionItem } from './entities/collection-item.entity';
-import { Post } from '../post/entities/post.entity';
-import { CreateMyListDto } from './dto/create-my-list.dto';
-import { In } from 'typeorm';
+
 @Injectable()
 export class MyListService {
   constructor(
     @InjectRepository(Collection)
-    private collectionRepository: Repository<Collection>, //Collection,
+    private collectionRepository: Repository<Collection>,
     @InjectRepository(CollectionItem)
-    private collectionItemRepository: Repository<CollectionItem>, // @InjectRepository(Post) // private postRepository: Repository<Post>,
+    private collectionItemRepository: Repository<CollectionItem>,
   ) {}
   /*
     ### 23.03.10
@@ -25,6 +22,9 @@ export class MyListService {
     ### MyList 전체조회(해당 유저의 맛집리스트만 불러오기)
     */
 
+  // 해결해야할 사항 fix:16 fix30
+  // 1. post에서 id: 1인 값만 가져옴 => 데이터베이스 수정으로 해결완료🔥
+  // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
   async getMyList(userId: number) {
     try {
       const myLists = await this.collectionRepository.find({
@@ -38,19 +38,10 @@ export class MyListService {
         select: { name: true, description: true, image: true },
       });
 
-      // for (let i = 0; i < myLists.length; i++) {
-      //   return [
-      //     myLists,
-      //     myLists[i].collectionItems[i].post.rating,
-      //     myLists[i].collectionItems[i].restaurant.name,
-      //   ];
-      // }
-      // console.log(myLists[0]);
-      return [
-        myLists,
-        // myLists[0].collectionItems[0].post.rating,
-        // myLists[0].collectionItems[0].restaurant.name,
-      ];
+      return myLists.map((collection) => ({
+        ...collection,
+        collectionItems: collection.collectionItems.slice(0, 3),
+      }));
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -156,7 +147,7 @@ export class MyListService {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  // 컬렉션아이디 에다가 포스팅 정보를 넘겨야함
+  // 중복된 포스팅이 못들어가도록 추가기능구현해야함
   async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
       for (let i = 0; i < collectionId.length; i++) {
@@ -166,6 +157,35 @@ export class MyListService {
           post: { id: postId },
           collection: { id: item },
         });
+      }
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
+  /*
+    ### 23.03.10
+    ### 표정훈
+    ### MyList 포스팅 삭제
+    */
+
+  //해당 collectionId일때 일치하는 postId만 삭제하는 기능
+  async myListMinusPosting(postId: number, collectionId: number) {
+    try {
+      if (collectionId) {
+        await this.collectionItemRepository.delete({
+          collection: { id: collectionId },
+          post: { id: postId },
+        });
+      } else {
+        throw new NotFoundException('해당 컬렉션은 없습니다.');
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
