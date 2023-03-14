@@ -40,7 +40,8 @@ export class UserProfileController {
     return {
       id: myProfile.id,
       nickname: myProfile.nickname,
-      profile_image: myProfile.profile_image,
+      introduce: myProfile.introduce,
+      profileImage: myProfile.profile_image,
     };
   }
 
