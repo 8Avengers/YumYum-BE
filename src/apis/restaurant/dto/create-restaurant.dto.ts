@@ -40,7 +40,7 @@ export class CreateRestaurantDto {
     required: true,
   })
   @IsString()
-  readonly kakao_place_id: string;
+  readonly id: string;
 
   @ApiProperty({
     example: "'064-782-7330' 이거나 빈값",
