@@ -27,17 +27,19 @@ export class UpdateUserProfileDto {
   @IsString({ message: '소개는 문자열로 입력해주세요.' })
   introduce?: string;
 
-  @ApiProperty({
-    example: 'profielImage',
-    description: '프로필이미지',
-  })
-  // @IsNumberString()
-  // profileImage: string;
-  @ApiProperty({
-    example: 'file',
-    description: '프로필 이미지',
-    required: true,
-  })
-  @IsString()
-  profileImage: string = 'file';
+  // @ApiProperty({
+  //   example: 'profielImage',
+  //   description: '프로필이미지',
+  // })
+  // // @IsNumberString()
+  // // profileImage: string;
+  // @ApiProperty({
+  //   example: 'file',
+  //   description: '프로필 이미지',
+  //   required: true,
+  // })
+  // @IsString()
+  // profileImage: string = 'file';
+
+  profileImage?: string;
 }
