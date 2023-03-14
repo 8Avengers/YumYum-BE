@@ -22,6 +22,28 @@ export class MyListService {
   /*
     ### 23.03.14
     ### 표정훈
+    ### MyList 이름조회(내꺼) 👍
+    */
+
+  async getMyListsName(userId: number) {
+    try {
+      const myLists = await this.collectionRepository.find({
+        where: { user_id: userId, deletedAt: null, type: 'myList' },
+        select: { name: true },
+      });
+
+      return myLists;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+    ### 23.03.14
+    ### 표정훈
     ### MyList 전체조회(내꺼)
     */
 

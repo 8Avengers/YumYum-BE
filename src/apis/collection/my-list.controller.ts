@@ -23,6 +23,22 @@ export class MyListController {
   /*
     ### 23.03.14
     ### 표정훈
+    ### MyList 이름조회(내꺼) 👍
+    */
+
+  @Get('/collections/name')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 이름조회(내꺼)' })
+  @ApiResponse({ status: 200, description: 'MyList 이름조회(내꺼) 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 이름조회(내꺼) 실패' })
+  async getMyListsName(@CurrentUser() currentUser: any) {
+    const myLists = await this.myListService.getMyListsName(currentUser.id);
+    return await myLists;
+  }
+
+  /*
+    ### 23.03.14
+    ### 표정훈
     ### MyList 전체조회(내꺼) 👍
     */
 
