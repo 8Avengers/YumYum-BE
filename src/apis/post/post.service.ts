@@ -30,10 +30,10 @@ export class PostService {
   ) {}
 
   /*
-                                                                                  ### 23.03.13
-                                                                                  ### 이드보라
-                                                                                  ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
-                                                                                  */
+    ### 23.03.13
+    ### 이드보라
+    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
+  */
   async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
@@ -235,7 +235,10 @@ export class PostService {
     hashtagNames: string[],
   ) {
     try {
-      const post = await this.postRepository.findOne({ where: { id }, relations: ['hashtags'] });
+      const post = await this.postRepository.findOne({
+        where: { id },
+        relations: ['hashtags'],
+      });
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
@@ -278,10 +281,13 @@ export class PostService {
         updateData.hashtags = hashtags;
       }
 
-      await this.postRepository.save({
-  ...post,
-  ...updateData
-}, { reload: true });
+      await this.postRepository.save(
+        {
+          ...post,
+          ...updateData,
+        },
+        { reload: true },
+      );
 
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
