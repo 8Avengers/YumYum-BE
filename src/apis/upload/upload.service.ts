@@ -21,7 +21,7 @@ export class UploadService {
     });
     this.S3_BUCKET_NAME = this.configService.get('AWS_S3_BUCKET_NAME');
   }
-
+  //S3에 업로드
   async uploadFileToS3(
     folder: string,
     file: Express.Multer.File,
@@ -31,9 +31,17 @@ export class UploadService {
     contentType: string;
   }> {
     try {
-      const key = `${folder}/${Date.now()}_${path.basename(
+      const filePath = `${Date.now()}_${path.basename(
         file.originalname,
       )}`.replace(/ /g, '');
+
+      const key = `${folder}/${filePath}`; //파일네임을 데이터베이스에 넣을
+
+      // const key = `${folder}/${Date.now()}_${path.basename(
+      //   file.originalname,
+      // )}`.replace(/ /g, '');
+
+      console.log(key);
 
       const s3Object = await this.awsS3
         .putObject({

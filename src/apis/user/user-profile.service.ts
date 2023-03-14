@@ -1,4 +1,7 @@
+import { UploadService } from './../upload/upload.service';
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -19,8 +22,7 @@ export class UserProfileService {
     @InjectRepository(Follow)
     private FollowRepository: Repository<Follow>,
 
-    @InjectRepository(Collection)
-    private readonly collectionRepository: Repository<Collection>,
+    private readonly uploadService: UploadService,
   ) {}
 
   //유저이메일로 찾기
@@ -67,24 +69,37 @@ export class UserProfileService {
   }
 
   //유저프로필 수정하기
-  async updateUserProfile({ UpdateUserProfileDto, user, file }) {
+  async updateUserProfile({ updateUserProfileDto, user, file }) {
     const existUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
-
-    console.log(existUser);
+    if (!existUser) {
+      throw new HttpException(
+        '존재하지 않는 유저입니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     if (existUser) {
-      existUser.nickname = UpdateUserProfileDto.nickname;
-      existUser.introduce = UpdateUserProfileDto.introduce;
-      file
-        ? (existUser.profile_image = file.location)
-        : (existUser.profile_image = existUser.profile_image);
+      existUser.nickname = updateUserProfileDto.nickname;
+      existUser.introduce = updateUserProfileDto.introduce;
+      if (file) {
+        const uploadedFile = await this.uploadService.uploadFileToS3(
+          'yumyumdb', //AmazonS3의 저장되는 폴더명
+          file,
+        );
+        existUser.profile_image = uploadedFile.key; //filePath=Key
+      } else {
+        existUser.profile_image = existUser.profile_image;
+      }
       const updatedUserProfile = await this.userRepository.save(existUser);
+      console.log('업데이트완료후!updatedUserProfile::', updatedUserProfile);
 
-      console.log(updatedUserProfile);
-
-      return updatedUserProfile;
+      return {
+        nickname: updatedUserProfile.nickname,
+        introduce: updatedUserProfile.introduce,
+        profile_image: updatedUserProfile.profile_image,
+      };
     }
   }
 
