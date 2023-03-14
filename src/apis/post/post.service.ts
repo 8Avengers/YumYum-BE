@@ -15,6 +15,8 @@ import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantService } from '../restaurant/restaurant.service';
+import { UserInterface } from '../../interfaces/user';
+import { Image } from './entities/image.entity';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -23,6 +25,7 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    @InjectRepository(Image) private imageRepository: Repository<Image>,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
@@ -54,7 +57,10 @@ export class PostService {
       );
 
       return posts.map((post) => {
-        const { id, nickname, profile_image } = post.user;
+        const user: UserInterface | undefined = post.user;
+        const id = user?.id || null;
+        const nickname = user?.nickname || null;
+        const profile_image = user?.profile_image || null;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
@@ -155,7 +161,7 @@ export class PostService {
     myListIds: number[],
     content: string,
     rating: number,
-    img: string,
+    img: string[],
     visibility,
     hashtagNames: string[],
     // usernames: string[],
@@ -181,7 +187,6 @@ export class PostService {
         restaurant: { id: restaurantId },
         content,
         rating,
-        img_url: img,
         visibility,
       });
 
@@ -194,6 +199,14 @@ export class PostService {
       await this.postRepository.save(post);
 
       const postId = post.id;
+
+      for (const imageUrl of img) {
+        const image = await this.imageRepository.create({
+          post: { id: postId },
+          file_name: imageUrl,
+        });
+        await this.imageRepository.save(image);
+      }
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
@@ -230,7 +243,7 @@ export class PostService {
     myListId: number[],
     content: string,
     rating: number,
-    image: string,
+    image: string[],
     visibility,
     hashtagNames: string[],
   ) {
@@ -268,8 +281,16 @@ export class PostService {
       if (rating) {
         updateData.rating = rating;
       }
-      if (image) {
-        updateData.img_url = image;
+      if (image && image.length > 0) {
+        const images = [];
+        for (const imageUrl of image) {
+          const image = await this.imageRepository.create({
+            file_name: imageUrl,
+            post: { id },
+          });
+          images.push(image);
+        }
+        updateData.images = images;
       }
       if (visibility) {
         updateData.visibility = visibility;
