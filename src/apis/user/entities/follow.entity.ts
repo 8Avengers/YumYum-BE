@@ -45,6 +45,8 @@ export class Follow {
   @UpdateDateColumn({ name: 'updated_at' })
   updated_at: Date;
 
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deleted_at: Date;
+  // @DeleteDateColumn({ name: 'deleted_at' })
+  // deleted_at: Date;
 }
+
+ 

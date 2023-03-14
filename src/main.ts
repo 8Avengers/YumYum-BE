@@ -11,8 +11,8 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('API Docs Example')
-    .setDescription('API 문서입니다')
+    .setTitle('YumYum API')
+    .setDescription('어서오세요. YUMYUMDB API 문서입니다')
     .setVersion('0.0.1')
     .addBearerAuth(
       {
@@ -38,6 +38,12 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
+
+  app.enableCors({
+    origin: true, //어떤 프론트엔드사이트라도 모두 접근가능.
+    credentials: true,
+  });
+
   await app.listen(port);
   // Logger.log(`Listening on port ${port} !!`);
 }

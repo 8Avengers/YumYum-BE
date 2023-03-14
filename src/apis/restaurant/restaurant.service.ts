@@ -39,9 +39,9 @@ export class RestaurantService {
     try {
       const restaurant = await this.getRestaurantDetails(kakao_place_id);
       if (restaurant.length > 0) {
-        return restaurant;
+        return restaurant[0].id;
       }
-      return this.restaurantRepository.insert({
+      const { identifiers } = await this.restaurantRepository.insert({
         address_name,
         category_group_code,
         category_group_name,
@@ -53,6 +53,8 @@ export class RestaurantService {
         x,
         y,
       });
+
+      return identifiers[0].id;
     } catch (err) {
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',

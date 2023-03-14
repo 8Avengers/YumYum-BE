@@ -20,14 +20,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (typeof error === 'string') {
       response.status(status).json({
         success: false,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toLocaleString(),
         path: request.url,
         error,
       });
     } else {
       response.status(status).json({
         success: false,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toLocaleString(),
         ...error,
       });
     }

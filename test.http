@@ -1,26 +1,105 @@
-###뉴스피드 페이지
+###모든 포스팅 보기
 GET localhost:3000/posts
 
 ###포스팅 상세보기
 GET localhost:3000/posts/3
 
+#### Authorization by token, part 2. Use token to authorize.
+#GET https://httpbin.org/headers
+#Authorization: Bearer {{accessToken}}
+
 ###포스팅 작성
-POST localhost:3000/posts/1
+POST localhost:8080/posts
 Content-Type: application/json
+Authorization: Bearer {{auth_token}}
 
 {
-  "content": "아주 엄청난 맛집이군요",
-  "rating": 2,
-  "img": "엄청난 사진입니당."
+  "restaurantId": 1,
+  "myListId": [1],
+  "content": "리뷰3",
+  "rating": 5,
+  "image": ["img_url"],
+  "visibility": "public",
+  "hashtagNames": ["해시태그 하나", "둘"]
 }
 
 ###포스팅 수정
-PUT localhost:3000/posts/3
+PUT localhost:3000/posts/2
+Content-Type: application/json
+
+{
+  "content": "리뷰2",
+  "visibility": "public",
+  "hashtagNames": ["해시태그 하나", "세번째 추가"]
+}
+
+###포스팅 삭제
+DELETE localhost:3000/posts/4
+
+###포스팅 좋아요
+POST localhost:3000/posts/2/like
+Content-Type: application/json
+
+{
+  "userId": 1
+}
+
+###포스팅 좋아요 취소
+DELETE localhost:3000/posts/2/like
+
+###특정 게시글에 해당하는 모든 댓글 보기
+GET localhost:3000/posts/2/comments
+
+###댓글 작성
+POST localhost:8080/posts/3/comments
+Content-Type: application/json
+
+{
+  "content": "우왕"
+}
+
+###댓글 수정
+PUT localhost:8080/posts/1/comments/1
 Content-Type: application/json
 
 {
   "content": "사실 별로였습니당"
 }
 
-###포스팅 삭제
-DELETE localhost:3000/posts/3
+###댓글 삭제
+DELETE localhost:3000/posts/1/comments/3
+
+###댓글 좋아요
+POST localhost:3000/posts/2/comments/2/like
+
+###댓글 좋아요 취소
+DELETE localhost:3000/posts/2/comments/2/like
+
+###회원가입
+POST localhost:8080/signup
+Content-Type: application/json
+
+{
+"name": "이드봉",
+"email": "email99@naver.com",
+"password": "Abcd1234!",
+"confirmPassword": "Abcd1234!",
+"nickname": "debdeb",
+"gender": "F",
+"birth": "19920913",
+"phoneNumber":"01072721789",
+"profileImage":"프로필 이미지"
+}
+
+###로그인
+POST localhost:8080/login
+Content-Type: application/json
+
+{
+"email": "email99@naver.com",
+"password": "Abcd1234!"
+}
+
+> {% client.global.set("auth_token", response.body.accessToken); %}
+
+
