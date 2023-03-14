@@ -1,5 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  BadRequestException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -93,7 +95,7 @@ export class BookmarkService {
       const bookmarkUpdate = await this.collectionRepository.update(
         { id: collectionId },
         {
-          name,
+          name: name,
         },
       );
       return bookmarkUpdate;
@@ -138,10 +140,23 @@ export class BookmarkService {
     */
   async collectionPlusPosting(collectionId: number, postId: number) {
     try {
-      await this.collectionItemRepository.insert({
+      const existingItem = await this.collectionItemRepository.findOne({
+        where: {
+          collection: { id: collectionId },
+          post: { id: postId },
+        },
+      });
+
+      if (existingItem) {
+        return; // Do nothing and exit the function if the CollectionItem already exists
+      }
+
+      const collectionItem = this.collectionItemRepository.create({
         collection: { id: collectionId },
         post: { id: postId },
       });
+
+      await this.collectionItemRepository.save(collectionItem);
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -183,12 +198,25 @@ export class BookmarkService {
     */
   async collectionPlusRestaurant(collectionId: number, restaurantId: number) {
     try {
+      const existingItem = await this.collectionItemRepository.findOne({
+        where: {
+          collection: { id: collectionId },
+          restaurant: { id: restaurantId },
+        },
+      });
+
+      console.log('북마크 레스토링', existingItem);
+
+      if (existingItem) {
+        return; // 이미 존재하는 CollectionItem이면 추가하지 않고, 함수 종료
+      }
+
       await this.collectionItemRepository.insert({
         collection: { id: collectionId },
         restaurant: { id: restaurantId },
       });
     } catch (err) {
-      if (err instanceof NotFoundException) {
+      if (err instanceof HttpException) {
         throw err;
       } else {
         console.error(err);
@@ -198,6 +226,7 @@ export class BookmarkService {
       }
     }
   }
+
   /*
     ### 23.03.13
     ### 표정훈

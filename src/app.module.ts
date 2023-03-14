@@ -1,3 +1,4 @@
+import { MapModule } from './apis/map/map.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -28,6 +29,7 @@ import { UploadModule } from './apis/upload/upload.module';
     AuthModule,
     RestaurantModule,
     UploadModule,
+    MapModule,
   ],
 })
 export class AppModule {}

@@ -23,6 +23,7 @@ export class SearchService {
   async getUserSearch(keyword: string) {
     const userSearchResult = await this.userRepository.findBy({
       nickname: Like(`${keyword}%`),
+      deleted_at: null,
     });
     return userSearchResult;
   }
@@ -35,6 +36,7 @@ export class SearchService {
   async getRestaurantSearch(keyword: string) {
     const restaurantSearchResult = await this.restaurantRepository.findBy({
       place_name: Like(`${keyword}%`),
+      deleted_at: null,
     });
     return restaurantSearchResult;
   }
@@ -47,6 +49,7 @@ export class SearchService {
   async getHashtagSearch(keyword: string) {
     const hashtagSearchResult = await this.hashtagRepository.findBy({
       name: Like(`${keyword}%`),
+      deleted_at: null,
     });
     return hashtagSearchResult;
   }

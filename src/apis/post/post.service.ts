@@ -15,6 +15,8 @@ import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantService } from '../restaurant/restaurant.service';
+import { UserInterface } from '../../interfaces/user';
+import { Image } from './entities/image.entity';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -23,6 +25,7 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    @InjectRepository(Image) private imageRepository: Repository<Image>,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
@@ -30,10 +33,11 @@ export class PostService {
   ) {}
 
   /*
-                                                                                  ### 23.03.13
-                                                                                  ### 이드보라
-                                                                                  ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
-                                                                                  */
+                                                                                    ### 23.03.13
+                                                                                    ### 이드보라
+                                                                                    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
+                                                                                    */
+
   async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
@@ -54,7 +58,10 @@ export class PostService {
       );
 
       return posts.map((post) => {
-        const { id, nickname, profile_image } = post.user;
+        const user: UserInterface | undefined = post.user;
+        const id = user?.id || null;
+        const nickname = user?.nickname || null;
+        const profile_image = user?.profile_image || null;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
@@ -84,10 +91,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.13
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
-                                                                                    */
+                                                                                      ### 23.03.13
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
+                                                                                      */
   async getPostById(postId: number, userId: number) {
     try {
       const post = await this.postRepository.find({
@@ -136,10 +143,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.11
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 작성
-                                                                                    */
+                                                                                      ### 23.03.11
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 작성
+                                                                                      */
   async createPost(
     userId: number,
     address_name: string,
@@ -155,7 +162,7 @@ export class PostService {
     myListIds: number[],
     content: string,
     rating: number,
-    img: string,
+    img: string[],
     visibility,
     hashtagNames: string[],
     // usernames: string[],
@@ -181,7 +188,6 @@ export class PostService {
         restaurant: { id: restaurantId },
         content,
         rating,
-        img_url: img,
         visibility,
       });
 
@@ -194,6 +200,14 @@ export class PostService {
       await this.postRepository.save(post);
 
       const postId = post.id;
+
+      for (const imageUrl of img) {
+        const image = await this.imageRepository.create({
+          post: { id: postId },
+          file_name: imageUrl,
+        });
+        await this.imageRepository.save(image);
+      }
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
@@ -211,10 +225,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.10
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 수정
-                                                                                    */
+                                                                                      ### 23.03.10
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 수정
+                                                                                      */
   async updatePost(
     id: number,
     address_name: string,
@@ -230,12 +244,15 @@ export class PostService {
     myListId: number[],
     content: string,
     rating: number,
-    image: string,
+    image: string[],
     visibility,
     hashtagNames: string[],
   ) {
     try {
-      const post = await this.postRepository.findOne({ where: { id }, relations: ['hashtags'] });
+      const post = await this.postRepository.findOne({
+        where: { id },
+        relations: ['hashtags'],
+      });
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
@@ -265,23 +282,44 @@ export class PostService {
       if (rating) {
         updateData.rating = rating;
       }
-      if (image) {
-        updateData.img_url = image;
+      if (image && image.length > 0) {
+        const images = [];
+        for (const imageUrl of image) {
+          const image = await this.imageRepository.create({
+            file_name: imageUrl,
+            post: { id },
+          });
+          images.push(image);
+        }
+        updateData.images = images;
       }
       if (visibility) {
         updateData.visibility = visibility;
       }
       if (hashtagNames) {
-        const hashtags = await this.postHashtagService.createOrUpdateHashtags(
-          hashtagNames,
-        );
-        updateData.hashtags = hashtags;
+        const existingHashtags = post.hashtags.map((hashtag) => hashtag.name);
+        const newHashtags = (
+          await this.postHashtagService.createOrUpdateHashtags(hashtagNames)
+        ).map((hashtag) => hashtag.name);
+
+        // Check if new and existing hashtags are the same
+        if (
+          existingHashtags.sort().join(',') !== newHashtags.sort().join(',')
+        ) {
+          const hashtags = await this.postHashtagService.createOrUpdateHashtags(
+            hashtagNames,
+          );
+          updateData.hashtags = hashtags;
+        }
       }
 
-      await this.postRepository.save({
-  ...post,
-  ...updateData
-}, { reload: true });
+      await this.postRepository.save(
+        {
+          ...post,
+          ...updateData,
+        },
+        { reload: true },
+      );
 
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
@@ -301,10 +339,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.06
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 삭제
-                                                                                    */
+                                                                                      ### 23.03.06
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 삭제
+                                                                                      */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id);

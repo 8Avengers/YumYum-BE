@@ -13,7 +13,7 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { CreateRestaurantDto } from "../restaurant/dto/create-restaurant.dto";
+import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -61,21 +61,33 @@ export class PostController {
   @UseGuards(AuthAccessGuard)
   createPost(
     @Body() data: CreatePostDto,
-    @Body() restaurantData: CreateRestaurantDto,
+    @Body()
+    {
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
+    }: CreateRestaurantDto,
     @CurrentUser() currentUser: any,
   ) {
     return this.postService.createPost(
       currentUser.id,
-      restaurantData.address_name,
-      restaurantData.category_group_code,
-      restaurantData.category_group_name,
-      restaurantData.category_name,
-      restaurantData.kakao_place_id,
-      restaurantData.phone,
-      restaurantData.place_name,
-      restaurantData.road_address_name,
-      restaurantData.x,
-      restaurantData.y,
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
       data.myListId,
       data.content,
       data.rating,
@@ -96,20 +108,32 @@ export class PostController {
   async updateArticle(
     @Param('postId') postId: number,
     @Body() data: Partial<UpdatePostDto>,
-    @Body() restaurantData: CreateRestaurantDto,
+    @Body()
+    {
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
+    }: CreateRestaurantDto,
   ) {
     return this.postService.updatePost(
       postId,
-      restaurantData.address_name,
-      restaurantData.category_group_code,
-      restaurantData.category_group_name,
-      restaurantData.category_name,
-      restaurantData.kakao_place_id,
-      restaurantData.phone,
-      restaurantData.place_name,
-      restaurantData.road_address_name,
-      restaurantData.x,
-      restaurantData.y,
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
       data.myListId,
       data.content,
       data.rating,

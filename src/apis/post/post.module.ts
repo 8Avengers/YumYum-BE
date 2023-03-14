@@ -12,12 +12,13 @@ import { CollectionModule } from '../collection/collection.module';
 import { MyFeedController } from './post-myfeed.controller';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantModule } from '../restaurant/restaurant.module';
+import { Image } from './entities/image.entity';
 
 // import { PostUserTagService } from './post-user-tag.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment]),
+    TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment, Image]),
     CollectionModule,
     RestaurantModule,
   ],
