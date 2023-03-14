@@ -1,21 +1,26 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../user/user.service';
+import { UserSignupService } from '../user/user-signup.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService, //
     private readonly configService: ConfigService,
-    private readonly userService: UserService,
+    private readonly userSignupService: UserSignupService,
   ) {}
 
   //액세스토큰생성
   createAccessToken({ user }) {
     console.log('acessToken의 유저', user);
     const accessToken = this.jwtService.sign(
-      { email: user.email, id: user.id, profileImage: user.profile_image }, //
+      {
+        email: user.email,
+        id: user.id,
+        nickname: user.nickname,
+        profileImage: user.profile_image,
+      },
       {
         secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         expiresIn: '14d',
@@ -30,7 +35,9 @@ export class AuthService {
     console.log('refreshToken의 유저', user);
 
     const refreshToken = this.jwtService.sign(
-      { email: user.email, id: user.id, profileImage: user.profile_image },
+      {
+        id: user.id,
+      },
       {
         secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
         expiresIn: '14d',
@@ -44,7 +51,7 @@ export class AuthService {
     console.log('oauth 끝나면 나오는 유저찍어보자', user);
 
     // 1. 가입확인
-    let existingUser = await this.userService.findOne({
+    let existingUser = await this.userSignupService.findOne({
       email: user.email,
     });
 
@@ -56,7 +63,7 @@ export class AuthService {
     try {
       // 2. 회원가입
       if (!existingUser) {
-        user = await this.userService.createOauthUser({
+        user = await this.userSignupService.createOauthUser({
           email: user.email,
           nickname: user.nickname,
           name: user.name,
@@ -92,13 +99,13 @@ export class AuthService {
 
     try {
       // 1. 가입확인
-      let existingUser = await this.userService.findOne({
+      let existingUser = await this.userSignupService.findOne({
         email: user.email,
       });
 
       // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
       if (!existingUser) {
-        user = await this.userService.createOauthUser({
+        user = await this.userSignupService.createOauthUser({
           email: user.email,
           nickname: user.nickname,
           name: user.name,

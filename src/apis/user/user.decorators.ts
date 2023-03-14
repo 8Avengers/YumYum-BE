@@ -26,3 +26,19 @@ export const signUpEmail = () => {
     }),
   );
 };
+
+export const UpdateUserProfile = () => {
+  return applyDecorators(
+    ApiOperation({ summary: '유저 프로필 정보 수정' }),
+    ApiResponse({ status: 200, description: '유저 프로필 정보 수정 성공' }),
+    ApiResponse({ status: 400, description: '유저 프로필 정보 수정 실패' }),
+  );
+};
+
+export const DeleteUser = () => {
+  return applyDecorators(
+    ApiOperation({ summary: '유저 탈퇴 - 소프트딜리트' }),
+    ApiResponse({ status: 200, description: '유저 탈퇴 - 소프트딜리트 성공' }),
+    ApiResponse({ status: 400, description: '유저 탈퇴 - 소프트딜리트 실패' }),
+  );
+};

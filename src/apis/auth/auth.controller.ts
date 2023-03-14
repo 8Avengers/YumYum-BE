@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
 import { ValidationPipe } from '@nestjs/common';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { UserService } from '../user/user.service';
+import { UserProfileService } from '../user/user-profile.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
@@ -35,7 +35,7 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('/')
 export class AuthController {
   constructor(
-    private readonly userService: UserService,
+    private readonly userProfileService: UserProfileService,
     private readonly authService: AuthService,
   ) {}
 
@@ -48,7 +48,7 @@ export class AuthController {
     // @Res() res, // res 를 써주지 않으면 무한로딩한다.
   ) {
     const { email, password } = loginUserDto;
-    const user = await this.userService.findOne({ email });
+    const user = await this.userProfileService.findByEmail({ email });
 
     if (!user)
       throw new UnprocessableEntityException(' 등록된 이메일이 없습니다.');

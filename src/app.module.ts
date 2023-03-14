@@ -9,6 +9,7 @@ import { AuthModule } from './apis/auth/auth.module';
 import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
 import { RestaurantModule } from './apis/restaurant/restaurant.module';
+import { UploadModule } from './apis/upload/upload.module';
 
 @Module({
   imports: [
@@ -19,10 +20,14 @@ import { RestaurantModule } from './apis/restaurant/restaurant.module';
     CollectionModule,
     SearchModule,
     PostModule,
+
+    UserModule,
+    AuthModule,
     CommentModule,
     UserModule,
     AuthModule,
     RestaurantModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

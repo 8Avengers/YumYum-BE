@@ -9,17 +9,19 @@ import { PostLike } from './entities/post-like.entity';
 import { Hashtag } from './entities/hashtag.entity';
 import { PostHashtagService } from './post-hashtag.service';
 import { CollectionModule } from '../collection/collection.module';
+import { MyFeedController } from './post-myfeed.controller';
 import { Comment } from '../comment/entities/comment.entity';
-import { RestaurantModule} from "../restaurant/restaurant.module";
+import { RestaurantModule } from '../restaurant/restaurant.module';
 
 // import { PostUserTagService } from './post-user-tag.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment]),
-    CollectionModule, RestaurantModule
+    CollectionModule,
+    RestaurantModule,
   ],
-  controllers: [PostController, PostLikeController],
+  controllers: [PostController, PostLikeController, MyFeedController],
   providers: [PostService, PostLikeService, PostHashtagService],
   exports: [PostService, TypeOrmModule],
 })
