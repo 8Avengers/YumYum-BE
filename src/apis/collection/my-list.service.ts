@@ -184,27 +184,27 @@ export class MyListService {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  // 중복된 포스팅이 가능하다 => 근데 포스트번호는 다르므로 중복제거.
-  // 🔥주의사항: 배열만 추가 가능🔥
+  // 같은 컬렉션 안에 동일한 포스트는 안들어감!
   async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
-      //지금 엔티티로는 만들 수 없는걸까?
-      //if(해당하는 콜렉션 아이디 안에 postId가 없다면 실행, 있으면 return;)
       for (let i = 0; i < collectionId.length; i++) {
-        let item = collectionId[i]; //item = 1 2 3 하나씩 찍힘(콜렉션아이디)
+        const item = collectionId[i];
+        const existingItem = await this.collectionItemRepository.findOne({
+          where: {
+            post: { id: postId },
+            collection: { id: item },
+          },
+        });
 
-        // SELECT post_id  FROM collection_item ci WHERE post_id =2 AND collection_id =2
-        // const existingItem = await this.collectionItemRepository.findOne({
-        //   where: {
-        //     post: { id: postId },
-        //     collection: { id: item },
-        //   },
-        // });
+        if (existingItem) {
+          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
+        }
 
-        await this.collectionItemRepository.insert({
+        const collectionItem = this.collectionItemRepository.create({
           post: { id: postId },
           collection: { id: item },
         });
+        await this.collectionItemRepository.save(collectionItem);
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
