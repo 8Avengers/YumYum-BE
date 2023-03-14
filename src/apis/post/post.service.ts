@@ -30,10 +30,10 @@ export class PostService {
   ) {}
 
   /*
-                                                                                  ### 23.03.13
-                                                                                  ### 이드보라
-                                                                                  ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
-                                                                                  */
+                                                                                    ### 23.03.13
+                                                                                    ### 이드보라
+                                                                                    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
+                                                                                    */
   async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
@@ -84,10 +84,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.13
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
-                                                                                    */
+                                                                                      ### 23.03.13
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
+                                                                                      */
   async getPostById(postId: number, userId: number) {
     try {
       const post = await this.postRepository.find({
@@ -136,10 +136,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.11
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 작성
-                                                                                    */
+                                                                                      ### 23.03.11
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 작성
+                                                                                      */
   async createPost(
     userId: number,
     address_name: string,
@@ -211,10 +211,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.10
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 수정
-                                                                                    */
+                                                                                      ### 23.03.10
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 수정
+                                                                                      */
   async updatePost(
     id: number,
     address_name: string,
@@ -235,7 +235,10 @@ export class PostService {
     hashtagNames: string[],
   ) {
     try {
-      const post = await this.postRepository.findOne({ where: { id }, relations: ['hashtags'] });
+      const post = await this.postRepository.findOne({
+        where: { id },
+        relations: ['hashtags'],
+      });
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
@@ -278,10 +281,13 @@ export class PostService {
         updateData.hashtags = hashtags;
       }
 
-      await this.postRepository.save({
-  ...post,
-  ...updateData
-}, { reload: true });
+      await this.postRepository.save(
+        {
+          ...post,
+          ...updateData,
+        },
+        { reload: true },
+      );
 
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
@@ -301,10 +307,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.06
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 삭제
-                                                                                    */
+                                                                                      ### 23.03.06
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 삭제
+                                                                                      */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id);
