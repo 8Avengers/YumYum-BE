@@ -43,7 +43,7 @@ export class PostService {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
         select: ['id', 'content', 'rating', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags', 'comments', 'image'],
+        relations: ['user', 'restaurant', 'hashtags', 'comments', 'images'],
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -69,9 +69,20 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const images = post.images
+          ? post.images.map((image) => ({
+              id: image.id,
+              name: image.file_name,
+            }))
+          : null;
         return {
-          ...post,
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
           user: { id, nickname, profile_image },
+          restaurant: post.restaurant,
+          images,
           hashtags,
           totalLikes: likes,
           isLiked,
@@ -122,9 +133,21 @@ export class PostService {
 
       const { id, nickname, profile_image } = post[0].user;
 
+      const images = post[0].images
+        ? post[0].images.map((image) => ({
+            id: image.id,
+            name: image.file_name,
+          }))
+        : null;
+
       return {
-        ...post[0],
+        id: post[0].id,
+        content: post[0].content,
+        rating: post[0].rating,
+        updated_at: post[0].updated_at,
         user: { id, nickname, profile_image },
+        restaurant: post[0].restaurant,
+        images,
         totalLikes,
         hashtags,
         isLiked,
@@ -372,7 +395,7 @@ export class PostService {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
         select: ['id', 'content', 'rating', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags'],
+        relations: ['user', 'restaurant', 'hashtags', 'images'],
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('작성하신 포스트가 없습니다.');
@@ -398,9 +421,20 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const images = post.images
+          ? post.images.map((image) => ({
+              id: image.id,
+              name: image.file_name,
+            }))
+          : null;
         return {
-          ...post,
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
           user: { id, nickname, profile_image },
+          restaurant: post.restaurant,
+          images,
           hashtags,
           totalLikes: likes,
           isLiked,
