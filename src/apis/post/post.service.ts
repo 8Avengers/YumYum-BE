@@ -296,10 +296,20 @@ export class PostService {
         updateData.visibility = visibility;
       }
       if (hashtagNames) {
-        const hashtags = await this.postHashtagService.createOrUpdateHashtags(
-          hashtagNames,
-        );
-        updateData.hashtags = hashtags;
+        const existingHashtags = post.hashtags.map((hashtag) => hashtag.name);
+        const newHashtags = (
+          await this.postHashtagService.createOrUpdateHashtags(hashtagNames)
+        ).map((hashtag) => hashtag.name);
+
+        // Check if new and existing hashtags are the same
+        if (
+          existingHashtags.sort().join(',') !== newHashtags.sort().join(',')
+        ) {
+          const hashtags = await this.postHashtagService.createOrUpdateHashtags(
+            hashtagNames,
+          );
+          updateData.hashtags = hashtags;
+        }
       }
 
       await this.postRepository.save(
