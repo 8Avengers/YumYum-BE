@@ -20,10 +20,10 @@ export class UploadController {
 
   //하나의 파일을 업로드
   @Post('upload')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('profileImage'))
   async uploadMediaFile(@UploadedFile() file: Express.Multer.File) {
     console.log(file);
-    return await this.uploadService.uploadFileToS3('cats', file);
+    return await this.uploadService.uploadFileToS3('profileImage', file);
   }
 
   //여러개의 파일을 업로드
@@ -33,8 +33,8 @@ export class UploadController {
     console.log(files);
   }
 
-  @Post('cats')
-  getImageUrl(@Body('key') key: string) {
-    return this.uploadService.getAwsS3FileUrl(key);
-  }
+  // @Post('cats')
+  // getImageUrl(@Body('key') key: string) {
+  //   return this.uploadService.getAwsS3FileUrl(key);
+  // }
 }

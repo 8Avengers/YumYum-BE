@@ -10,6 +10,8 @@ import {
   Delete,
   Put,
   BadRequestException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -18,6 +20,7 @@ import { User } from './entities/user.entity';
 import { DeleteUser, UpdateUserProfile } from './user.decorators';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UploadService } from '../upload/upload.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('유저프로필/팔로우/팔로잉')
 @Controller('/profile')
@@ -28,38 +31,39 @@ export class UserProfileController {
   ) {}
 
   //나의프로필 보기 얘는 항상 제일 위에 있어야 한다. 아니면 이상한 에러나온다.
-  @UseGuards(AuthAccessGuard)
   @Get('/me')
+  @UseGuards(AuthAccessGuard)
   async getMyProfile(@CurrentUser() user: User) {
     const myProfile = await this.userService.getUserById(user.id);
 
     return myProfile;
   }
 
-  //유저아이디로 유저프로필 불러오기
-  @Get('/:userId')
-  async getUserProfile(@Param('userId') userId: number) {
-    const user = await this.userService.getUserById(userId);
-    return user;
-  }
+  // //공식홈페이지
+  // @Post('upload')
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadFile(@UploadedFile() file: Express.Multer.File) {
+  //   console.log(file);
+  // }
 
   //유저프로필 수정하기
+  @Put('/me')
   @UpdateUserProfile()
   @UseGuards(AuthAccessGuard)
-  @Put('/me')
+  @UseInterceptors(FileInterceptor('file')) //포스트맨의 키값과 일치
   async updateMyProfile(
     @CurrentUser() user: any,
+    @UploadedFile() file: Express.Multer.File,
     @Body() UpdateUserProfileDto: UpdateUserProfileDto,
   ) {
-    try {
-      return await this.userService.updateUserProfile({
-        UpdateUserProfileDto,
-        user,
-      });
-    } catch (error) {
-      console.error(error);
-      throw new BadRequestException('Error updating profile');
-    }
+    console.log(file);
+    //포스트맨으로 하면, 사진 자체가 받아지지 않는다. 뭐가 문제일까?
+
+    return await this.userService.updateUserProfile({
+      user,
+      UpdateUserProfileDto,
+      file,
+    });
   }
 
   //유저 탈퇴하기(소프트딜리트)
@@ -73,6 +77,13 @@ export class UserProfileController {
       console.error(error);
       throw new BadRequestException(error.message);
     }
+  }
+
+  //유저아이디로 유저프로필 불러오기
+  @Get('/:userId')
+  async getUserProfile(@Param('userId') userId: number) {
+    const user = await this.userService.getUserById(userId);
+    return user;
   }
 
   //유저팔로우하기

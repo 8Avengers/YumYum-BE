@@ -22,13 +22,13 @@ export class UpdateUserProfileDto {
   introduce?: string;
 
   @ApiProperty({
-    example: 'profiel_image',
+    example: 'profielImage',
     description: '프로필이미지',
   })
-  @IsString()
+  // @IsString()
   profileImage: string;
-}
 
-// @ApiProperty({ example: 'img', description: '프로필 이미지', required: true })
-// @IsString()
-// profileImage: string = 'img';
+  // @ApiProperty({ example: 'img', description: '프로필 이미지', required: true })
+  // @IsString()
+  // profileImage: string = 'img';
+}

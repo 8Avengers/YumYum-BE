@@ -67,11 +67,7 @@ export class UserProfileService {
   }
 
   //유저프로필 수정하기
-  async updateUserProfile({
-    UpdateUserProfileDto,
-    user,
-    //file
-  }) {
+  async updateUserProfile({ UpdateUserProfileDto, user, file }) {
     const existUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
@@ -79,9 +75,9 @@ export class UserProfileService {
     if (existUser) {
       existUser.nickname = UpdateUserProfileDto.nickname;
       existUser.introduce = UpdateUserProfileDto.introduce;
-      // file
-      //   ? (existUser.profileImage = file.location)
-      //   : (existUser.profileImage = existUser.profileImage);
+      file
+        ? (existUser.profile_image = file.location)
+        : (existUser.profile_image = existUser.profile_image);
       await this.userRepository.save(existUser);
       return existUser;
     }
