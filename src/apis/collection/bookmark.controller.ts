@@ -159,7 +159,7 @@ export class BookmarkController {
   /*
         ### 23.03.13
         ### 표정훈
-        ### 컬렉션에 맛집 빼기
+        ### 컬렉션에 맛집 빼기🔥
         */
   @Delete('/collections/minus/restaurant/:restaurantId')
   @ApiOperation({ summary: '북마크 맛집 삭제' })
