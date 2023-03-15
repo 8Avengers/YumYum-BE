@@ -18,9 +18,9 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { User } from './entities/user.entity';
 import { DeleteUser, UpdateUserProfile } from './user.decorators';
-import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { UploadService } from '../upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 
 @ApiTags('유저프로필/팔로우/팔로잉')
 @Controller('/profile')
@@ -35,33 +35,32 @@ export class UserProfileController {
   @UseGuards(AuthAccessGuard)
   async getMyProfile(@CurrentUser() user: User) {
     const myProfile = await this.userService.getUserById(user.id);
+    console.log(myProfile);
 
-    return myProfile;
+    return {
+      id: myProfile.id,
+      nickname: myProfile.nickname,
+      introduce: myProfile.introduce,
+      profileImage: myProfile.profile_image,
+    };
   }
-
-  // //공식홈페이지
-  // @Post('upload')
-  // @UseInterceptors(FileInterceptor('file'))
-  // uploadFile(@UploadedFile() file: Express.Multer.File) {
-  //   console.log(file);
-  // }
 
   //유저프로필 수정하기
   @Put('/me')
   @UpdateUserProfile()
   @UseGuards(AuthAccessGuard)
-  @UseInterceptors(FileInterceptor('file')) //포스트맨의 키값과 일치
+  @UseInterceptors(FileInterceptor('file'))
   async updateMyProfile(
     @CurrentUser() user: any,
-    @UploadedFile() file: Express.MulterS3.File,
-    @Body() UpdateUserProfileDto: UpdateUserProfileDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Body(ValidationPipe) updateUserProfileDto: UpdateUserProfileDto,
   ) {
-    console.log(file);
+    console.log('포스맨통과하면여기찍힌다.file::::::', file);
     //포스트맨으로 하면, 사진 자체가 받아지지 않는다. 뭐가 문제일까?
 
     const updatedUserProfile = await this.userService.updateUserProfile({
       user,
-      UpdateUserProfileDto,
+      updateUserProfileDto,
       file,
     });
 
@@ -134,7 +133,7 @@ export class UserProfileController {
 
   //유저의 팔로잉 불러오기
   @Get('/:userId/followings')
-  async getFollowingsOfUser(@Param('userid') userId: number): Promise<User[]> {
+  async getFollowingsOfUser(@Param('userId') userId: number): Promise<User[]> {
     return this.userService.getFollowings(userId);
   }
 }
