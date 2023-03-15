@@ -43,14 +43,14 @@ export class UploadService {
         .toBuffer()
         .catch((error) => {
           console.error(error);
-          throw new BadRequestException(`Resizing image failed: ${error}`);
+          throw new BadRequestException(
+            `이미지 리사이징을 올바르게 다시 해주세요. : ${error}`,
+          );
         });
 
       const key = `${folder}/${Date.now()}_${path.basename(
         file.originalname,
       )}`.replace(/ /g, '');
-
-      console.log('DB에 저장될 때 필요한 key값:', key);
 
       const s3Object = await this.awsS3
         .putObject({
@@ -67,7 +67,9 @@ export class UploadService {
 
       return { key, s3Object, contentType: file.mimetype, postImage };
     } catch (error) {
-      throw new BadRequestException(`File upload failed : ${error}`);
+      throw new BadRequestException(
+        `파일 업로드를 올바르게 다시 해주세요. : ${error}`,
+      );
     }
   }
 
@@ -94,7 +96,9 @@ export class UploadService {
         .toBuffer()
         .catch((error) => {
           console.error(error);
-          throw new BadRequestException(`Resizing image failed: ${error}`);
+          throw new BadRequestException(
+            `이미지 리사이징을 다시 해주세요.: ${error}`,
+          );
         });
 
       // const filePath = `${Date.now()}_${path.basename(
@@ -106,8 +110,6 @@ export class UploadService {
       const key = `${folder}/${Date.now()}_${path.basename(
         file.originalname,
       )}`.replace(/ /g, '');
-
-      console.log('DB에 저장될 때 필요한 key값:', key);
 
       const s3Object = await this.awsS3
         .putObject({
@@ -124,7 +126,9 @@ export class UploadService {
 
       return { key, s3Object, contentType: file.mimetype, profileImage };
     } catch (error) {
-      throw new BadRequestException(`File upload failed : ${error}`);
+      throw new BadRequestException(
+        `파일 올바르게 업로드를 다시 해주세요. : ${error}`,
+      );
     }
   }
 
@@ -144,7 +148,7 @@ export class UploadService {
         .promise();
       return { success: true };
     } catch (error) {
-      throw new BadRequestException(`Failed to delete file : ${error}`);
+      throw new BadRequestException(`파일을 올바르게 삭제해주세요. : ${error}`);
     }
   }
 
