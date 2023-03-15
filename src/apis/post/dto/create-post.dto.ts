@@ -11,9 +11,9 @@ export class CreatePostDto {
   @IsNumber()
   readonly rating: number;
 
-  @IsArray()
-  @IsString({ each: true })
-  readonly image: string[];
+  // @IsArray()
+  // @IsString({ each: true })
+  // readonly image: string[];
 
   readonly visibility: 'public' | 'private';
 

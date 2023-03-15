@@ -1,4 +1,7 @@
+import { UploadService } from './../upload/upload.service';
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -7,7 +10,6 @@ import {
 import { Repository } from 'typeorm'; //데이터들어갈떄
 import { InjectRepository } from '@nestjs/typeorm'; //데이터들어갈떄
 import { User } from './entities/user.entity'; //데이터들어갈떄
-import { Collection } from '../collection/entities/collection.entity';
 import { Follow } from './entities/follow.entity';
 
 @Injectable()
@@ -19,8 +21,7 @@ export class UserProfileService {
     @InjectRepository(Follow)
     private FollowRepository: Repository<Follow>,
 
-    @InjectRepository(Collection)
-    private readonly collectionRepository: Repository<Collection>,
+    private readonly uploadService: UploadService,
   ) {}
 
   //유저이메일로 찾기
@@ -67,24 +68,47 @@ export class UserProfileService {
   }
 
   //유저프로필 수정하기
-  async updateUserProfile({ UpdateUserProfileDto, user, file }) {
+  async updateUserProfile({ updateUserProfileDto, user, file }) {
     const existUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
-
-    console.log(existUser);
+    if (!existUser) {
+      throw new HttpException(
+        '존재하지 않는 유저입니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     if (existUser) {
-      existUser.nickname = UpdateUserProfileDto.nickname;
-      existUser.introduce = UpdateUserProfileDto.introduce;
-      file
-        ? (existUser.profile_image = file.location)
-        : (existUser.profile_image = existUser.profile_image);
+      existUser.nickname = updateUserProfileDto.nickname;
+      existUser.introduce = updateUserProfileDto.introduce;
+      if (file) {
+        const uploadedFile = await this.uploadService.uploadProfileImageToS3(
+          'yumyumdb-profile', //AmazonS3의 저장되는 폴더명
+          file,
+        );
+
+        console.log(
+          'uploadProfileImageToS3의 리턴값 uploadedFile',
+          uploadedFile,
+        );
+
+        console.log('existUser::::', existUser);
+
+        existUser.profile_image = uploadedFile.profileImage; //이미지를 업로드 하셔서 업데이트
+      } else {
+        existUser.profile_image = existUser.profile_image; //이미지를 업로드하지 않으셔서 노 업데이트
+      }
+
       const updatedUserProfile = await this.userRepository.save(existUser);
+      console.log('업데이트완료후!updatedUserProfile::', updatedUserProfile);
 
-      console.log(updatedUserProfile);
-
-      return updatedUserProfile;
+      return {
+        id: updatedUserProfile.id,
+        nickname: updatedUserProfile.nickname,
+        introduce: updatedUserProfile.introduce,
+        profile_image: updatedUserProfile.profile_image,
+      };
     }
   }
 
@@ -100,6 +124,49 @@ export class UserProfileService {
     const result = await this.userRepository.softDelete({ id: user.id });
     console.log(result);
     return result.affected ? true : false;
+  }
+
+  // 팔로우 상태 확인하기
+  async checkUserFollowRelation(
+    followerId: number,
+    followingId: number,
+  ): Promise<boolean> {
+    const follow = await this.FollowRepository.findOne({
+      where: { follower: { id: followerId }, following: { id: followingId } },
+    });
+    return !!follow;
+  }
+
+  // 현재 팔로우 관계에 따라 팔로우 언팔로우 실행하기
+
+  async followUser(follower: User, followingId: number): Promise<User> {
+    const followingUser = await this.getUserById(followingId);
+
+    if (!followingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existingFollow = await this.getFollowByFollowerAndFollowingIds(
+      follower.id,
+      followingId,
+    );
+
+    if (existingFollow) {
+      await this.deleteUserFollowRelation(follower, followingId);
+      return followingUser;
+    } else {
+      await this.createUserFollowRelation(follower, followingId);
+      return followingUser;
+    }
+  }
+
+  async getFollowByFollowerAndFollowingIds(
+    followerId: number,
+    followingId: number,
+  ): Promise<Follow> {
+    return await this.FollowRepository.findOne({
+      where: { follower: { id: followerId }, following: { id: followingId } },
+    });
   }
 
   //팔로우하기
@@ -183,14 +250,22 @@ export class UserProfileService {
     }
   }
 
-  //팔로워조회하기
-  async getFollowers(userId: number): Promise<User[]> {
+  //유저의 팔로워 조회하기
+  async getFollowers(
+    userId: number,
+  ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     try {
       const follows = await this.FollowRepository.find({
         where: { following: { id: userId } },
         relations: ['follower'],
       });
-      return follows.map((follow) => follow.follower);
+      const result = follows.map((follow) => ({
+        id: follow.follower.id,
+        nickname: follow.follower.nickname,
+        profile_image: follow.follower.profile_image,
+      }));
+
+      return result;
     } catch (error) {
       console.error(error);
       throw new Error(
@@ -199,14 +274,22 @@ export class UserProfileService {
     }
   }
 
-  //팔로잉조회하기
-  async getFollowings(userId: number): Promise<User[]> {
+  //유저의 팔로잉 조회하기
+  async getFollowings(
+    userId: number,
+  ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     try {
       const follows = await this.FollowRepository.find({
         where: { follower: { id: userId } },
         relations: ['following'],
       });
-      return follows.map((follow) => follow.following);
+      const result = follows.map((follow) => ({
+        id: follow.following.id,
+        nickname: follow.following.nickname,
+        profile_image: follow.following.profile_image,
+      }));
+
+      return result;
     } catch (error) {
       console.error(error);
       throw new Error(

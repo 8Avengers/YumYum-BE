@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsNumberString,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserProfileDto {
   @ApiProperty({
@@ -13,31 +7,30 @@ export class UpdateUserProfileDto {
     description: 'nickanme',
     required: true,
   })
-  @IsOptional({ message: '닉네임을 최소2자 최대 10글자를 입력해주세요.' })
   @IsString({ message: '닉네임은 문자열로 입력해주세요.' })
   @MinLength(2, { message: '닉네임은 최소 2글자 입니다.' })
   @MaxLength(10, { message: '닉네임은 최대 10글자 입니다.' })
-  nickname?: string;
+  nickname: string;
 
+  //TODO: 자기소개글 최대 몇자로해야할까?
   @ApiProperty({
     example: '이것은 나의 소개를 입력하는 곳입니다.',
     description: '소개',
   })
   @IsOptional()
   @IsString({ message: '소개는 문자열로 입력해주세요.' })
+  @MaxLength(100, {
+    message: '자기소개는 최대 100글자까지 입력할 수 있습니다.',
+  })
   introduce?: string;
 
+  //TODO: 미 입력시 기본이미지로 업로드되도록 할 수 있을까?
   @ApiProperty({
-    example: 'profielImage',
-    description: '프로필이미지',
+    example: 'profileImage',
+    description: 'Profile Image',
+    // required: true,
   })
-  // @IsNumberString()
-  // profileImage: string;
-  @ApiProperty({
-    example: 'file',
-    description: '프로필 이미지',
-    required: true,
-  })
-  @IsString()
-  profileImage: string = 'file';
+  @IsString({ message: 'Profile Image must be a string.' })
+  @IsOptional()
+  profileImage?: string;
 }

@@ -5,6 +5,7 @@ import {
   ApiBearerAuth,
   ApiOAuth2,
 } from '@nestjs/swagger';
+import { UpdateUserProfileResponseDto } from './dto/update-user-response.dto';
 import { UserDto } from './dto/user.dto';
 
 //TODO: 카카오 회원가입시 로그인 시 request 어떻게 할까?
@@ -30,7 +31,11 @@ export const signUpEmail = () => {
 export const UpdateUserProfile = () => {
   return applyDecorators(
     ApiOperation({ summary: '유저 프로필 정보 수정' }),
-    ApiResponse({ status: 200, description: '유저 프로필 정보 수정 성공' }),
+    ApiResponse({
+      status: 200,
+      description: '유저 프로필 정보 수정 성공',
+      type: UpdateUserProfileResponseDto,
+    }),
     ApiResponse({ status: 400, description: '유저 프로필 정보 수정 실패' }),
   );
 };
