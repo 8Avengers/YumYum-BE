@@ -96,9 +96,9 @@ export class PostController {
       data.myListId,
       data.content,
       data.rating,
-      data.image,
       data.visibility,
       data.hashtagNames,
+      files,
       // data.userNames,
     );
   }
@@ -144,9 +144,9 @@ export class PostController {
       data.myListId,
       data.content,
       data.rating,
-      data.image,
       data.visibility,
       data.hashtagNames,
+      files,
     );
   }
 
