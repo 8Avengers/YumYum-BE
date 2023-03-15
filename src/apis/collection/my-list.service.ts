@@ -73,7 +73,7 @@ export class MyListService {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 상세 더보기(동일한 포스트 불러오기)
+    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
 
   /* 로직 설명
@@ -85,33 +85,41 @@ export class MyListService {
     */
   async getMyListsDetailPost(
     userId: number,
+    restaurantId: number,
     collectionId: number,
     postId: number,
   ) {
     try {
-      const myLists = await this.collectionRepository.find({
-        relations: {
-          collectionItems: {
-            post: true,
-          },
-        },
-        where: {
-          user_id: userId,
-          deletedAt: null,
-          type: 'myList',
-          id: collectionId,
-        },
-        select: { name: true, description: true, image: true },
+      const existRestaurant = await this.collectionItemRepository.find({
+        where: { id: restaurantId },
       });
+      console.log(existRestaurant);
+      return existRestaurant;
 
-      const collectedPosts = [];
-      for (let i = 0; i < myLists.length; i++) {
-        if (postId == myLists[0].collectionItems[i].post.id) {
-          collectedPosts.push(myLists[0].collectionItems[i].post);
-        }
-      }
+      // const myLists = await this.collectionRepository.find({
+      //   relations: {
+      //     collectionItems: {
+      //       post: true,
+      //       restaurant: true,
+      //     },
+      //   },
+      //   where: {
+      //     id: collectionId,
+      //     user_id: userId,
+      //     deletedAt: null,
+      //     type: 'myList',
+      //   },
+      //   select: { name: true, description: true, image: true },
+      // });
 
-      return myLists;
+      // const collectedPosts = [];
+      // for (let i = 0; i < myLists.length; i++) {
+      //   if (postId == myLists[0].collectionItems[i].post.id) {
+      //     collectedPosts.push(myLists[0].collectionItems[i].post);
+      //   }
+      // }
+
+      // return myLists;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(

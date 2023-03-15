@@ -15,6 +15,7 @@ import { MyListService } from './my-list.service';
 import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { DetailMylistDto } from './dto/my-list.detail.dto';
 
 @Controller('my-list')
 export class MyListController {
@@ -44,22 +45,23 @@ export class MyListController {
   /*
     ### 23.03.15
     ### 표정훈
-    ### MyList 상세 더보기(동일한 포스트 불러오기)
+    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
-  @Get('/collections/posts/:collectionId/:postId')
+  @Get('/collections/posts/:rastaurantId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
   async getMyListsDetailPost(
-    @Param('collectionId') collectionId: number,
-    @Param('postId') postId: number,
+    @Param('restaurantId') restaurantId: number,
+    @Body() data: DetailMylistDto,
     @CurrentUser() currentUser: any,
   ) {
     const myLists = await this.myListService.getMyListsDetailPost(
       currentUser.id,
-      collectionId,
-      postId,
+      restaurantId,
+      data.collectionId,
+      data.postId,
     );
     return await myLists;
   }
