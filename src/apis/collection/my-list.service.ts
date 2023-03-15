@@ -19,6 +19,7 @@ export class MyListService {
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
   ) {}
+
   /*
     ### 23.03.14
     ### 표정훈
@@ -42,6 +43,73 @@ export class MyListService {
         },
         select: { name: true, description: true, image: true },
       });
+
+      // post가 null일 경우 rating 대신 null 값을 반환
+      const myListsDetail = myLists.map((list) => ({
+        name: list.name,
+        description: list.description,
+        image: list.image,
+        collectionItems: list.collectionItems.map((item) => ({
+          id: item.id,
+          post: {
+            id: item.post?.id ?? null,
+            rating: item.post?.rating ?? null,
+          },
+          restaurant: {
+            id: item.restaurant?.id ?? null,
+            place_name: item.restaurant?.place_name ?? null,
+          },
+        })),
+      }));
+      console.log(myListsDetail);
+      return myListsDetail;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+  /*
+    ### 23.03.10
+    ### 표정훈
+    ### MyList 상세 더보기(동일한 포스트 불러오기)
+    */
+
+  /* 로직 설명
+      1. 맛집상세리스트 PAGE2에 있는 맛집을 클릭한다. (레스토랑ID)
+      2. 레스토랑ID에 담긴 해당 유저의 포스팅ID 를 가져온다.
+      3. 레스토랑의 정보와 게시물 정보를 가져온다
+      레스토랑 정보: 가게이름, 업종(카페), 주소
+      포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등 
+    */
+  async getMyListsDetailPost(
+    userId: number,
+    collectionId: number,
+    postId: number,
+  ) {
+    try {
+      const myLists = await this.collectionRepository.find({
+        relations: {
+          collectionItems: {
+            post: true,
+          },
+        },
+        where: {
+          user_id: userId,
+          deletedAt: null,
+          type: 'myList',
+          id: collectionId,
+        },
+        select: { name: true, description: true, image: true },
+      });
+
+      const collectedPosts = [];
+      for (let i = 0; i < myLists.length; i++) {
+        if (postId == myLists[0].collectionItems[i].post.id) {
+          collectedPosts.push(myLists[0].collectionItems[i].post);
+        }
+      }
 
       return myLists;
     } catch (err) {
@@ -239,21 +307,23 @@ export class MyListService {
     ### 표정훈
     ### MyList 포스팅 추가
     */
-  // 같은 컬렉션 안에 동일한 포스트는 안들어감!
+
   async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
       for (let i = 0; i < collectionId.length; i++) {
         const item = collectionId[i];
-        const existingItem = await this.collectionItemRepository.findOne({
-          where: {
-            post: { id: postId },
-            collection: { id: item },
-          },
-        });
 
-        if (existingItem) {
-          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
-        }
+        // // 같은 컬렉션 안에 동일한 포스트는 안들어가는 기능 => 폐기(중복되야함)
+        // const existingItem = await this.collectionItemRepository.findOne({
+        //   where: {
+        //     post: { id: postId },
+        //     collection: { id: item },
+        //   },
+        // });
+
+        // if (existingItem) {
+        //   continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
+        // }
 
         const collectionItem = this.collectionItemRepository.create({
           post: { id: postId },
@@ -302,30 +372,47 @@ export class MyListService {
       }
     }
   }
+
+  /*
+    ### 23.03.15
+    ### 표정훈
+    ### MyList 포스팅 업데이트(미구현)
+    */
+
+  //put이라면 collection 아이디값만 변경하는것 될듯함
+  // 컬렉션 해제한 것은 삭제.....는 어떻게 하지?
+
+  async myListUpdatePosting(postId: number, collectionId: number[]) {
+    try {
+      for (let i = 0; i < collectionId.length; i++) {
+        const item = collectionId[i];
+        const existingItem = await this.collectionItemRepository.findOne({
+          where: {
+            post: { id: postId },
+            collection: { id: item },
+          },
+        });
+        //중복된 값이 있다면 안들어감 => 이기능은 필요한가? 중복값 받아야겠지?
+        if (existingItem) {
+          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
+        }
+
+        //이부분을 업데이트로 해서 컬렉션 값만 바꾸면 될듯?
+        const collectionItem = this.collectionItemRepository.create({
+          post: { id: postId },
+          collection: { id: item },
+        });
+        await this.collectionItemRepository.save(collectionItem);
+      }
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 }
-
-// async 데이터찾기(userId: number) {
-//   try {
-
-// const myLists = await this.collectionRepository.find({
-//   relations: {
-//     collectionItems: {
-//       post: true,
-//     },
-//     user: true,
-//   },
-//   where: {
-//     user: {
-//       id: userId,
-//     },
-//   },
-// });
-
-// return myLists;
-//   } catch (err) {
-//     console.log(err);
-//     throw new InternalServerErrorException(
-//       'Something went wrong while processing your request. Please try again later.',
-//     );
-//   }
-// }
