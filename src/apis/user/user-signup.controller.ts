@@ -11,20 +11,26 @@ export class UserSignupController {
 
   @Post('/signup')
   async signUp(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    const { email, password, nickname, name, gender, birth, phoneNumber } =
-      createUserDto;
-    console.log(createUserDto);
+    try {
+      const { email, password, nickname, name, gender, birth, phoneNumber } =
+        createUserDto;
+      console.log(createUserDto);
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = await bcrypt.hash(password, 12);
 
-    return this.userSignupService.createUser({
-      email,
-      hashedPassword,
-      nickname,
-      name,
-      gender,
-      birth,
-      phoneNumber,
-    });
+      const response = await this.userSignupService.createUser({
+        email,
+        hashedPassword,
+        nickname,
+        name,
+        gender,
+        birth,
+        phoneNumber,
+      });
+
+      return { message: '회원가입이 성공했습니다.' };
+    } catch (error) {
+      return { error: error.message };
+    }
   }
 }
