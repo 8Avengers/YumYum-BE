@@ -16,7 +16,7 @@ export class Image {
   id: number;
 
   @Column()
-  file_name: string;
+  file_url: string;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;

@@ -8,6 +8,8 @@ import {
   Put,
   Patch,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 
 import { PostService } from './post.service';
@@ -16,6 +18,7 @@ import { UpdatePostDto } from './dto/update-post.dto';
 import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 export class PostController {
@@ -59,7 +62,9 @@ export class PostController {
               */
   @Post()
   @UseGuards(AuthAccessGuard)
+  @UseInterceptors(FilesInterceptor('files'))
   createPost(
+    @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() data: CreatePostDto,
     @Body()
     {
@@ -105,7 +110,9 @@ export class PostController {
               */
   @Patch('/:postId')
   @UseGuards(AuthAccessGuard)
+  @UseInterceptors(FilesInterceptor('files'))
   async updateArticle(
+    @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('postId') postId: number,
     @Body() data: Partial<UpdatePostDto>,
     @Body()
