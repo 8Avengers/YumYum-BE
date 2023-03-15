@@ -33,9 +33,6 @@ export class Post {
   @Column()
   rating: number;
 
-  @Column()
-  img_url: string;
-
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 

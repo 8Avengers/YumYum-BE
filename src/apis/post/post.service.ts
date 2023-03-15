@@ -16,7 +16,7 @@ import { MyListService } from '../collection/my-list.service';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { UserInterface } from '../../interfaces/user';
-import { Image } from './entities/image.entity';
+import { ImageRepository } from './image.repository';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -25,7 +25,7 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
-    @InjectRepository(Image) private imageRepository: Repository<Image>,
+    private imageRepository: ImageRepository,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
@@ -42,8 +42,9 @@ export class PostService {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
-        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags', 'comments'],
+        select: ['id', 'content', 'rating', 'updated_at'],
+        relations: ['user', 'restaurant', 'hashtags', 'comments', 'images'],
+        order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -69,9 +70,20 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const images = post.images
+          ? post.images.map((image) => ({
+              id: image.id,
+              name: image.file_name,
+            }))
+          : null;
         return {
-          ...post,
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
           user: { id, nickname, profile_image },
+          restaurant: post.restaurant,
+          images,
           hashtags,
           totalLikes: likes,
           isLiked,
@@ -99,8 +111,8 @@ export class PostService {
     try {
       const post = await this.postRepository.find({
         where: { id: postId, deleted_at: null, visibility: 'public' },
-        select: ['content', 'rating', 'img_url', 'updated_at'],
-        relations: ['restaurant', 'user', 'hashtags'],
+        select: ['content', 'rating', 'updated_at'],
+        relations: ['restaurant', 'user', 'hashtags', 'images'],
       });
 
       if (!post) {
@@ -122,9 +134,21 @@ export class PostService {
 
       const { id, nickname, profile_image } = post[0].user;
 
+      const images = post[0].images
+        ? post[0].images.map((image) => ({
+            id: image.id,
+            name: image.file_name,
+          }))
+        : null;
+
       return {
-        ...post[0],
+        id: post[0].id,
+        content: post[0].content,
+        rating: post[0].rating,
+        updated_at: post[0].updated_at,
         user: { id, nickname, profile_image },
+        restaurant: post[0].restaurant,
+        images,
         totalLikes,
         hashtags,
         isLiked,
@@ -201,10 +225,10 @@ export class PostService {
 
       const postId = post.id;
 
-      for (const imageUrl of img) {
+      for (const imageName of img) {
         const image = await this.imageRepository.create({
           post: { id: postId },
-          file_name: imageUrl,
+          file_name: imageName,
         });
         await this.imageRepository.save(image);
       }
@@ -244,14 +268,14 @@ export class PostService {
     myListId: number[],
     content: string,
     rating: number,
-    image: string[],
+    images: string[],
     visibility,
     hashtagNames: string[],
   ) {
     try {
       const post = await this.postRepository.findOne({
         where: { id },
-        relations: ['hashtags'],
+        relations: ['hashtags', 'images'],
       });
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
@@ -282,17 +306,7 @@ export class PostService {
       if (rating) {
         updateData.rating = rating;
       }
-      if (image && image.length > 0) {
-        const images = [];
-        for (const imageUrl of image) {
-          const image = await this.imageRepository.create({
-            file_name: imageUrl,
-            post: { id },
-          });
-          images.push(image);
-        }
-        updateData.images = images;
-      }
+
       if (visibility) {
         updateData.visibility = visibility;
       }
@@ -302,7 +316,6 @@ export class PostService {
           await this.postHashtagService.createOrUpdateHashtags(hashtagNames)
         ).map((hashtag) => hashtag.name);
 
-        // Check if new and existing hashtags are the same
         if (
           existingHashtags.sort().join(',') !== newHashtags.sort().join(',')
         ) {
@@ -321,6 +334,8 @@ export class PostService {
         { reload: true },
       );
 
+      await this.imageRepository.updatePostImages(post, images);
+
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
       }
@@ -328,6 +343,7 @@ export class PostService {
       return { postId: id };
     } catch (err) {
       if (err instanceof NotFoundException) {
+        console.error(err);
         throw err;
       } else {
         console.error(err);
@@ -361,15 +377,22 @@ export class PostService {
     }
   }
 
-  async getMyPosts(userId: number) {
+  /*
+                                                                                      ### 23.03.14
+                                                                                      ### 장승윤
+                                                                                      ### 내 포스트만 불러오기
+                                                                                      */
+
+  async getPostsByUserId(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
-        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags'],
+        select: ['id', 'content', 'rating', 'updated_at'],
+        relations: ['user', 'restaurant', 'hashtags', 'images'],
+        order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
-        throw new NotFoundException('No posts found.');
+        throw new NotFoundException('작성하신 포스트가 없습니다.');
       }
       const postIds = posts.map((post) => post.id);
 
@@ -381,13 +404,36 @@ export class PostService {
       );
 
       return posts.map((post) => {
+        const user: UserInterface | undefined = post.user;
+        const id = user?.id || null;
+        const nickname = user?.nickname || null;
+        const profile_image = user?.profile_image || null;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
         const isLiked =
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
-        return { ...post, hashtags, totalLikes: likes, isLiked };
+        const totalComments = post.comments ? post.comments.length : 0;
+        const images = post.images
+          ? post.images.map((image) => ({
+              id: image.id,
+              name: image.file_name,
+            }))
+          : null;
+        return {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: { id, nickname, profile_image },
+          restaurant: post.restaurant,
+          images,
+          hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+        };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {
