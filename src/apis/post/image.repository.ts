@@ -12,7 +12,7 @@ export class ImageRepository extends Repository<Image> {
   async updatePostImages(post: Post, imagesData: string[]) {
     try {
       const imagesToDelete = post.images.filter(
-        (image) => !imagesData.includes(image.file_name),
+        (image) => !imagesData.includes(image.file_url),
       );
 
       if (imagesToDelete.length > 0) {
@@ -23,10 +23,10 @@ export class ImageRepository extends Repository<Image> {
         .filter(
           (image) =>
             !post.images.some(
-              (existingImage) => existingImage.file_name === image,
+              (existingImage) => existingImage.file_url === image,
             ),
         )
-        .map((image) => ({ file_name: image, post }));
+        .map((image) => ({ file_url: image, post }));
 
       await this.save(newImages);
 

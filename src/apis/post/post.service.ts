@@ -42,7 +42,21 @@ export class PostService {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
-        select: ['id', 'content', 'rating', 'updated_at'],
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          restaurant: {
+            id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+        },
         relations: ['user', 'restaurant', 'hashtags', 'comments', 'images'],
         order: { created_at: 'desc' },
       });
@@ -59,10 +73,6 @@ export class PostService {
       );
 
       return posts.map((post) => {
-        const user: UserInterface | undefined = post.user;
-        const id = user?.id || null;
-        const nickname = user?.nickname || null;
-        const profile_image = user?.profile_image || null;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
@@ -70,20 +80,14 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const images = post.images
-          ? post.images.map((image) => ({
-              id: image.id,
-              name: image.file_name,
-            }))
-          : null;
         return {
           id: post.id,
           content: post.content,
           rating: post.rating,
           updated_at: post.updated_at,
-          user: { id, nickname, profile_image },
+          user: post.user,
           restaurant: post.restaurant,
-          images,
+          images: post.images,
           hashtags,
           totalLikes: likes,
           isLiked,
@@ -111,7 +115,21 @@ export class PostService {
     try {
       const post = await this.postRepository.find({
         where: { id: postId, deleted_at: null, visibility: 'public' },
-        select: ['content', 'rating', 'updated_at'],
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          restaurant: {
+            id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+        },
         relations: ['restaurant', 'user', 'hashtags', 'images'],
       });
 
@@ -132,23 +150,14 @@ export class PostService {
         where: { deleted_at: null, post: { id: postId } },
       });
 
-      const { id, nickname, profile_image } = post[0].user;
-
-      const images = post[0].images
-        ? post[0].images.map((image) => ({
-            id: image.id,
-            name: image.file_name,
-          }))
-        : null;
-
       return {
         id: post[0].id,
         content: post[0].content,
         rating: post[0].rating,
         updated_at: post[0].updated_at,
-        user: { id, nickname, profile_image },
+        user: post[0].user,
         restaurant: post[0].restaurant,
-        images,
+        images: post[0].images,
         totalLikes,
         hashtags,
         isLiked,
@@ -225,10 +234,10 @@ export class PostService {
 
       const postId = post.id;
 
-      for (const imageName of img) {
+      for (const imageUrl of img) {
         const image = await this.imageRepository.create({
           post: { id: postId },
-          file_name: imageName,
+          file_url: imageUrl,
         });
         await this.imageRepository.save(image);
       }
@@ -378,8 +387,8 @@ export class PostService {
   }
 
   /*
-                                                                                      ### 23.03.14
-                                                                                      ### 장승윤
+                                                                                      ### 23.03.15
+                                                                                      ### 장승윤, 이드보라
                                                                                       ### 내 포스트만 불러오기
                                                                                       */
 
@@ -387,7 +396,21 @@ export class PostService {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
-        select: ['id', 'content', 'rating', 'updated_at'],
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          restaurant: {
+            id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+        },
         relations: ['user', 'restaurant', 'hashtags', 'images'],
         order: { created_at: 'desc' },
       });
@@ -404,10 +427,6 @@ export class PostService {
       );
 
       return posts.map((post) => {
-        const user: UserInterface | undefined = post.user;
-        const id = user?.id || null;
-        const nickname = user?.nickname || null;
-        const profile_image = user?.profile_image || null;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
@@ -415,20 +434,14 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const images = post.images
-          ? post.images.map((image) => ({
-              id: image.id,
-              name: image.file_name,
-            }))
-          : null;
         return {
           id: post.id,
           content: post.content,
           rating: post.rating,
           updated_at: post.updated_at,
-          user: { id, nickname, profile_image },
+          user: post.user,
           restaurant: post.restaurant,
-          images,
+          images: post.images,
           hashtags,
           totalLikes: likes,
           isLiked,
