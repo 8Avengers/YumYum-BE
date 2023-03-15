@@ -12,28 +12,33 @@ export class MapService {
   ) {}
 
   async getFollowerPosting(userId: number) {
-    let followerPostingResult = [];
-    let followerList = await this.followRepository.findBy({
+    const followerList = await this.followRepository.findBy({
       follower: { id: userId },
     });
-
-    for (let follower of followerList) {
-      const followerPost = await this.postRepository.find({
-        relations: ['restaurant'],
-        where: { user: { id: follower.id } },
-      });
-      console.log(follower.id, '여기 시작1', followerPost, '여기 끝');
-      if (followerPost.length < 1) {
-        continue;
-      }
-
-      followerPostingResult.push(...followerPost);
-    }
-    // followerPostingResult = followerList.map(function (follower) {
-    //   this.postRepository.findBy({
-    //     userId: follower.id,
+    // for (let follower of followerList) {
+    //   const followerPost = await this.postRepository.find({
+    //     relations: ['restaurant'],
+    //     where: { user: { id: follower.id } },
     //   });
-    // });
-    return followerPostingResult;
+    //   followerPostingResult.push(...followerPost);
+    // }
+
+    // map 메소드는 await이 작동을 안해서 Promise를 리턴을 하기 때문에 비동기로 작동하지 않는다.
+    return await Promise.all(
+      followerList.map(async (follower) => {
+        let followerPost = await this.postRepository.find({
+          relations: ['restaurant'],
+          where: { user: { id: follower.id } },
+        });
+        return followerPost;
+      }),
+    );
+  }
+
+  async getMyPosting(userId: number) {
+    return await this.postRepository.find({
+      relations: ['restaurant'],
+      where: { user: { id: userId } },
+    });
   }
 }
