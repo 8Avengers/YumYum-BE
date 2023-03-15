@@ -87,13 +87,29 @@ export class MyListService {
     userId: number,
     restaurantId: number,
     collectionId: number,
-    postId: number,
   ) {
     try {
+      //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
       const existRestaurant = await this.collectionItemRepository.find({
-        where: { id: restaurantId },
+        where: {
+          restaurant: { id: restaurantId },
+          collection: { id: collectionId },
+        },
+        select: {
+          restaurant: {
+            id: true,
+            category_group_name: true,
+            road_address_name: true,
+            place_name: true,
+          },
+          post: {
+            content: true,
+            rating: true,
+          },
+        },
+        relations: ['restaurant', 'post'],
       });
-      console.log(existRestaurant);
+
       return existRestaurant;
 
       // const myLists = await this.collectionRepository.find({

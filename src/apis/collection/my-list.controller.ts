@@ -47,7 +47,7 @@ export class MyListController {
     ### 표정훈
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
-  @Get('/collections/posts/:rastaurantId')
+  @Get('/collections/posts/:restaurantId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
@@ -61,7 +61,6 @@ export class MyListController {
       currentUser.id,
       restaurantId,
       data.collectionId,
-      data.postId,
     );
     return await myLists;
   }
