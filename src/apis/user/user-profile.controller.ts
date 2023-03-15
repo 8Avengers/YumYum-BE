@@ -44,7 +44,7 @@ export class UserProfileController {
       id: myProfile.id,
       nickname: myProfile.nickname,
       introduce: myProfile.introduce,
-      profileImage: myProfile.profile_image,
+      profile_image: myProfile.profile_image,
     };
 
     return response;
@@ -73,7 +73,7 @@ export class UserProfileController {
       id: updatedUserProfile.id,
       nickname: updatedUserProfile.nickname,
       introduce: updatedUserProfile.introduce,
-      profileImage: updatedUserProfile.profileImage,
+      profile_image: updatedUserProfile.profile_image,
     };
 
     return response;
@@ -119,8 +119,8 @@ export class UserProfileController {
       id: userProfile.id,
       nickname: userProfile.nickname,
       introduce: userProfile.introduce,
-      profileImage: userProfile.profile_image,
-      followRelationship:
+      profile_image: userProfile.profile_image,
+      follow_relationship:
         followStatus === true
           ? 'True'
           : followStatus === false
@@ -171,7 +171,7 @@ export class UserProfileController {
   @Get('/:userId/followers')
   async getFollowersOfUser(
     @Param('userId') userId: number,
-  ): Promise<{ id: number; nickname: string; profileImage: string }[]> {
+  ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     const userIdFollowers = await this.userService.getFollowers(userId);
     return userIdFollowers;
   }
@@ -180,7 +180,7 @@ export class UserProfileController {
   @Get('/:userId/followings')
   async getFollowingsOfUser(
     @Param('userId') userId: number,
-  ): Promise<{ id: number; nickname: string; profileImage: string }[]> {
+  ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     const userIdFollowings = await this.userService.getFollowings(userId);
     return userIdFollowings;
   }

@@ -107,7 +107,7 @@ export class UserProfileService {
         id: updatedUserProfile.id,
         nickname: updatedUserProfile.nickname,
         introduce: updatedUserProfile.introduce,
-        profileImage: updatedUserProfile.profile_image,
+        profile_image: updatedUserProfile.profile_image,
       };
     }
   }
@@ -253,7 +253,7 @@ export class UserProfileService {
   //유저의 팔로워 조회하기
   async getFollowers(
     userId: number,
-  ): Promise<{ id: number; nickname: string; profileImage: string }[]> {
+  ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     try {
       const follows = await this.FollowRepository.find({
         where: { following: { id: userId } },
@@ -262,7 +262,7 @@ export class UserProfileService {
       const result = follows.map((follow) => ({
         id: follow.follower.id,
         nickname: follow.follower.nickname,
-        profileImage: follow.follower.profile_image,
+        profile_image: follow.follower.profile_image,
       }));
 
       return result;
@@ -277,7 +277,7 @@ export class UserProfileService {
   //유저의 팔로잉 조회하기
   async getFollowings(
     userId: number,
-  ): Promise<{ id: number; nickname: string; profileImage: string }[]> {
+  ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     try {
       const follows = await this.FollowRepository.find({
         where: { follower: { id: userId } },
@@ -286,7 +286,7 @@ export class UserProfileService {
       const result = follows.map((follow) => ({
         id: follow.following.id,
         nickname: follow.following.nickname,
-        profileImage: follow.following.profile_image,
+        profile_image: follow.following.profile_image,
       }));
 
       return result;
