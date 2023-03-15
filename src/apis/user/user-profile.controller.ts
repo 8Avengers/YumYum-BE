@@ -12,6 +12,7 @@ import {
   BadRequestException,
   UseInterceptors,
   UploadedFile,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -28,11 +29,11 @@ import { PostService } from '../post/post.service';
 export class UserProfileController {
   constructor(
     private readonly userService: UserProfileService, //
-    private readonly uploadService: UploadService, //
     private readonly postService: PostService,
   ) {}
 
-  //나의프로필 보기 얘는 항상 제일 위에 있어야 한다. 아니면 이상한 에러나온다.
+  //나의프로필 보기
+  //나의프로필 보기는 항상 제일 위에 있어야 한다. 아니면 이상한 에러나온다.
   @Get('/me')
   @UseGuards(AuthAccessGuard)
   async getMyProfile(@CurrentUser() user: User) {
@@ -42,13 +43,14 @@ export class UserProfileController {
     const response = {
       id: myProfile.id,
       nickname: myProfile.nickname,
+      introduce: myProfile.introduce,
       profileImage: myProfile.profile_image,
     };
 
     return response;
   }
 
-  //유저프로필 수정하기
+  //나의프로필 수정하기
   @Put('/me')
   @UpdateUserProfile()
   @UseGuards(AuthAccessGuard)
@@ -68,6 +70,7 @@ export class UserProfileController {
     });
 
     const response = {
+      id: updatedUserProfile.id,
       nickname: updatedUserProfile.nickname,
       introduce: updatedUserProfile.introduce,
       profileImage: updatedUserProfile.profileImage,
@@ -89,16 +92,40 @@ export class UserProfileController {
     }
   }
 
-  //유저아이디로 유저프로필 불러오기
+  //다른사람의 프로필보기
   @Get('/:userId')
-  async getUserProfile(@Param('userId') userId: number) {
-    const user = await this.userService.getUserById(userId);
+  @UseGuards(AuthAccessGuard)
+  async getUserProfile(
+    @Param('userId') userId: number,
+    @CurrentUser() currentUser?: User,
+  ) {
+    const userProfile = await this.userService.getUserById(userId);
+
+    let followStatus = null;
+    if (currentUser) {
+      if (currentUser.id === userId) {
+        followStatus = 'me';
+      } else {
+        followStatus = await this.userService.checkUserFollowRelation(
+          currentUser.id,
+          userId,
+        );
+      }
+    }
+
+    console.log('followStatus', followStatus);
 
     const response = {
-      id: user.id,
-      nickname: user.nickname,
-      introduce: user.introduce,
-      profileImage: user.profile_image,
+      id: userProfile.id,
+      nickname: userProfile.nickname,
+      introduce: userProfile.introduce,
+      profileImage: userProfile.profile_image,
+      followRelationship:
+        followStatus === true
+          ? 'True'
+          : followStatus === false
+          ? 'False'
+          : followStatus,
     };
 
     return response;
@@ -112,60 +139,50 @@ export class UserProfileController {
     return allPostsByUserId;
   }
 
-  //유저팔로우하기
+  // 유저 팔로우 하기 & 언팔로우 하기
   @UseGuards(AuthAccessGuard)
   @Post('/:userId/follow')
   async followUser(
     @CurrentUser() follower: User,
-    @Param('userId') followingId: number, // : Promise<User>
-  ) {
-    console.log('Follower follower, followingId', follower.id, followingId);
-    const followerId = follower.id;
+    @Param('userId') followingId: number,
+  ): Promise<string> {
+    const followingUser = await this.userService.getUserById(followingId);
 
-    try {
-      const followingUser = await this.userService.createUserFollowRelation(
-        follower,
+    if (!followingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existingFollow =
+      await this.userService.getFollowByFollowerAndFollowingIds(
+        follower.id,
         followingId,
       );
-      const response = {
-        id: followingUser.id,
-        nickname: followingUser.nickname,
-        introduce: followingUser.introduce,
-        profileImage: followingUser.profile_image,
-      };
 
-      return response;
-    } catch (error) {
-      console.error(error);
-      throw new BadRequestException('Invalid user id');
+    if (existingFollow) {
+      await this.userService.deleteUserFollowRelation(follower, followingId);
+      return `${follower.nickname}님이 ${followingUser.nickname}님을 언팔로우하였어요`;
+    } else {
+      await this.userService.createUserFollowRelation(follower, followingId);
+      return `${follower.nickname}님이 ${followingUser.nickname}님을 팔로우하였어요`;
     }
   }
 
-  //유저팔로잉취소하기
-  @UseGuards(AuthAccessGuard)
-  @Delete('/:userId/follow')
-  async unfollowUser(
-    @CurrentUser() follower: User,
-    @Param('userId') followingId: number,
-  ): Promise<User> {
-    const unfollowedUser = await this.userService.deleteUserFollowRelation(
-      follower,
-      followingId,
-    );
-    return unfollowedUser;
-    // return follower
-  }
-
-  //유저의 팔로워 불러오기
+  //유저의 팔로워 조회하기
   @Get('/:userId/followers')
-  async getFollowersOfUser(@Param('userId') userId: number): Promise<User[]> {
-    return this.userService.getFollowers(userId);
+  async getFollowersOfUser(
+    @Param('userId') userId: number,
+  ): Promise<{ id: number; nickname: string; profileImage: string }[]> {
+    const userIdFollowers = await this.userService.getFollowers(userId);
+    return userIdFollowers;
   }
 
-  //유저의 팔로잉 불러오기
+  //유저의 팔로잉 조회하기
   @Get('/:userId/followings')
-  async getFollowingsOfUser(@Param('userId') userId: number): Promise<User[]> {
-    return this.userService.getFollowings(userId);
+  async getFollowingsOfUser(
+    @Param('userId') userId: number,
+  ): Promise<{ id: number; nickname: string; profileImage: string }[]> {
+    const userIdFollowings = await this.userService.getFollowings(userId);
+    return userIdFollowings;
   }
 }
 
