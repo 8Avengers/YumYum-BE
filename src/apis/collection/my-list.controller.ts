@@ -15,6 +15,7 @@ import { MyListService } from './my-list.service';
 import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { DetailMylistDto } from './dto/my-list.detail.dto';
 
 @Controller('my-list')
 export class MyListController {
@@ -42,9 +43,32 @@ export class MyListController {
   }
 
   /*
+    ### 23.03.15
+    ### 표정훈
+    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
+    */
+  @Get('/collections/posts/:restaurantId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
+  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
+  async getMyListsDetailPost(
+    @Param('restaurantId') restaurantId: number,
+    @Body() data: DetailMylistDto,
+    @CurrentUser() currentUser: any,
+  ) {
+    const myLists = await this.myListService.getMyListsDetailPost(
+      currentUser.id,
+      restaurantId,
+      data.collectionId,
+    );
+    return await myLists;
+  }
+
+  /*
     ### 23.03.14
     ### 표정훈
-    ### MyList 이름조회(내꺼) 👍
+    ### MyList 이름조회(내꺼)
     */
 
   @Get('/collections/name')
@@ -60,7 +84,7 @@ export class MyListController {
   /*
     ### 23.03.14
     ### 표정훈
-    ### MyList 전체조회(내꺼) 👍
+    ### MyList 전체조회(내꺼)
     */
 
   @Get('/collections')
@@ -76,7 +100,7 @@ export class MyListController {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 전체조회(남의 전체조회) 👍
+    ### MyList 전체조회(남의 전체조회)
     */
 
   @Get('/collections/:userId')
@@ -90,7 +114,7 @@ export class MyListController {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 생성 👍
+    ### MyList 생성
     */
   @Post('/collections')
   @UseGuards(AuthAccessGuard)
@@ -111,7 +135,7 @@ export class MyListController {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 수정 👍
+    ### MyList 수정
     */
 
   @Put('/collections/:collectionId')
@@ -137,7 +161,7 @@ export class MyListController {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 삭제 👍
+    ### MyList 삭제
     */
   @Delete('/collections/:collectionId')
   @UseGuards(AuthAccessGuard)
@@ -154,7 +178,7 @@ export class MyListController {
   /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 포스팅 추가 👍
+    ### MyList 포스팅 추가
     */
   @Post('/collections/plus/:postId')
   @UseGuards(AuthAccessGuard)
@@ -171,7 +195,7 @@ export class MyListController {
   /*
     ### 23.03.13
     ### 표정훈
-    ### MyList 포스팅 삭제 👍
+    ### MyList 포스팅 삭제
     */
   @Delete('/collections/minus/:postId')
   @UseGuards(AuthAccessGuard)
@@ -187,6 +211,23 @@ export class MyListController {
       postId,
       data.collectionId,
     );
+  }
+
+  /*
+    ### 23.03.15
+    ### 표정훈
+    ### MyList 포스팅 업데이트(미구현)
+    */
+  @Put('/collections/plus/:postId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 포스팅 업데이트' })
+  @ApiResponse({ status: 200, description: 'MyList 포스팅 업데이트 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 포스팅 업데이트 실패' })
+  async myListUpdatePosting(
+    @Param('postId') postId: number,
+    @Body() data: addCollectionPostingDto,
+  ) {
+    return this.myListService.myListPlusPosting(postId, data.collectionId);
   }
 }
 
