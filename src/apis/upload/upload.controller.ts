@@ -11,8 +11,7 @@ import {
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UploadService } from './upload.service';
 
-// npm i -D @types/multer
-// npm i aws-sdk @nestjs/config
+//upload 할때 예시입니다.
 
 @Controller('/')
 export class UploadController {
@@ -41,10 +40,5 @@ export class UploadController {
       this.uploadService.uploadProfileImageToS3('yumyumdb-tests', file),
     );
     return await Promise.all(promises);
-  }
-
-  @Post('')
-  getImageUrl(@Body('key') key: string) {
-    return this.uploadService.getAwsS3FileUrl(key);
   }
 }
