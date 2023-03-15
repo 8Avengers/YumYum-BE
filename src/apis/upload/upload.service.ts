@@ -127,7 +127,7 @@ export class UploadService {
       return { key, s3Object, contentType: file.mimetype, profileImage };
     } catch (error) {
       throw new BadRequestException(
-        `파일 올바르게 업로드를 다시 해주세요. : ${error}`,
+        `파일 업로드를 올바르게 다시 해주세요. : ${error}`,
       );
     }
   }
@@ -148,7 +148,9 @@ export class UploadService {
         .promise();
       return { success: true };
     } catch (error) {
-      throw new BadRequestException(`파일을 올바르게 삭제해주세요. : ${error}`);
+      throw new BadRequestException(
+        `파일을 올바르게 다시 삭제해주세요. : ${error}`,
+      );
     }
   }
 
