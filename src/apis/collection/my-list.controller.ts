@@ -23,6 +23,27 @@ export class MyListController {
   /*
     ### 23.03.14
     ### 표정훈
+    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
+    */
+  @Get('/collections/datail/:collectionId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
+  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
+  async getMyListsDetail(
+    @Param('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    const myLists = await this.myListService.getMyListsDetail(
+      currentUser.id,
+      collectionId,
+    );
+    return await myLists;
+  }
+
+  /*
+    ### 23.03.14
+    ### 표정훈
     ### MyList 이름조회(내꺼) 👍
     */
 

@@ -1,4 +1,7 @@
+import { UploadService } from './../upload/upload.service';
 import {
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -7,7 +10,6 @@ import {
 import { Repository } from 'typeorm'; //데이터들어갈떄
 import { InjectRepository } from '@nestjs/typeorm'; //데이터들어갈떄
 import { User } from './entities/user.entity'; //데이터들어갈떄
-import { Collection } from '../collection/entities/collection.entity';
 import { Follow } from './entities/follow.entity';
 
 @Injectable()
@@ -19,8 +21,7 @@ export class UserProfileService {
     @InjectRepository(Follow)
     private FollowRepository: Repository<Follow>,
 
-    @InjectRepository(Collection)
-    private readonly collectionRepository: Repository<Collection>,
+    private readonly uploadService: UploadService,
   ) {}
 
   //유저이메일로 찾기
@@ -67,24 +68,46 @@ export class UserProfileService {
   }
 
   //유저프로필 수정하기
-  async updateUserProfile({ UpdateUserProfileDto, user, file }) {
+  async updateUserProfile({ updateUserProfileDto, user, file }) {
     const existUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
-
-    console.log(existUser);
+    if (!existUser) {
+      throw new HttpException(
+        '존재하지 않는 유저입니다.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     if (existUser) {
-      existUser.nickname = UpdateUserProfileDto.nickname;
-      existUser.introduce = UpdateUserProfileDto.introduce;
-      file
-        ? (existUser.profile_image = file.location)
-        : (existUser.profile_image = existUser.profile_image);
+      existUser.nickname = updateUserProfileDto.nickname;
+      existUser.introduce = updateUserProfileDto.introduce;
+      if (file) {
+        const uploadedFile = await this.uploadService.uploadProfileImageToS3(
+          'yumyumdb-profile', //AmazonS3의 저장되는 폴더명
+          file,
+        );
+
+        console.log(
+          'uploadProfileImageToS3의 리턴값 uploadedFile',
+          uploadedFile,
+        );
+
+        console.log('existUser::::', existUser);
+
+        existUser.profile_image = uploadedFile.profileImage; //업데이트
+      } else {
+        existUser.profile_image = existUser.profile_image; //노 업데이트
+      }
+
       const updatedUserProfile = await this.userRepository.save(existUser);
+      console.log('업데이트완료후!updatedUserProfile::', updatedUserProfile);
 
-      console.log(updatedUserProfile);
-
-      return updatedUserProfile;
+      return {
+        nickname: updatedUserProfile.nickname,
+        introduce: updatedUserProfile.introduce,
+        profileImage: updatedUserProfile.profile_image,
+      };
     }
   }
 
