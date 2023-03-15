@@ -64,6 +64,11 @@ export class UserSignupService {
       if (nicknameExists)
         throw new ConflictException('이미 사용중인 nickname입니다.');
 
+      const profileImageUrl =
+        gender === 'M'
+          ? 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/male.jpg'
+          : 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/female.jpg';
+
       const newUser = await this.userRepository.save({
         email,
         password: hashedPassword,
@@ -72,6 +77,7 @@ export class UserSignupService {
         gender,
         birth,
         phone_number: phoneNumber,
+        profile_image: profileImageUrl, // Save the profile image URL
       });
 
       const collection = new Collection();
@@ -85,7 +91,6 @@ export class UserSignupService {
       throw error;
     }
   }
-
   async createOauthUser({ email, nickname, name }) {
     try {
       const user = await this.userRepository.findOne({

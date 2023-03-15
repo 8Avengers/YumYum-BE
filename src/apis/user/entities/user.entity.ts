@@ -51,7 +51,7 @@ export class User {
   introduce: string;
 
   //TODO: 회원가입시 default 이미지로값으로 가입완료
-  @Column({ nullable: true, default: 'default-image-url' })
+  @Column({ nullable: true })
   profile_image: string;
 
   @Column({ name: 'follower_count', default: 0 })
@@ -97,5 +97,3 @@ export class User {
   @JoinColumn()
   collections: Collection[];
 }
-
- 
