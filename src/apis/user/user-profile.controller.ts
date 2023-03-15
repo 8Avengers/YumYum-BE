@@ -21,6 +21,7 @@ import { DeleteUser, UpdateUserProfile } from './user.decorators';
 import { UploadService } from '../upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
+import { PostService } from '../post/post.service';
 
 @ApiTags('유저프로필/팔로우/팔로잉')
 @Controller('/profile')
@@ -28,6 +29,7 @@ export class UserProfileController {
   constructor(
     private readonly userService: UserProfileService, //
     private readonly uploadService: UploadService, //
+    private readonly postService: PostService,
   ) {}
 
   //나의프로필 보기 얘는 항상 제일 위에 있어야 한다. 아니면 이상한 에러나온다.
@@ -37,19 +39,20 @@ export class UserProfileController {
     const myProfile = await this.userService.getUserById(user.id);
     console.log(myProfile);
 
-    return {
+    const response = {
       id: myProfile.id,
       nickname: myProfile.nickname,
-      introduce: myProfile.introduce,
       profileImage: myProfile.profile_image,
     };
+
+    return response;
   }
 
   //유저프로필 수정하기
   @Put('/me')
   @UpdateUserProfile()
   @UseGuards(AuthAccessGuard)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file')) //files d
   async updateMyProfile(
     @CurrentUser() user: any,
     @UploadedFile() file: Express.Multer.File,
@@ -64,7 +67,13 @@ export class UserProfileController {
       file,
     });
 
-    return updatedUserProfile;
+    const response = {
+      nickname: updatedUserProfile.nickname,
+      introduce: updatedUserProfile.introduce,
+      profileImage: updatedUserProfile.profileImage,
+    };
+
+    return response;
   }
 
   //유저 탈퇴하기(소프트딜리트)
@@ -84,7 +93,23 @@ export class UserProfileController {
   @Get('/:userId')
   async getUserProfile(@Param('userId') userId: number) {
     const user = await this.userService.getUserById(userId);
-    return user;
+
+    const response = {
+      id: user.id,
+      nickname: user.nickname,
+      introduce: user.introduce,
+      profileImage: user.profile_image,
+    };
+
+    return response;
+  }
+
+  //그 사람이 작성한 모든 포스트들
+  @Get('/:userId/posts')
+  async getUserIdPosts(@Param('userId') userId: number) {
+    const allPostsByUserId = await this.postService.getPostsByUserId(userId);
+
+    return allPostsByUserId;
   }
 
   //유저팔로우하기
@@ -92,8 +117,8 @@ export class UserProfileController {
   @Post('/:userId/follow')
   async followUser(
     @CurrentUser() follower: User,
-    @Param('userId') followingId: number,
-  ): Promise<User> {
+    @Param('userId') followingId: number, // : Promise<User>
+  ) {
     console.log('Follower follower, followingId', follower.id, followingId);
     const followerId = follower.id;
 
@@ -102,8 +127,14 @@ export class UserProfileController {
         follower,
         followingId,
       );
+      const response = {
+        id: followingUser.id,
+        nickname: followingUser.nickname,
+        introduce: followingUser.introduce,
+        profileImage: followingUser.profile_image,
+      };
 
-      return followingUser;
+      return response;
     } catch (error) {
       console.error(error);
       throw new BadRequestException('Invalid user id');
