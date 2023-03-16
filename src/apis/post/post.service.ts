@@ -204,7 +204,7 @@ export class PostService {
         isLiked,
         totalComments,
         myList: post[0].collectionItems,
-        visibility: post.visibility,
+        visibility: post[0].visibility,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
