@@ -29,6 +29,7 @@ export class CommentService {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
+        select: ['id'],
       });
       if (!existPost) {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
@@ -36,7 +37,12 @@ export class CommentService {
 
       const comments = await this.commentRepository.find({
         where: { deleted_at: null, post: { id: postId } },
-        select: ['id', 'content', 'updated_at'],
+        select: {
+          id: true,
+          content: true,
+          updated_at: true,
+          user: { id: true, nickname: true, profile_image: true },
+        },
         relations: ['user'],
       });
 
@@ -52,7 +58,6 @@ export class CommentService {
         );
 
       return comments.map((comment) => {
-        const { id, nickname, profile_image } = comment.user;
         const likes =
           commentLikes.find((like) => like.commentId === comment.id)
             ?.totalLikes || 0;
@@ -60,8 +65,10 @@ export class CommentService {
           likedStatuses.find((status) => status.commentId === comment.id)
             ?.isLiked || 'False';
         return {
-          ...comment,
-          user: { id, nickname, profile_image },
+          id: comment.id,
+          content: comment.id,
+          updated_at: comment.updated_at,
+          user: comment.user,
           totalLikes: likes,
           isLiked,
         };
@@ -117,6 +124,7 @@ export class CommentService {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
+        select: ['id'],
       });
       if (!existPost) {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
@@ -149,6 +157,7 @@ export class CommentService {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
+        select: ['id'],
       });
       if (!existPost) {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
@@ -181,6 +190,7 @@ export class CommentService {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
+        select: ['id'],
       });
       if (!existPost) {
         throw new NotFoundException('존재하지 않는 포스트입니다.');

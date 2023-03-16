@@ -10,30 +10,34 @@ export class MapService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Follow) private followRepository: Repository<Follow>,
-    @InjectRepository(CollectionItem)
-    private collectionItemsRepository: Repository<CollectionItem>,
   ) {}
 
   async getFollowerPosting(userId: number) {
     let followerPostingResult = [];
-    const followerList = await this.followRepository.findBy({
-      follower: { id: userId },
+    const followerList = await this.followRepository.find({
+      relations: ['follower'],
+      where: { follower: { id: userId } },
+      select: { follower: { id: true } },
     });
 
+    console.log('followerList : ', followerList);
     for (let follower of followerList) {
       const followerPost = await this.postRepository.find({
         relations: ['restaurant', 'user'],
-        where: { user: { id: follower.id } },
+        where: { user: { id: follower.follower.id } },
         select: {
           id: true,
           rating: true,
+          content: true,
+          updated_at: true,
           restaurant: {
             place_name: true,
+            kakao_place_id: true,
             category_name: true,
             x: true,
             y: true,
           },
-          user: { profile_image: true },
+          user: { id: true, nickname: true, profile_image: true },
         },
         order: {
           updated_at: 'DESC',
