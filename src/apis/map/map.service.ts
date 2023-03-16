@@ -28,19 +28,22 @@ export class MapService {
         select: {
           id: true,
           rating: true,
+          content: true,
+          updated_at: true,
           restaurant: {
             place_name: true,
+            kakao_place_id: true,
             category_name: true,
             x: true,
             y: true,
           },
-          user: { profile_image: true },
+          user: { id: true, nickname: true, profile_image: true },
         },
         order: {
           updated_at: 'DESC',
         },
       });
-      followerPostingResult.push(followerPost);
+      followerPostingResult.push(...followerPost);
     }
     return followerPostingResult;
 
