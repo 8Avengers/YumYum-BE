@@ -9,7 +9,7 @@ export class ImageRepository extends Repository<Image> {
     super(Image, dataSource.createEntityManager());
   }
 
-  async updatePostImages(post: Post, imagesData: string[]) {
+  async updatePostImages(imagesData: string[], post: Post) {
     try {
       const imagesToDelete = post.images.filter(
         (image) => !imagesData.includes(image.file_url),
