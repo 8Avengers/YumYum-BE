@@ -122,6 +122,7 @@ export class PostService {
           isLiked,
           totalComments,
           myList: post.collectionItems,
+          visibility: post.visibility,
         };
       });
     } catch (err) {
@@ -150,6 +151,7 @@ export class PostService {
           content: true,
           rating: true,
           updated_at: true,
+          visibility: true,
           restaurant: {
             id: true,
             address_name: true,
@@ -202,6 +204,7 @@ export class PostService {
         isLiked,
         totalComments,
         myList: post[0].collectionItems,
+        visibility: post.visibility,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -477,6 +480,7 @@ export class PostService {
           content: true,
           rating: true,
           updated_at: true,
+          visibility: true,
           restaurant: {
             id: true,
             address_name: true,
@@ -533,6 +537,7 @@ export class PostService {
           isLiked,
           totalComments,
           myList: post.collectionItems,
+          visibility: post.visibility,
         };
       });
     } catch (err) {
