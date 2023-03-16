@@ -1,5 +1,5 @@
 import { AuthAccessGuard } from './../auth/guards/auth.guards';
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MapService } from './map.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -10,11 +10,19 @@ export class MapController {
   constructor(private readonly mapService: MapService) {}
 
   @ApiOperation({ summary: '맵 탐색 페이지' })
-  //   @UseGuards(AuthAccessGuard)
+  @UseGuards(AuthAccessGuard)
   @Get('/posting')
-  async getUserSearch() {
-    // @CurrentUser() currentUser: any
-    const userId = 5;
-    return await this.mapService.getFollowerPosting(userId);
+  async getFollowerSearchInMap(@CurrentUser() currentUser: any) {
+    return await this.mapService.getFollowerPosting(currentUser.id);
+  }
+
+  @ApiOperation({ summary: '내 포스팅 지도' })
+  @UseGuards(AuthAccessGuard)
+  @Get('/myPosting/:collectionId')
+  async getMyPostingSearchInMap(
+    @Param('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.mapService.getMyPosting(currentUser.id, collectionId);
   }
 }
