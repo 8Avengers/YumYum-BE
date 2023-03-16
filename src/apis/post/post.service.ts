@@ -422,7 +422,7 @@ export class PostService {
         order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
-        throw new NotFoundException('작성하신 포스트가 없습니다.');
+        return [];
       }
       const postIds = posts.map((post) => post.id);
 
