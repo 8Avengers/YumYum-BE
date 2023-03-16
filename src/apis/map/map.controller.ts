@@ -11,14 +11,14 @@ export class MapController {
 
   @ApiOperation({ summary: '맵 탐색 페이지' })
   @UseGuards(AuthAccessGuard)
-  @Get('/posting')
+  @Get('/followerPosting')
   async getFollowerSearchInMap(@CurrentUser() currentUser: any) {
     return await this.mapService.getFollowerPosting(currentUser.id);
   }
 
   @ApiOperation({ summary: '내 포스팅 지도' })
   @UseGuards(AuthAccessGuard)
-  @Get('/myPosting/:collectionId')
+  @Get('/myListPosting/:collectionId')
   async getMyPostingSearchInMap(
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
