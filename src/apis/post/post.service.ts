@@ -53,7 +53,7 @@ export class PostService {
           updated_at: true,
           visibility: true,
           restaurant: {
-            id: true,
+            kakao_place_id: true,
             address_name: true,
             category_name: true,
             place_name: true,
@@ -153,7 +153,7 @@ export class PostService {
           updated_at: true,
           visibility: true,
           restaurant: {
-            id: true,
+            kakao_place_id: true,
             address_name: true,
             category_name: true,
             place_name: true,
@@ -482,7 +482,7 @@ export class PostService {
           updated_at: true,
           visibility: true,
           restaurant: {
-            id: true,
+            kakao_place_id: true,
             address_name: true,
             category_name: true,
             place_name: true,
