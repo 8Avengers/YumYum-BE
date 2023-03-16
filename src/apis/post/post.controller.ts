@@ -133,13 +133,22 @@ export class PostController {
       road_address_name,
       x,
       y,
-    }: CreateRestaurantDto,
+    }: Partial<CreateRestaurantDto>,
   ) {
-    const parsedMyListId = JSON.parse(data.myListId);
+    let parsedMyListId;
+    let parsedRating;
+    let parsedHashtagNames;
+    if (data.myListId) {
+      parsedMyListId = JSON.parse(data.myListId);
+    }
 
-    const parsedRating = JSON.parse(data.rating);
+    if (data.rating) {
+      parsedRating = JSON.parse(data.rating);
+    }
 
-    const parsedHashtagNames = JSON.parse(data.hashtagNames);
+    if (data.hashtagNames) {
+      parsedHashtagNames = JSON.parse(data.hashtagNames);
+    }
 
     return this.postService.updatePost(
       postId,

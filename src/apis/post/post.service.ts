@@ -225,9 +225,7 @@ export class PostService {
         visibility,
       });
 
-      const hashtags = await this.postHashtagService.createOrUpdateHashtags(
-        hashtagNames,
-      );
+      const hashtags = await this.postHashtagService.createOrUpdateHashtags([]);
 
       post.hashtags = hashtags;
 
@@ -362,16 +360,12 @@ export class PostService {
       );
 
       // await this.imageRepository.updatePostImages(post, images);
-      files.map(async (file) => {
+      const uploadedFiles = files.map(async (file) => {
         try {
-          const uploadedFile = await this.uploadService.uploadPostImageToS3(
+          return await this.uploadService.uploadPostImageToS3(
             'yumyumdb-post',
             file,
           );
-          await this.imageRepository.save({
-            file_url: uploadedFile.postImage,
-            post: { id },
-          });
         } catch (err) {
           console.error(err);
           throw new InternalServerErrorException(
@@ -379,6 +373,12 @@ export class PostService {
           );
         }
       });
+
+      const results = await Promise.all(uploadedFiles);
+      const postImages = results.map((result) => result.postImage);
+      await this.imageRepository.updatePostImages(postImages, post);
+
+      // await this.imageRepository.updatePostImages(results.postImage, post);
 
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
