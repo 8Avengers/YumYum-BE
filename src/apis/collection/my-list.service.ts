@@ -1,3 +1,4 @@
+import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { Collection } from './entities/collection.entity';
 import {
   Injectable,
@@ -71,14 +72,14 @@ export class MyListService {
     }
   }
   /*
-    ### 23.03.10
+    ### 23.03.15
     ### 표정훈
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
 
   /* 로직 설명
       1. 맛집상세리스트 PAGE2에 있는 맛집을 클릭한다. (레스토랑ID)
-      2. 레스토랑ID에 담긴 해당 유저의 포스팅ID 를 가져온다.
+      2. 콜렉션 아이템에 있는 레스토랑아이디와 콜렉션아이디가 둘다 일치하는 정보를 찾는다.
       3. 레스토랑의 정보와 게시물 정보를 가져온다
       레스토랑 정보: 가게이름, 업종(카페), 주소
       포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등 
@@ -111,31 +112,6 @@ export class MyListService {
       });
 
       return existRestaurant;
-
-      // const myLists = await this.collectionRepository.find({
-      //   relations: {
-      //     collectionItems: {
-      //       post: true,
-      //       restaurant: true,
-      //     },
-      //   },
-      //   where: {
-      //     id: collectionId,
-      //     user_id: userId,
-      //     deletedAt: null,
-      //     type: 'myList',
-      //   },
-      //   select: { name: true, description: true, image: true },
-      // });
-
-      // const collectedPosts = [];
-      // for (let i = 0; i < myLists.length; i++) {
-      //   if (postId == myLists[0].collectionItems[i].post.id) {
-      //     collectedPosts.push(myLists[0].collectionItems[i].post);
-      //   }
-      // }
-
-      // return myLists;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -154,7 +130,7 @@ export class MyListService {
     try {
       const myLists = await this.collectionRepository.find({
         where: { user_id: userId, deletedAt: null, type: 'myList' },
-        select: { name: true },
+        select: { id: true, name: true },
       });
 
       return myLists;
