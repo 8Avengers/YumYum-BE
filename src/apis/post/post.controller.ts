@@ -81,6 +81,12 @@ export class PostController {
     }: CreateRestaurantDto,
     @CurrentUser() currentUser: any,
   ) {
+    const parsedMyListId = JSON.parse(data.myListId);
+
+    const parsedRating = JSON.parse(data.rating);
+
+    const parsedHashtagNames = JSON.parse(data.hashtagNames);
+
     return this.postService.createPost(
       currentUser.id,
       address_name,
@@ -93,11 +99,11 @@ export class PostController {
       road_address_name,
       x,
       y,
-      data.myListId,
+      parsedMyListId,
       data.content,
-      data.rating,
+      parsedRating,
       data.visibility,
-      data.hashtagNames,
+      parsedHashtagNames,
       files,
       // data.userNames,
     );
@@ -129,6 +135,12 @@ export class PostController {
       y,
     }: CreateRestaurantDto,
   ) {
+    const parsedMyListId = JSON.parse(data.myListId);
+
+    const parsedRating = JSON.parse(data.rating);
+
+    const parsedHashtagNames = JSON.parse(data.hashtagNames);
+
     return this.postService.updatePost(
       postId,
       address_name,
@@ -141,11 +153,11 @@ export class PostController {
       road_address_name,
       x,
       y,
-      data.myListId,
+      parsedMyListId,
       data.content,
-      data.rating,
+      parsedRating,
       data.visibility,
-      data.hashtagNames,
+      parsedHashtagNames,
       files,
     );
   }
