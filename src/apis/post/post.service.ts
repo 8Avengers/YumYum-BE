@@ -430,7 +430,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
         },
-        relations: ['user', 'restaurant', 'hashtags', 'images'],
+        relations: ['user', 'restaurant', 'hashtags', 'images', 'comments'],
         order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
