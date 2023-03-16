@@ -225,9 +225,7 @@ export class PostService {
         visibility,
       });
 
-      const hashtags = await this.postHashtagService.createOrUpdateHashtags(
-        hashtagNames,
-      );
+      const hashtags = await this.postHashtagService.createOrUpdateHashtags([]);
 
       post.hashtags = hashtags;
 
@@ -242,8 +240,22 @@ export class PostService {
       //   });
       //   await this.imageRepository.save(image);
       // }
-      files.map((file) => {
-        this.uploadService.uploadPostImageToS3('yumyumdb-post', file);
+      files.map(async (file) => {
+        try {
+          const uploadedFile = await this.uploadService.uploadPostImageToS3(
+            'yumyumdb-post',
+            file,
+          );
+          await this.imageRepository.save({
+            file_url: uploadedFile.postImage,
+            post: { id: postId },
+          });
+        } catch (err) {
+          console.error(err);
+          throw new InternalServerErrorException(
+            'Something went wrong while processing your request. Please try again later.',
+          );
+        }
       });
 
       await this.myListService.myListPlusPosting(postId, myListIds);
@@ -422,7 +434,7 @@ export class PostService {
         order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
-        throw new NotFoundException('작성하신 포스트가 없습니다.');
+        return [];
       }
       const postIds = posts.map((post) => post.id);
 
