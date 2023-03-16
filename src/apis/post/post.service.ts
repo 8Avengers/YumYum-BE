@@ -17,6 +17,7 @@ import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
+import { CollectionItem } from '../collection/entities/collection-item.entity';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -25,6 +26,8 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    @InjectRepository(CollectionItem)
+    private collectionItemRepository: Repository<CollectionItem>,
     private imageRepository: ImageRepository,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
@@ -48,6 +51,7 @@ export class PostService {
           content: true,
           rating: true,
           updated_at: true,
+          visibility: true,
           restaurant: {
             id: true,
             address_name: true,
@@ -57,14 +61,25 @@ export class PostService {
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
+          collectionItems: { id: true, collection: { id: true } },
         },
-        relations: ['user', 'restaurant', 'hashtags', 'comments', 'images'],
+        relations: {
+          user: true,
+          restaurant: true,
+          hashtags: true,
+          comments: true,
+          images: true,
+          collectionItems: {
+            collection: true,
+          },
+        },
         order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
       }
       const postIds = posts.map((post) => post.id);
+      // console.log('*****', posts[4].collectionItems);
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
@@ -72,6 +87,19 @@ export class PostService {
         postIds,
         userId,
       );
+
+      // const collectionItemIds = posts.reduce((ids, post) => {
+      //   post.collectionItems.forEach((collectionItem) => {
+      //     ids.add(collectionItem.collection.id);
+      //   });
+      //   return ids;
+      // }, new Set());
+      //
+      // const collections = await this.collectionItemRepository.find({
+      //   where: { id: collectionItemIds },
+      //   select: { collection: { id: true } },
+      //   relations: ['collection'],
+      // });
 
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
@@ -93,6 +121,7 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
+          myList: post.collectionItems,
         };
       });
     } catch (err) {
@@ -130,8 +159,17 @@ export class PostService {
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
+          collectionItems: { id: true, collection: { id: true } },
         },
-        relations: ['restaurant', 'user', 'hashtags', 'images'],
+        relations: {
+          user: true,
+          restaurant: true,
+          hashtags: true,
+          images: true,
+          collectionItems: {
+            collection: true,
+          },
+        },
       });
 
       if (!post) {
@@ -163,6 +201,7 @@ export class PostService {
         hashtags,
         isLiked,
         totalComments,
+        myList: post[0].collectionItems,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -225,7 +264,9 @@ export class PostService {
         visibility,
       });
 
-      const hashtags = await this.postHashtagService.createOrUpdateHashtags([]);
+      const hashtags = await this.postHashtagService.createOrUpdateHashtags(
+        hashtagNames,
+      );
 
       post.hashtags = hashtags;
 
@@ -445,8 +486,18 @@ export class PostService {
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
+          collectionItems: { id: true, collection: { id: true } },
         },
-        relations: ['user', 'restaurant', 'hashtags', 'images', 'comments'],
+        relations: {
+          user: true,
+          restaurant: true,
+          hashtags: true,
+          comments: true,
+          images: true,
+          collectionItems: {
+            collection: true,
+          },
+        },
         order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
@@ -481,6 +532,7 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
+          myList: post.collectionItems,
         };
       });
     } catch (err) {
