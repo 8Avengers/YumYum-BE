@@ -225,7 +225,9 @@ export class PostService {
         visibility,
       });
 
-      const hashtags = await this.postHashtagService.createOrUpdateHashtags([]);
+      const hashtags = await this.postHashtagService.createOrUpdateHashtags(
+        hashtagNames,
+      );
 
       post.hashtags = hashtags;
 
