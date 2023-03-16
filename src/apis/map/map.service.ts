@@ -15,16 +15,15 @@ export class MapService {
   async getFollowerPosting(userId: number) {
     let followerPostingResult = [];
     const followerList = await this.followRepository.find({
-      relations: ['follower'],
+      relations: ['following'],
       where: { follower: { id: userId } },
-      select: { follower: { id: true } },
+      select: { following: { id: true } },
     });
-
     console.log('followerList : ', followerList);
-    for (let follower of followerList) {
+    for (let following of followerList) {
       const followerPost = await this.postRepository.find({
         relations: ['restaurant', 'user'],
-        where: { user: { id: follower.follower.id } },
+        where: { user: { id: following.following.id } },
         select: {
           id: true,
           rating: true,
