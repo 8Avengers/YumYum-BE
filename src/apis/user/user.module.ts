@@ -9,9 +9,14 @@ import { UserSignupController } from './user-signup.controller';
 import { UserSignupService } from './user-signup.service';
 import { UploadModule } from './../upload/upload.module';
 import { UploadService } from '../upload/upload.service';
+import { PostModule } from '../post/post.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Collection, Follow]), UploadModule],
+  imports: [
+    TypeOrmModule.forFeature([User, Collection, Follow]),
+    UploadModule,
+    PostModule,
+  ],
   controllers: [UserProfileController, UserSignupController],
   providers: [UserProfileService, UserSignupService, UploadService],
   exports: [UserProfileService, UserSignupService, TypeOrmModule],

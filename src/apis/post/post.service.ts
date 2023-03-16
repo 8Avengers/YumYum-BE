@@ -15,8 +15,8 @@ import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantService } from '../restaurant/restaurant.service';
-import { UserInterface } from '../../interfaces/user';
 import { ImageRepository } from './image.repository';
+import { UploadService } from '../upload/upload.service';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -29,7 +29,8 @@ export class PostService {
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
-    private readonly restaurantService: RestaurantService, // private readonly postUserTagService: PostUserTagService,
+    private readonly restaurantService: RestaurantService,
+    private readonly uploadService: UploadService, // private readonly postUserTagService: PostUserTagService,
   ) {}
 
   /*
@@ -195,9 +196,9 @@ export class PostService {
     myListIds: number[],
     content: string,
     rating: number,
-    img: string[],
     visibility,
     hashtagNames: string[],
+    files: Express.Multer.File[],
     // usernames: string[],
   ) {
     try {
@@ -234,13 +235,16 @@ export class PostService {
 
       const postId = post.id;
 
-      for (const imageUrl of img) {
-        const image = await this.imageRepository.create({
-          post: { id: postId },
-          file_url: imageUrl,
-        });
-        await this.imageRepository.save(image);
-      }
+      // for (const imageUrl of img) {
+      //   const image = await this.imageRepository.create({
+      //     post: { id: postId },
+      //     file_url: imageUrl,
+      //   });
+      //   await this.imageRepository.save(image);
+      // }
+      files.map((file) => {
+        this.uploadService.uploadPostImageToS3('yumyumdb-post', file);
+      });
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
@@ -277,9 +281,9 @@ export class PostService {
     myListId: number[],
     content: string,
     rating: number,
-    images: string[],
     visibility,
     hashtagNames: string[],
+    files: Express.Multer.File[],
   ) {
     try {
       const post = await this.postRepository.findOne({
@@ -343,7 +347,10 @@ export class PostService {
         { reload: true },
       );
 
-      await this.imageRepository.updatePostImages(post, images);
+      // await this.imageRepository.updatePostImages(post, images);
+      files.map((file) => {
+        this.uploadService.uploadPostImageToS3('yumyumdb-post', file);
+      });
 
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);

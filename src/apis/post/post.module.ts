@@ -14,6 +14,7 @@ import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantModule } from '../restaurant/restaurant.module';
 import { Image } from './entities/image.entity';
 import { ImageRepository } from './image.repository';
+import { UploadModule } from '../upload/upload.module';
 
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -22,6 +23,7 @@ import { ImageRepository } from './image.repository';
     TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment, Image]),
     CollectionModule,
     RestaurantModule,
+    UploadModule,
   ],
   controllers: [PostController, PostLikeController, MyFeedController],
   providers: [
