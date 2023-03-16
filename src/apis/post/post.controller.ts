@@ -8,14 +8,17 @@ import {
   Put,
   Patch,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { CreateRestaurantDto } from "../restaurant/dto/create-restaurant.dto";
+import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('posts')
 export class PostController {
@@ -59,29 +62,49 @@ export class PostController {
               */
   @Post()
   @UseGuards(AuthAccessGuard)
+  @UseInterceptors(FilesInterceptor('files'))
   createPost(
+    @UploadedFiles() files: Array<Express.Multer.File>,
     @Body() data: CreatePostDto,
-    @Body() restaurantData: CreateRestaurantDto,
+    @Body()
+    {
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
+    }: CreateRestaurantDto,
     @CurrentUser() currentUser: any,
   ) {
+    const parsedMyListId = JSON.parse(data.myListId);
+
+    const parsedRating = JSON.parse(data.rating);
+
+    const parsedHashtagNames = JSON.parse(data.hashtagNames);
+
     return this.postService.createPost(
       currentUser.id,
-      restaurantData.address_name,
-      restaurantData.category_group_code,
-      restaurantData.category_group_name,
-      restaurantData.category_name,
-      restaurantData.kakao_place_id,
-      restaurantData.phone,
-      restaurantData.place_name,
-      restaurantData.road_address_name,
-      restaurantData.x,
-      restaurantData.y,
-      data.myListId,
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
+      parsedMyListId,
       data.content,
-      data.rating,
-      data.image,
+      parsedRating,
       data.visibility,
-      data.hashtagNames,
+      parsedHashtagNames,
+      files,
       // data.userNames,
     );
   }
@@ -93,29 +116,49 @@ export class PostController {
               */
   @Patch('/:postId')
   @UseGuards(AuthAccessGuard)
+  @UseInterceptors(FilesInterceptor('files'))
   async updateArticle(
+    @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('postId') postId: number,
     @Body() data: Partial<UpdatePostDto>,
-    @Body() restaurantData: CreateRestaurantDto,
+    @Body()
+    {
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
+    }: CreateRestaurantDto,
   ) {
+    const parsedMyListId = JSON.parse(data.myListId);
+
+    const parsedRating = JSON.parse(data.rating);
+
+    const parsedHashtagNames = JSON.parse(data.hashtagNames);
+
     return this.postService.updatePost(
       postId,
-      restaurantData.address_name,
-      restaurantData.category_group_code,
-      restaurantData.category_group_name,
-      restaurantData.category_name,
-      restaurantData.kakao_place_id,
-      restaurantData.phone,
-      restaurantData.place_name,
-      restaurantData.road_address_name,
-      restaurantData.x,
-      restaurantData.y,
-      data.myListId,
+      address_name,
+      category_group_code,
+      category_group_name,
+      category_name,
+      id,
+      phone,
+      place_name,
+      road_address_name,
+      x,
+      y,
+      parsedMyListId,
       data.content,
-      data.rating,
-      data.image,
+      parsedRating,
       data.visibility,
-      data.hashtagNames,
+      parsedHashtagNames,
+      files,
     );
   }
 

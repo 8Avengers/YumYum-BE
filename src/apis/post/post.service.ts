@@ -15,6 +15,8 @@ import { PostHashtagService } from './post-hashtag.service';
 import { MyListService } from '../collection/my-list.service';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantService } from '../restaurant/restaurant.service';
+import { ImageRepository } from './image.repository';
+import { UploadService } from '../upload/upload.service';
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -23,23 +25,41 @@ export class PostService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    private imageRepository: ImageRepository,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
-    private readonly restaurantService: RestaurantService, // private readonly postUserTagService: PostUserTagService,
+    private readonly restaurantService: RestaurantService,
+    private readonly uploadService: UploadService, // private readonly postUserTagService: PostUserTagService,
   ) {}
 
   /*
-    ### 23.03.13
-    ### 이드보라
-    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
-  */
+                                                                                    ### 23.03.13
+                                                                                    ### 이드보라
+                                                                                    ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
+                                                                                    */
+
   async getPosts(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
-        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags', 'comments'],
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          restaurant: {
+            id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+        },
+        relations: ['user', 'restaurant', 'hashtags', 'comments', 'images'],
+        order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -54,7 +74,6 @@ export class PostService {
       );
 
       return posts.map((post) => {
-        const { id, nickname, profile_image } = post.user;
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
@@ -63,8 +82,13 @@ export class PostService {
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
         return {
-          ...post,
-          user: { id, nickname, profile_image },
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: post.user,
+          restaurant: post.restaurant,
+          images: post.images,
           hashtags,
           totalLikes: likes,
           isLiked,
@@ -84,16 +108,30 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.13
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
-                                                                                    */
+                                                                                      ### 23.03.13
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
+                                                                                      */
   async getPostById(postId: number, userId: number) {
     try {
       const post = await this.postRepository.find({
         where: { id: postId, deleted_at: null, visibility: 'public' },
-        select: ['content', 'rating', 'img_url', 'updated_at'],
-        relations: ['restaurant', 'user', 'hashtags'],
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          restaurant: {
+            id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+        },
+        relations: ['restaurant', 'user', 'hashtags', 'images'],
       });
 
       if (!post) {
@@ -113,11 +151,14 @@ export class PostService {
         where: { deleted_at: null, post: { id: postId } },
       });
 
-      const { id, nickname, profile_image } = post[0].user;
-
       return {
-        ...post[0],
-        user: { id, nickname, profile_image },
+        id: post[0].id,
+        content: post[0].content,
+        rating: post[0].rating,
+        updated_at: post[0].updated_at,
+        user: post[0].user,
+        restaurant: post[0].restaurant,
+        images: post[0].images,
         totalLikes,
         hashtags,
         isLiked,
@@ -136,10 +177,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.11
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 작성
-                                                                                    */
+                                                                                      ### 23.03.11
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 작성
+                                                                                      */
   async createPost(
     userId: number,
     address_name: string,
@@ -155,9 +196,9 @@ export class PostService {
     myListIds: number[],
     content: string,
     rating: number,
-    img: string,
     visibility,
     hashtagNames: string[],
+    files: Express.Multer.File[],
     // usernames: string[],
   ) {
     try {
@@ -181,19 +222,41 @@ export class PostService {
         restaurant: { id: restaurantId },
         content,
         rating,
-        img_url: img,
         visibility,
       });
 
-      const hashtags = await this.postHashtagService.createOrUpdateHashtags(
-        hashtagNames,
-      );
+      const hashtags = await this.postHashtagService.createOrUpdateHashtags([]);
 
       post.hashtags = hashtags;
 
       await this.postRepository.save(post);
 
       const postId = post.id;
+
+      // for (const imageUrl of img) {
+      //   const image = await this.imageRepository.create({
+      //     post: { id: postId },
+      //     file_url: imageUrl,
+      //   });
+      //   await this.imageRepository.save(image);
+      // }
+      files.map(async (file) => {
+        try {
+          const uploadedFile = await this.uploadService.uploadPostImageToS3(
+            'yumyumdb-post',
+            file,
+          );
+          await this.imageRepository.save({
+            file_url: uploadedFile.postImage,
+            post: { id: postId },
+          });
+        } catch (err) {
+          console.error(err);
+          throw new InternalServerErrorException(
+            'Something went wrong while processing your request. Please try again later.',
+          );
+        }
+      });
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
@@ -211,10 +274,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.10
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 수정
-                                                                                    */
+                                                                                      ### 23.03.10
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 수정
+                                                                                      */
   async updatePost(
     id: number,
     address_name: string,
@@ -230,14 +293,14 @@ export class PostService {
     myListId: number[],
     content: string,
     rating: number,
-    image: string,
     visibility,
     hashtagNames: string[],
+    files: Express.Multer.File[],
   ) {
     try {
       const post = await this.postRepository.findOne({
         where: { id },
-        relations: ['hashtags'],
+        relations: ['hashtags', 'images'],
       });
       if (!post) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
@@ -268,17 +331,24 @@ export class PostService {
       if (rating) {
         updateData.rating = rating;
       }
-      if (image) {
-        updateData.img_url = image;
-      }
+
       if (visibility) {
         updateData.visibility = visibility;
       }
       if (hashtagNames) {
-        const hashtags = await this.postHashtagService.createOrUpdateHashtags(
-          hashtagNames,
-        );
-        updateData.hashtags = hashtags;
+        const existingHashtags = post.hashtags.map((hashtag) => hashtag.name);
+        const newHashtags = (
+          await this.postHashtagService.createOrUpdateHashtags(hashtagNames)
+        ).map((hashtag) => hashtag.name);
+
+        if (
+          existingHashtags.sort().join(',') !== newHashtags.sort().join(',')
+        ) {
+          const hashtags = await this.postHashtagService.createOrUpdateHashtags(
+            hashtagNames,
+          );
+          updateData.hashtags = hashtags;
+        }
       }
 
       await this.postRepository.save(
@@ -289,6 +359,25 @@ export class PostService {
         { reload: true },
       );
 
+      // await this.imageRepository.updatePostImages(post, images);
+      files.map(async (file) => {
+        try {
+          const uploadedFile = await this.uploadService.uploadPostImageToS3(
+            'yumyumdb-post',
+            file,
+          );
+          await this.imageRepository.save({
+            file_url: uploadedFile.postImage,
+            post: { id },
+          });
+        } catch (err) {
+          console.error(err);
+          throw new InternalServerErrorException(
+            'Something went wrong while processing your request. Please try again later.',
+          );
+        }
+      });
+
       if (myListId) {
         await this.myListService.myListPlusPosting(id, myListId);
       }
@@ -296,6 +385,7 @@ export class PostService {
       return { postId: id };
     } catch (err) {
       if (err instanceof NotFoundException) {
+        console.error(err);
         throw err;
       } else {
         console.error(err);
@@ -307,10 +397,10 @@ export class PostService {
   }
 
   /*
-                                                                                    ### 23.03.06
-                                                                                    ### 이드보라
-                                                                                    ### 포스팅 삭제
-                                                                                    */
+                                                                                      ### 23.03.06
+                                                                                      ### 이드보라
+                                                                                      ### 포스팅 삭제
+                                                                                      */
   async deletePost(id: number) {
     try {
       const result = await this.postRepository.softDelete(id);
@@ -329,15 +419,36 @@ export class PostService {
     }
   }
 
-  async getMyPosts(userId: number) {
+  /*
+                                                                                      ### 23.03.15
+                                                                                      ### 장승윤, 이드보라
+                                                                                      ### 내 포스트만 불러오기
+                                                                                      */
+
+  async getPostsByUserId(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
-        select: ['id', 'content', 'rating', 'img_url', 'updated_at'],
-        relations: ['user', 'restaurant', 'hashtags'],
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          restaurant: {
+            id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+        },
+        relations: ['user', 'restaurant', 'hashtags', 'images', 'comments'],
+        order: { created_at: 'desc' },
       });
       if (!posts || posts.length === 0) {
-        throw new NotFoundException('No posts found.');
+        return [];
       }
       const postIds = posts.map((post) => post.id);
 
@@ -355,7 +466,20 @@ export class PostService {
         const isLiked =
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
-        return { ...post, hashtags, totalLikes: likes, isLiked };
+        const totalComments = post.comments ? post.comments.length : 0;
+        return {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: post.user,
+          restaurant: post.restaurant,
+          images: post.images,
+          hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+        };
       });
     } catch (err) {
       if (err instanceof NotFoundException) {

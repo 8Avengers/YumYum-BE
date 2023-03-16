@@ -12,17 +12,26 @@ import { CollectionModule } from '../collection/collection.module';
 import { MyFeedController } from './post-myfeed.controller';
 import { Comment } from '../comment/entities/comment.entity';
 import { RestaurantModule } from '../restaurant/restaurant.module';
+import { Image } from './entities/image.entity';
+import { ImageRepository } from './image.repository';
+import { UploadModule } from '../upload/upload.module';
 
 // import { PostUserTagService } from './post-user-tag.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment]),
+    TypeOrmModule.forFeature([Post, PostLike, Hashtag, Comment, Image]),
     CollectionModule,
     RestaurantModule,
+    UploadModule,
   ],
   controllers: [PostController, PostLikeController, MyFeedController],
-  providers: [PostService, PostLikeService, PostHashtagService],
+  providers: [
+    PostService,
+    PostLikeService,
+    PostHashtagService,
+    ImageRepository,
+  ],
   exports: [PostService, TypeOrmModule],
 })
 export class PostModule {}

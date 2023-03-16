@@ -1,25 +1,23 @@
 import { IsNumber, IsString, IsArray } from 'class-validator';
 
 export class CreatePostDto {
-  @IsArray()
-  @IsNumber({}, { each: true })
-  readonly myListId: number[];
+  @IsString({ each: true })
+  readonly myListId: string;
 
   @IsString()
   readonly content: string;
 
-  @IsNumber()
-  readonly rating: number;
+  @IsString()
+  readonly rating: string;
 
-  @IsArray()
-  @IsString({ each: true })
-  readonly image: string;
+  // @IsArray()
+  // @IsString({ each: true })
+  // readonly image: string[];
 
   readonly visibility: 'public' | 'private';
 
-  @IsArray()
   @IsString({ each: true })
-  readonly hashtagNames?: string[];
+  readonly hashtagNames?: string;
 
   // @IsArray()
   // @IsString({ each: true })
