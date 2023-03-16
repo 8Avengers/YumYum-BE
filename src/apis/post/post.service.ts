@@ -53,7 +53,7 @@ export class PostService {
           updated_at: true,
           visibility: true,
           restaurant: {
-            id: true,
+            kakao_place_id: true,
             address_name: true,
             category_name: true,
             place_name: true,
@@ -122,6 +122,7 @@ export class PostService {
           isLiked,
           totalComments,
           myList: post.collectionItems,
+          visibility: post.visibility,
         };
       });
     } catch (err) {
@@ -150,8 +151,9 @@ export class PostService {
           content: true,
           rating: true,
           updated_at: true,
+          visibility: true,
           restaurant: {
-            id: true,
+            kakao_place_id: true,
             address_name: true,
             category_name: true,
             place_name: true,
@@ -202,6 +204,7 @@ export class PostService {
         isLiked,
         totalComments,
         myList: post[0].collectionItems,
+        visibility: post[0].visibility,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -477,8 +480,9 @@ export class PostService {
           content: true,
           rating: true,
           updated_at: true,
+          visibility: true,
           restaurant: {
-            id: true,
+            kakao_place_id: true,
             address_name: true,
             category_name: true,
             place_name: true,
@@ -533,6 +537,7 @@ export class PostService {
           isLiked,
           totalComments,
           myList: post.collectionItems,
+          visibility: post.visibility,
         };
       });
     } catch (err) {
