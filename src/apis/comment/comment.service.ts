@@ -66,7 +66,7 @@ export class CommentService {
             ?.isLiked || 'False';
         return {
           id: comment.id,
-          content: comment.id,
+          content: comment.content,
           updated_at: comment.updated_at,
           user: comment.user,
           totalLikes: likes,
