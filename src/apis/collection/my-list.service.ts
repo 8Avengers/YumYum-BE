@@ -9,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
+import { In } from 'typeorm';
 
 @Injectable()
 export class MyListService {
@@ -376,34 +377,31 @@ export class MyListService {
   /*
     ### 23.03.15
     ### 표정훈
-    ### MyList 포스팅 업데이트(미구현)
+    ### MyList 포스팅 업데이트🔥
     */
 
-  //put이라면 collection 아이디값만 변경하는것 될듯함
-  // 컬렉션 해제한 것은 삭제.....는 어떻게 하지?
-
+  /* 로직 설명
+      1. 입력받은 값으로 컬렉션에 있는 포스트아이디를 모두 찾는다
+      2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
+      3. 입력 받은 값을 저장한다.
+      이슈: 자신의 포스터만 마이리스트에 저장할 수 있기에 가능, 데이터 낭비코드이긴 함ㅠㅠ
+      */
   async myListUpdatePosting(postId: number, collectionId: number[]) {
     try {
-      for (let i = 0; i < collectionId.length; i++) {
-        const item = collectionId[i];
-        const existingItem = await this.collectionItemRepository.findOne({
-          where: {
-            post: { id: postId },
-            collection: { id: item },
-          },
-        });
-        //중복된 값이 있다면 안들어감 => 이기능은 필요한가? 중복값 받아야겠지?
-        if (existingItem) {
-          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
-        }
-
-        //이부분을 업데이트로 해서 컬렉션 값만 바꾸면 될듯?
-        const collectionItem = this.collectionItemRepository.create({
+      // 1. 입력받은 값으로 컬렉션아이템에 있는 포스트아이디를 모두 찾는다.
+      const findPostId = await this.collectionItemRepository.find({
+        relations: ['post', 'collection'],
+        where: {
           post: { id: postId },
-          collection: { id: item },
-        });
-        await this.collectionItemRepository.save(collectionItem);
-      }
+          collection: { type: 'myList' }, //마이리스트 일때만!
+        },
+      });
+
+      // 2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
+      await this.collectionItemRepository.remove(findPostId);
+      // 3. 입력받은 정보로 모두 넣어준다.
+      this.myListPlusPosting(postId, collectionId);
+      return;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

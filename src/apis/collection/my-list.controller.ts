@@ -214,11 +214,11 @@ export class MyListController {
   }
 
   /*
-    ### 23.03.15
+    ### 23.03.17
     ### 표정훈
-    ### MyList 포스팅 업데이트(미구현)
+    ### MyList 포스팅 업데이트🔥
     */
-  @Put('/collections/plus/:postId')
+  @Post('/collections/update/:postId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 포스팅 업데이트' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 업데이트 성공' })
@@ -227,7 +227,7 @@ export class MyListController {
     @Param('postId') postId: number,
     @Body() data: addCollectionPostingDto,
   ) {
-    return this.myListService.myListPlusPosting(postId, data.collectionId);
+    return this.myListService.myListUpdatePosting(postId, data.collectionId);
   }
 }
 
