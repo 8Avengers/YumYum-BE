@@ -23,6 +23,7 @@ import { UploadService } from '../upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { PostService } from '../post/post.service';
+import { DeleteUserDto } from './dto/delete-user.dto';
 
 @ApiTags('유저프로필/팔로우/팔로잉')
 @Controller('/profile')
@@ -79,13 +80,16 @@ export class UserProfileController {
     return response;
   }
 
-  //유저 탈퇴하기(소프트딜리트)
+  //유저 탈퇴하기 TypeORM이 제공하는 SoftDelete
   @DeleteUser()
   @UseGuards(AuthAccessGuard)
   @Delete('/me')
-  async deleteUser(@CurrentUser() user: any): Promise<Boolean> {
+  async deleteUser(
+    @CurrentUser() user: any,
+    @Body() deleteUserDto: DeleteUserDto,
+  ): Promise<Boolean> {
     try {
-      return await this.userService.deleteUser(user);
+      return await this.userService.deleteUser(user, deleteUserDto.password);
     } catch (error) {
       console.error(error);
       throw new BadRequestException(error.message);
