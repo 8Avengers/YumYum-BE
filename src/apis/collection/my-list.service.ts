@@ -28,11 +28,8 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
-    @InjectRepository(Comment) private commentRepository: Repository<Comment>, // private readonly likeService: PostLikeService, // private imageRepository: ImageRepository,
-  ) // private readonly postHashtagService: PostHashtagService,
-  // private readonly restaurantService: RestaurantService,
-  // private readonly uploadService: UploadService,
-  {}
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>, // private readonly likeService: PostLikeService, // private imageRepository: ImageRepository, // private readonly postHashtagService: PostHashtagService, // private readonly restaurantService: RestaurantService, // private readonly uploadService: UploadService,
+  ) {}
 
   /*
     ### 23.03.14
@@ -303,6 +300,39 @@ export class MyListService {
       throw new InternalServerErrorException(
         'Something went wrong while processing your request. Please try again later.',
       );
+    }
+  }
+
+  /*
+    ### 23.03.20
+    ### 표정훈
+    ### MyList 수정조회
+    */
+
+  async getMyListInfo(collectionId: number) {
+    try {
+      const myListCheck = await this.collectionRepository.findOne({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          image: true,
+        },
+        where: {
+          id: collectionId,
+        },
+      });
+
+      return myListCheck;
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
     }
   }
 
