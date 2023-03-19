@@ -106,7 +106,12 @@ export class MyListService {
     //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
     try {
       const posts = await this.postRepository.find({
-        where: { deleted_at: null, visibility: 'public', user: { id: userId } },
+        where: {
+          deleted_at: null,
+          visibility: 'public',
+          user: { id: userId },
+          collectionItems: { id: collectionId },
+        },
         select: {
           id: true,
           content: true,
