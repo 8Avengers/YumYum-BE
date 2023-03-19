@@ -459,7 +459,7 @@ export class MyListService {
       // 2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
       await this.collectionItemRepository.remove(findPostId);
       // 3. 입력받은 정보로 모두 넣어준다.
-      this.myListPlusPosting(postId, collectionId);
+      await this.myListPlusPosting(postId, collectionId);
       return;
     } catch (err) {
       if (err instanceof NotFoundException) {
