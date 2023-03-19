@@ -17,6 +17,7 @@ import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
 import { PostHashtagService } from '../post/post-hashtag.service';
 import { Image } from '../post/entities/image.entity';
+import { PostModule } from '../post/post.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { Image } from '../post/entities/image.entity';
     ]),
     RestaurantModule,
     UploadModule,
+    PostModule,
   ],
   controllers: [BookmarkController, MyListController],
   providers: [
