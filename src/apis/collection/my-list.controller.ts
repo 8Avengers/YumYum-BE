@@ -7,6 +7,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CreateMyListDto } from './dto/create-my-list.dto';
@@ -16,10 +17,24 @@ import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
+import { PostService } from '../post/post.service';
 
+@ApiTags('My-list')
 @Controller('my-list')
 export class MyListController {
-  constructor(private readonly myListService: MyListService) {}
+  constructor(
+    private readonly myListService: MyListService,
+    private readonly postService: PostService,
+  ) {}
+  // 보라님 포스팅상세보기(상세더보기대용)
+  @Get('/collections/newsfeeds/:postId')
+  @UseGuards(AuthAccessGuard)
+  async getPostById(
+    @Param('postId') postId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.postService.getPostById(postId, currentUser.id);
+  }
 
   /*
     ### 23.03.14
