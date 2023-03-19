@@ -7,7 +7,6 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
-  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CreateMyListDto } from './dto/create-my-list.dto';
@@ -19,7 +18,6 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
 import { PostService } from '../post/post.service';
 
-@ApiTags('My-list')
 @Controller('my-list')
 export class MyListController {
   constructor(

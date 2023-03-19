@@ -10,6 +10,7 @@ import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
 import { In } from 'typeorm';
+
 import { Comment } from '../comment/entities/comment.entity';
 import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
@@ -28,12 +29,6 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
-    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
-    private readonly likeService: PostLikeService,
-    private imageRepository: ImageRepository,
-    private readonly postHashtagService: PostHashtagService,
-    private readonly restaurantService: RestaurantService,
-    private readonly uploadService: UploadService,
   ) {}
 
   /*
@@ -444,7 +439,7 @@ export class MyListService {
   }
 
   /*
-    ### 23.03.17
+    ### 23.03.15
     ### 표정훈
     ### MyList 포스팅 업데이트🔥
     */
@@ -469,7 +464,7 @@ export class MyListService {
       // 2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
       await this.collectionItemRepository.remove(findPostId);
       // 3. 입력받은 정보로 모두 넣어준다.
-      this.myListPlusPosting(postId, collectionId);
+      await this.myListPlusPosting(postId, collectionId);
       return;
     } catch (err) {
       if (err instanceof NotFoundException) {
