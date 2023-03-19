@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { BookmarkController } from './bookmark.controller';
 import { BookmarkService } from './bookmark.service';
 import { Post } from '../post/entities/post.entity';
@@ -32,17 +32,10 @@ import { PostModule } from '../post/post.module';
     ]),
     RestaurantModule,
     UploadModule,
-    PostModule,
+    forwardRef(() => PostModule),
   ],
   controllers: [BookmarkController, MyListController],
-  providers: [
-    BookmarkService,
-    MyListService,
-    PostService,
-    PostLikeService,
-    ImageRepository,
-    PostHashtagService,
-  ],
+  providers: [BookmarkService, MyListService],
   exports: [MyListService, TypeOrmModule],
 })
 export class CollectionModule {}
