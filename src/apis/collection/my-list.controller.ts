@@ -31,18 +31,15 @@ export class MyListController {
     ### MyList 상세보기
     */
   @Get('/collections/detail/:collectionId')
-  @UseGuards(AuthAccessGuard)
+  // @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 상세보기' })
   @ApiResponse({ status: 200, description: 'MyList 상세보기 성공' })
   @ApiResponse({ status: 400, description: 'MyList 상세보기 실패' })
   async getMyListDetail(
     @Param('collectionId') collectionId: number,
-    @CurrentUser() currentUser: any,
+    // @CurrentUser() currentUser: any,
   ) {
-    const myLists = await this.myListService.getMyListDetail(
-      currentUser.id,
-      collectionId,
-    );
+    const myLists = await this.myListService.getMyListDetail(collectionId);
     return await myLists;
   }
 
@@ -61,7 +58,7 @@ export class MyListController {
   //   @Param('collectionId') collectionId: number,
   //   @CurrentUser() currentUser: any,
   // ) {
-  //   const myLists = await this.myListService.getMyListsDetailPost(
+  //   const myLists = await this.postService.getMyListsDetailPost(
   //     currentUser.id,
   //     restaurantId,
   //     collectionId,
