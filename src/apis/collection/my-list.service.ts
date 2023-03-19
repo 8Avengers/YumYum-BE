@@ -115,7 +115,7 @@ export class MyListService {
           deleted_at: null,
           visibility: 'public',
           user: { id: userId },
-          collectionItems: { id: collectionId },
+          // collectionItems: { id: collectionId },
         },
         select: {
           id: true,
