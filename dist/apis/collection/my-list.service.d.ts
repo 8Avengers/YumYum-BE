@@ -62,6 +62,7 @@ export declare class MyListService {
         user: import("../user/entities/user.entity").User;
     }[]>;
     createMyList(userId: number, name: string, type: 'myList'): Promise<import("typeorm").InsertResult>;
+    getMyListInfo(collectionId: number): Promise<Collection>;
     updateMyList(userId: number, collectionId: number, name: string, image: string, description: string, visibility: 'public' | 'private'): Promise<void>;
     deleteMyList(userId: number, id: number): Promise<void>;
     myListPlusPosting(postId: number, collectionId: number[]): Promise<void>;

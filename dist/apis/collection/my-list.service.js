@@ -138,6 +138,31 @@ let MyListService = class MyListService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
+    async getMyListInfo(collectionId) {
+        try {
+            const myListCheck = await this.collectionRepository.findOne({
+                select: {
+                    id: true,
+                    name: true,
+                    description: true,
+                    image: true,
+                },
+                where: {
+                    id: collectionId,
+                },
+            });
+            return myListCheck;
+        }
+        catch (err) {
+            if (err instanceof common_1.NotFoundException) {
+                throw err;
+            }
+            else {
+                console.error(err);
+                throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+            }
+        }
+    }
     async updateMyList(userId, collectionId, name, image, description, visibility) {
         try {
             const myList = await this.collectionRepository.find({

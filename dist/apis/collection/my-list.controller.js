@@ -48,6 +48,9 @@ let MyListController = class MyListController {
     async createMyList(data, currentUser) {
         return await this.myListService.createMyList(currentUser.id, data.name, data.type);
     }
+    async getMyListInfo(collectionId) {
+        return this.myListService.getMyListInfo(collectionId);
+    }
     async updateMyList(collectionId, data, currentUser) {
         return this.myListService.updateMyList(currentUser, collectionId, data.name, data.image, data.description, data.visibility);
     }
@@ -118,6 +121,17 @@ __decorate([
     __metadata("design:paramtypes", [create_my_list_dto_1.CreateMyListDto, Object]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "createMyList", null);
+__decorate([
+    (0, common_1.Get)('/collections/update/:collectionId'),
+    (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'MyList 수정조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 수정조회 성공' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 수정조회 실패' }),
+    __param(0, (0, decorators_1.Param)('collectionId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], MyListController.prototype, "getMyListInfo", null);
 __decorate([
     (0, common_1.Put)('/collections/:collectionId'),
     (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),

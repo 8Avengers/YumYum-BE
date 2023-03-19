@@ -60,6 +60,7 @@ export declare class MyListController {
         user: import("../user/entities/user.entity").User;
     }[]>;
     createMyList(data: CreateMyListDto, currentUser: any): Promise<import("typeorm").InsertResult>;
+    getMyListInfo(collectionId: number): Promise<import("./entities/collection.entity").Collection>;
     updateMyList(collectionId: number, data: UpdateMyListDto, currentUser: any): Promise<void>;
     deleteMyList(collectionId: number, currentUser: any): Promise<void>;
     myListPlusPosting(postId: number, data: addCollectionPostingDto): Promise<void>;
