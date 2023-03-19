@@ -10,7 +10,6 @@ import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
 import { In } from 'typeorm';
-
 import { Comment } from '../comment/entities/comment.entity';
 import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
@@ -29,12 +28,18 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
-  ) {}
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+  ) // private readonly likeService: PostLikeService,
+  // private imageRepository: ImageRepository,
+  // private readonly postHashtagService: PostHashtagService,
+  // private readonly restaurantService: RestaurantService,
+  // private readonly uploadService: UploadService,
+  {}
 
   /*
-    ### 23.03.19
-    ### 표정훈, 이드보라
-    ### MyList 상세보기
+    ### 23.03.14
+    ### 표정훈
+    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
     */
 
   async getMyListDetail(userId: number, collectionId: number) {
@@ -92,93 +97,105 @@ export class MyListService {
     }
   }
 
-  /*
-    ### 23.03.15
-    ### 표정훈
-    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
-    */
+  // /*
+  //   ### 23.03.15
+  //   ### 표정훈
+  //   ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
+  //   */
 
-  async getMyListsDetailPost(
-    userId: number,
-    restaurantId: number,
-    collectionId: number,
-  ) {
-    //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
-    try {
-      const posts = await this.postRepository.find({
-        where: { deleted_at: null, visibility: 'public', user: { id: userId } },
-        select: {
-          id: true,
-          content: true,
-          rating: true,
-          updated_at: true,
-          visibility: true,
-          restaurant: {
-            kakao_place_id: true,
-            address_name: true,
-            category_name: true,
-            place_name: true,
-            road_address_name: true,
-          },
-          user: { id: true, nickname: true, profile_image: true },
-          images: { id: true, file_url: true },
-          collectionItems: { id: true, collection: { id: true } },
-        },
-        relations: {
-          user: true,
-          restaurant: true,
-          hashtags: true,
-          comments: true,
-          images: true,
-          collectionItems: {
-            collection: true,
-          },
-        },
-        order: { created_at: 'desc' },
-      });
-      if (!posts || posts.length === 0) {
-        return [];
-      }
-      const postIds = posts.map((post) => post.id);
+  // /* 로직 설명
+  //     1. 맛집상세리스트 PAGE2에 있는 맛집을 클릭한다. (레스토랑ID)
+  //     2. 콜렉션 아이템에 있는 레스토랑아이디와 콜렉션아이디가 둘다 일치하는 정보를 찾는다.
+  //     3. 레스토랑의 정보와 게시물 정보를 가져온다
+  //     레스토랑 정보: 가게이름, 업종(카페), 주소
+  //     포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등
+  //   */
+  // async getMyListsDetailPost(
+  //   userId: number,
+  //   restaurantId: number,
+  //   collectionId: number,
+  // ) {
+  //   //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
+  //   try {
+  //     const posts = await this.postRepository.find({
+  //       where: {
+  //         deleted_at: null,
+  //         visibility: 'public',
+  //         user: { id: userId },
+  //         restaurant: { id: restaurantId },
+  //       },
+  //       select: {
+  //         id: true,
+  //         content: true,
+  //         rating: true,
+  //         updated_at: true,
+  //         visibility: true,
+  //         restaurant: {
+  //           kakao_place_id: true,
+  //           address_name: true,
+  //           category_name: true,
+  //           place_name: true,
+  //           road_address_name: true,
+  //         },
+  //         user: { id: true, nickname: true, profile_image: true },
+  //         images: { id: true, file_url: true },
+  //         collectionItems: { id: true, collection: { id: true } },
+  //       },
+  //       relations: {
+  //         user: true,
+  //         restaurant: true,
+  //         hashtags: true,
+  //         comments: true,
+  //         images: true,
+  //         collectionItems: {
+  //           collection: true,
+  //         },
+  //       },
+  //       order: { created_at: 'desc' },
+  //     });
+  //     if (!posts || posts.length === 0) {
+  //       return [];
+  //     }
+  //     const postIds = posts.map((post) => post.id);
 
-      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+  //     const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
-      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
-        postIds,
-        userId,
-      );
+  //     const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+  //       postIds,
+  //       userId,
+  //     );
 
-      return posts.map((post) => {
-        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
-        const likes =
-          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
-        const isLiked =
-          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
-          'False';
-        const totalComments = post.comments ? post.comments.length : 0;
-        return {
-          id: post.id,
-          content: post.content,
-          rating: post.rating,
-          updated_at: post.updated_at,
-          user: post.user,
-          restaurant: post.restaurant,
-          images: post.images,
-          hashtags,
-          totalLikes: likes,
-          isLiked,
-          totalComments,
-          myList: post.collectionItems,
-          visibility: post.visibility,
-        };
-      });
-    } catch (err) {
-      console.error(err);
-      throw new InternalServerErrorException(
-        'Something went wrong while processing your request. Please try again later.',
-      );
-    }
-  }
+  //     return posts.map((post) => {
+  //       const hashtags = post.hashtags.map((hashtag) => hashtag.name);
+  //       const likes =
+  //         postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+  //       const isLiked =
+  //         likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+  //         'False';
+  //       const totalComments = post.comments ? post.comments.length : 0;
+  //       return {
+  //         id: post.id,
+  //         content: post.content,
+  //         rating: post.rating,
+  //         updated_at: post.updated_at,
+  //         user: post.user,
+  //         restaurant: post.restaurant,
+  //         images: post.images,
+  //         hashtags,
+  //         totalLikes: likes,
+  //         isLiked,
+  //         totalComments,
+  //         myList: post.collectionItems,
+  //         visibility: post.visibility,
+  //       };
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw new InternalServerErrorException(
+  //       'Something went wrong while processing your request. Please try again later.',
+  //     );
+  //   }
+  // }
 
   /*
     ### 23.03.14
@@ -434,7 +451,7 @@ export class MyListService {
   }
 
   /*
-    ### 23.03.15
+    ### 23.03.17
     ### 표정훈
     ### MyList 포스팅 업데이트🔥
     */
