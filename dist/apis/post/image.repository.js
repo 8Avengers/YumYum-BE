@@ -18,16 +18,13 @@ let ImageRepository = class ImageRepository extends typeorm_1.Repository {
         super(image_entity_1.Image, dataSource.createEntityManager());
         this.dataSource = dataSource;
     }
-    async updatePostImages(imagesData, post) {
+    async updatePostImages(newImages, originalImages, post) {
         try {
-            const imagesToDelete = post.images.filter((image) => !imagesData.includes(image.file_url));
+            const imagesToDelete = post.images.filter((image) => !originalImages.includes(image.file_url));
             if (imagesToDelete.length > 0) {
                 await this.remove(imagesToDelete);
             }
-            const newImages = imagesData
-                .filter((image) => !post.images.some((existingImage) => existingImage.file_url === image))
-                .map((image) => ({ file_url: image, post }));
-            await this.save(newImages);
+            await this.save(newImages.map((imageUrl) => ({ file_url: imageUrl, post })));
             return;
         }
         catch (err) {
