@@ -16,26 +16,30 @@ import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
+import { PostService } from '../post/post.service';
 
 @Controller('my-list')
 export class MyListController {
-  constructor(private readonly myListService: MyListService) {}
+  constructor(
+    private readonly myListService: MyListService,
+    private readonly postService: PostService,
+  ) {}
 
   /*
-    ### 23.03.14
+    ### 23.03.19
     ### 표정훈
-    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
+    ### MyList 상세보기
     */
-  @Get('/collections/datail/:collectionId')
+  @Get('/collections/detail/:collectionId')
   @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
-  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
-  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
-  async getMyListsDetail(
+  @ApiOperation({ summary: 'MyList 상세보기' })
+  @ApiResponse({ status: 200, description: 'MyList 상세보기 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 상세보기 실패' })
+  async getMyListDetail(
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
   ) {
-    const myLists = await this.myListService.getMyListsDetail(
+    const myLists = await this.myListService.getMyListDetail(
       currentUser.id,
       collectionId,
     );
@@ -47,20 +51,20 @@ export class MyListController {
     ### 표정훈
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
-  @Get('/collections/posts/:restaurantId')
+  @Get('/collections/detail/posts/:collectionId/:restaurantId')
   @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
-  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
-  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
+  @ApiOperation({ summary: 'MyList 상세 더보기' })
+  @ApiResponse({ status: 200, description: 'MyList 상세 더보기 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 상세 더보기 실패' })
   async getMyListsDetailPost(
     @Param('restaurantId') restaurantId: number,
-    @Body() data: DetailMylistDto,
+    @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
   ) {
     const myLists = await this.myListService.getMyListsDetailPost(
       currentUser.id,
       restaurantId,
-      data.collectionId,
+      collectionId,
     );
     return await myLists;
   }
