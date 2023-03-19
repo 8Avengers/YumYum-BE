@@ -493,7 +493,7 @@ export class PostService {
                                                                                       ### 내 포스트만 불러오기
                                                                                       */
 
-  async getPostsByUserId(userId: number) {
+  async getPostsByMyId(userId: number) {
     try {
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
@@ -536,6 +536,87 @@ export class PostService {
       const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
         postIds,
         userId,
+      );
+
+      return posts.map((post) => {
+        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
+        const likes =
+          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+        const isLiked =
+          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+          'False';
+        const totalComments = post.comments ? post.comments.length : 0;
+        return {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: post.user,
+          restaurant: post.restaurant,
+          images: post.images,
+          hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+          myList: post.collectionItems,
+          visibility: post.visibility,
+        };
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
+  async getPostsByOtherUserId(userId: number, myUserId: number) {
+    try {
+      const posts = await this.postRepository.find({
+        where: { deleted_at: null, visibility: 'public', user: { id: userId } },
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          visibility: true,
+          restaurant: {
+            kakao_place_id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+          collectionItems: { id: true, collection: { id: true } },
+        },
+        relations: {
+          user: true,
+          restaurant: true,
+          hashtags: true,
+          comments: true,
+          images: true,
+          collectionItems: {
+            collection: true,
+          },
+        },
+        order: { created_at: 'desc' },
+      });
+      if (!posts || posts.length === 0) {
+        return [];
+      }
+      const postIds = posts.map((post) => post.id);
+
+      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+
+      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+        postIds,
+        myUserId,
       );
 
       return posts.map((post) => {
