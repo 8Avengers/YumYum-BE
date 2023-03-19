@@ -18,6 +18,7 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
+type Image = string | Express.Multer.File;
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -203,7 +204,7 @@ export class PostService {
         hashtags,
         isLiked,
         totalComments,
-        myList: post[0].collectionItems,
+        myList: post[0].collectionItems[0].collection,
         visibility: post[0].visibility,
       };
     } catch (err) {
@@ -339,7 +340,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
-    files: Express.Multer.File[],
+    files: Image[],
   ) {
     try {
       const post = await this.postRepository.findOne({
@@ -350,21 +351,23 @@ export class PostService {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
 
-      const createdRestaurant = await this.restaurantService.createRestaurant(
-        address_name,
-        category_group_code,
-        category_group_name,
-        category_name,
-        kakao_place_id,
-        phone,
-        place_name,
-        road_address_name,
-        x,
-        y,
-      );
+      let createdRestaurant;
 
+      if (kakao_place_id) {
+        createdRestaurant = await this.restaurantService.createRestaurant(
+          address_name,
+          category_group_code,
+          category_group_name,
+          category_name,
+          kakao_place_id,
+          phone,
+          place_name,
+          road_address_name,
+          x,
+          y,
+        );
+      }
       const restaurantId = createdRestaurant;
-
       const updateData: any = {};
       if (restaurantId) {
         updateData.restaurant = { id: restaurantId };
@@ -404,12 +407,18 @@ export class PostService {
       );
 
       // await this.imageRepository.updatePostImages(post, images);
-      const uploadedFiles = files.map(async (file) => {
+      const uploadedFiles = files.map(async (image) => {
         try {
-          return await this.uploadService.uploadPostImageToS3(
-            'yumyumdb-post',
-            file,
-          );
+          let file: Express.Multer.File;
+          if (typeof image === 'string') {
+            return image;
+          } else {
+            file = image;
+            return await this.uploadService.uploadPostImageToS3(
+              'yumyumdb-post',
+              file,
+            );
+          }
         } catch (err) {
           console.error(err);
           throw new InternalServerErrorException(
@@ -419,13 +428,20 @@ export class PostService {
       });
 
       const results = await Promise.all(uploadedFiles);
-      const postImages = results.map((result) => result.postImage);
+      const postImages = results.map((result) => {
+        if (typeof result === 'string') {
+          return result;
+        } else {
+          return result.postImage;
+        }
+      });
+
       await this.imageRepository.updatePostImages(postImages, post);
 
       // await this.imageRepository.updatePostImages(results.postImage, post);
 
       if (myListId) {
-        await this.myListService.myListPlusPosting(id, myListId);
+        await this.myListService.myListUpdatePosting(id, myListId);
       }
 
       return { postId: id };
