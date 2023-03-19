@@ -50,7 +50,7 @@ let PostController = class PostController {
         if (data.hashtagNames) {
             parsedHashtagNames = JSON.parse(data.hashtagNames);
         }
-        return this.postService.updatePost(postId, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, files);
+        return this.postService.updatePost(postId, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, files, data.files);
     }
     async deletePost(postId) {
         return this.postService.deletePost(postId);

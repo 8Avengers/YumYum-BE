@@ -215,7 +215,7 @@ let PostService = class PostService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    async updatePost(id, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListId, content, rating, visibility, hashtagNames, files) {
+    async updatePost(id, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListId, content, rating, visibility, hashtagNames, newFiles, originalFiles) {
         try {
             const post = await this.postRepository.findOne({
                 where: { id },
@@ -251,32 +251,26 @@ let PostService = class PostService {
                 }
             }
             await this.postRepository.save(Object.assign(Object.assign({}, post), updateData), { reload: true });
-            const uploadedFiles = files.map(async (image) => {
-                try {
-                    let file;
-                    if (typeof image === 'string') {
-                        return image;
+            if (!Array.isArray(originalFiles)) {
+                originalFiles = [originalFiles];
+            }
+            let newPostImages;
+            if (newFiles) {
+                const uploadedFiles = newFiles.map(async (image) => {
+                    try {
+                        return await this.uploadService.uploadPostImageToS3('yumyumdb-post', image);
                     }
-                    else {
-                        file = image;
-                        return await this.uploadService.uploadPostImageToS3('yumyumdb-post', file);
+                    catch (err) {
+                        console.error(err);
+                        throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
                     }
-                }
-                catch (err) {
-                    console.error(err);
-                    throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
-                }
-            });
-            const results = await Promise.all(uploadedFiles);
-            const postImages = results.map((result) => {
-                if (typeof result === 'string') {
-                    return result;
-                }
-                else {
+                });
+                const results = await Promise.all(uploadedFiles);
+                newPostImages = results.map((result) => {
                     return result.postImage;
-                }
-            });
-            await this.imageRepository.updatePostImages(postImages, post);
+                });
+            }
+            await this.imageRepository.updatePostImages(newPostImages, originalFiles, post);
             if (myListId) {
                 await this.myListService.myListUpdatePosting(id, myListId);
             }

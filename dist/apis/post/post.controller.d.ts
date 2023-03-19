@@ -43,7 +43,7 @@ export declare class PostController {
     createPost(files: Array<Express.Multer.File>, data: CreatePostDto, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }: CreateRestaurantDto, currentUser: any): Promise<{
         postId: number;
     }>;
-    updatePost(files: Array<Express.Multer.File | string>, postId: number, data: Partial<UpdatePostDto>, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }: Partial<CreateRestaurantDto>): Promise<{
+    updatePost(files: Array<Express.Multer.File>, postId: number, data: Partial<UpdatePostDto>, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }: Partial<CreateRestaurantDto>): Promise<{
         postId: number;
     }>;
     deletePost(postId: number): Promise<void>;

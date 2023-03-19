@@ -9,7 +9,6 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
-type Image = string | Express.Multer.File;
 export declare class PostService {
     private postRepository;
     private commentRepository;
@@ -58,7 +57,7 @@ export declare class PostService {
     createPost(userId: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListIds: number[], content: string, rating: number, visibility: any, hashtagNames: string[], files: Express.Multer.File[]): Promise<{
         postId: number;
     }>;
-    updatePost(id: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListId: number[], content: string, rating: number, visibility: any, hashtagNames: string[], files: Image[]): Promise<{
+    updatePost(id: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListId: number[], content: string, rating: number, visibility: any, hashtagNames: string[], newFiles: Express.Multer.File[], originalFiles: string[]): Promise<{
         postId: number;
     }>;
     deletePost(id: number): Promise<void>;
@@ -78,4 +77,3 @@ export declare class PostService {
         visibility: "public" | "private";
     }[]>;
 }
-export {};
