@@ -10,7 +10,6 @@ import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
 import { In } from 'typeorm';
-
 import { Comment } from '../comment/entities/comment.entity';
 import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
@@ -29,12 +28,18 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    private readonly likeService: PostLikeService,
+    private imageRepository: ImageRepository,
+    private readonly postHashtagService: PostHashtagService,
+    private readonly restaurantService: RestaurantService,
+    private readonly uploadService: UploadService,
   ) {}
 
   /*
-    ### 23.03.19
-    ### 표정훈, 이드보라
-    ### MyList 상세보기
+    ### 23.03.14
+    ### 표정훈
+    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
     */
 
   async getMyListDetail(userId: number, collectionId: number) {
@@ -98,6 +103,13 @@ export class MyListService {
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
 
+  /* 로직 설명
+      1. 맛집상세리스트 PAGE2에 있는 맛집을 클릭한다. (레스토랑ID)
+      2. 콜렉션 아이템에 있는 레스토랑아이디와 콜렉션아이디가 둘다 일치하는 정보를 찾는다.
+      3. 레스토랑의 정보와 게시물 정보를 가져온다
+      레스토랑 정보: 가게이름, 업종(카페), 주소
+      포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등 
+    */
   async getMyListsDetailPost(
     userId: number,
     restaurantId: number,
@@ -110,7 +122,7 @@ export class MyListService {
           deleted_at: null,
           visibility: 'public',
           user: { id: userId },
-          collectionItems: { id: collectionId },
+          restaurant: { id: restaurantId },
         },
         select: {
           id: true,
@@ -439,7 +451,7 @@ export class MyListService {
   }
 
   /*
-    ### 23.03.15
+    ### 23.03.17
     ### 표정훈
     ### MyList 포스팅 업데이트🔥
     */
@@ -464,7 +476,7 @@ export class MyListService {
       // 2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
       await this.collectionItemRepository.remove(findPostId);
       // 3. 입력받은 정보로 모두 넣어준다.
-      await this.myListPlusPosting(postId, collectionId);
+      this.myListPlusPosting(postId, collectionId);
       return;
     } catch (err) {
       if (err instanceof NotFoundException) {
