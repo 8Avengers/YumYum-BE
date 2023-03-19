@@ -192,6 +192,10 @@ export class PostService {
         where: { deleted_at: null, post: { id: postId } },
       });
 
+      const myList = post[0].collectionItems.map((item) => ({
+        id: item.collection.id,
+      }));
+
       return {
         id: post[0].id,
         content: post[0].content,
@@ -204,7 +208,7 @@ export class PostService {
         hashtags,
         isLiked,
         totalComments,
-        myList: post[0].collectionItems[0].collection,
+        myList,
         visibility: post[0].visibility,
       };
     } catch (err) {
