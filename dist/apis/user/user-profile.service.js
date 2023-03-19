@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserProfileService = void 0;
 const upload_service_1 = require("./../upload/upload.service");
 const common_1 = require("@nestjs/common");
+const bcrypt = require("bcrypt");
 const typeorm_1 = require("typeorm");
 const typeorm_2 = require("@nestjs/typeorm");
 const user_entity_1 = require("./entities/user.entity");
@@ -96,9 +97,18 @@ let UserProfileService = class UserProfileService {
         if (!existingUser) {
             throw new common_1.UnprocessableEntityException('존재하지 않는 유저입니다..');
         }
-        const result = await this.userRepository.softDelete({ id: user.id });
-        console.log(result);
-        return result.affected ? true : false;
+        try {
+            const result = await this.userRepository.softDelete({ id: user.id });
+            console.log('result결과값', result);
+            return result.affected ? true : false;
+        }
+        catch (error) {
+            console.error('Error in soft deleting the user:', error);
+            throw new common_1.InternalServerErrorException('An error occurred while soft deleting the user.');
+        }
+    }
+    async comparePasswords(plainPassword, hashedPassword) {
+        return await bcrypt.compare(plainPassword, hashedPassword);
     }
     async checkUserFollowRelation(followerId, followingId) {
         const follow = await this.FollowRepository.findOne({
@@ -153,14 +163,9 @@ let UserProfileService = class UserProfileService {
         if (!following) {
             throw new common_1.NotFoundException('User not found');
         }
-        console.log('여기오나1');
         const follow = await this.FollowRepository.query('SELECT * FROM follow WHERE follower_id = ? AND following_id = ?', [follower.id, Number(followingId)]);
-        console.log('follow 테이블의 id는?', follow);
-        console.log('여기오나2');
         try {
             const follow = await this.FollowRepository.query('SELECT * FROM follow WHERE follower_id = ? AND following_id = ?', [follower.id, Number(followingId)]);
-            console.log('follow 테이블의 id는?', follow);
-            console.log('여기오나2');
             if (follow) {
                 const result = await this.FollowRepository.query('DELETE FROM follow WHERE id = ?', [follow[0].id]);
                 if (result.affectedRows === 1) {

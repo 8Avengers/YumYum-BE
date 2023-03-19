@@ -49,9 +49,16 @@ let UserSignupService = class UserSignupService {
         try {
             const user = await this.userRepository.findOne({
                 where: { email },
+                withDeleted: true,
             });
-            if (user)
-                throw new common_2.ConflictException('이미 등록된 이메일입니다.');
+            if (user) {
+                if (user.deleted_at) {
+                    throw new common_2.ConflictException('이미 탈퇴한 회원입니다.');
+                }
+                else {
+                    throw new common_2.ConflictException('이미 등록된 이메일입니다.');
+                }
+            }
             const nicknameExists = await this.userRepository.findOne({
                 where: { nickname },
             });

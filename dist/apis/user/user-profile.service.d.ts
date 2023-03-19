@@ -23,6 +23,7 @@ export declare class UserProfileService {
         profile_image: string;
     }>;
     deleteUser(user: any): Promise<boolean>;
+    comparePasswords(plainPassword: string, hashedPassword: string): Promise<boolean>;
     checkUserFollowRelation(followerId: number, followingId: number): Promise<boolean>;
     followUser(follower: User, followingId: number): Promise<User>;
     getFollowByFollowerAndFollowingIds(followerId: number, followingId: number): Promise<Follow>;
