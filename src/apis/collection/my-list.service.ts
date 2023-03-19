@@ -10,6 +10,12 @@ import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
 import { In } from 'typeorm';
+import { Comment } from '../comment/entities/comment.entity';
+import { PostLikeService } from '../post/post-like.service';
+import { ImageRepository } from '../post/image.repository';
+import { PostHashtagService } from '../post/post-hashtag.service';
+import { RestaurantService } from '../restaurant/restaurant.service';
+import { UploadService } from '../upload/upload.service';
 
 @Injectable()
 export class MyListService {
@@ -20,6 +26,12 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    private readonly likeService: PostLikeService,
+    private imageRepository: ImageRepository,
+    private readonly postHashtagService: PostHashtagService,
+    private readonly restaurantService: RestaurantService,
+    private readonly uploadService: UploadService,
   ) {}
 
   /*
@@ -39,15 +51,24 @@ export class MyListService {
         },
         where: {
           user_id: userId,
+
           deletedAt: null,
           type: 'myList',
           id: collectionId,
         },
-        select: { name: true, description: true, image: true },
+        select: { id: true, name: true },
+      });
+
+      // 해당 postId랑 일치하는 이미지 가져오기
+      const postImage = await this.imageRepository.find({
+        where: {
+          post: { id: myLists[0].collectionItems[0].post.id },
+        },
       });
 
       // post가 null일 경우 rating 대신 null 값을 반환
       const myListsDetail = myLists.map((list) => ({
+        id: list.id,
         name: list.name,
         description: list.description,
         image: list.image,
@@ -63,8 +84,8 @@ export class MyListService {
           },
         })),
       }));
-      console.log(myListsDetail);
-      return myListsDetail;
+      console.log(myListsDetail, postImage);
+      return [myListsDetail, postImage];
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -72,6 +93,89 @@ export class MyListService {
       );
     }
   }
+
+  /*
+  ### 23.03.13
+  ### 이드보라
+  ### 포스팅 상세보기.좋아요 기능 추가. 불러오는 유저 정보 수정
+  hashtags 135번째 문제발생...
+  */
+  async getPostById(postId: number, userId: number) {
+    try {
+      const post = await this.postRepository.find({
+        where: { id: postId, deleted_at: null, visibility: 'public' },
+        select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          visibility: true,
+          restaurant: {
+            kakao_place_id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+          collectionItems: { id: true, collection: { id: true } },
+        },
+        relations: {
+          user: true,
+          restaurant: true,
+          hashtags: true,
+          images: true,
+          collectionItems: {
+            collection: true,
+          },
+        },
+      });
+
+      if (!post) {
+        throw new NotFoundException(`존재하지 않는 포스트입니다.`);
+      }
+
+      const totalLikes = await this.likeService.getLikesForPost(postId);
+
+      const hashtags = post[0].hashtags.map(({ name }) => ({ name }));
+
+      const { isLiked } = await this.likeService.getLikedStatusforOnePost(
+        postId,
+        userId,
+      );
+
+      const totalComments = await this.commentRepository.count({
+        where: { deleted_at: null, post: { id: postId } },
+      });
+
+      return {
+        id: post[0].id,
+        content: post[0].content,
+        rating: post[0].rating,
+        updated_at: post[0].updated_at,
+        user: post[0].user,
+        restaurant: post[0].restaurant,
+        images: post[0].images,
+        totalLikes,
+        hashtags,
+        isLiked,
+        totalComments,
+        myList: post[0].collectionItems,
+        visibility: post[0].visibility,
+      };
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
   /*
     ### 23.03.15
     ### 표정훈
@@ -98,15 +202,19 @@ export class MyListService {
           collection: { id: collectionId },
         },
         select: {
-          restaurant: {
-            id: true,
-            category_group_name: true,
-            road_address_name: true,
-            place_name: true,
-          },
           post: {
+            id: true,
             content: true,
             rating: true,
+            restaurant: {
+              id: true,
+              address_name: true,
+              category_name: true,
+              kakao_place_id: true,
+              place_name: true,
+              road_address_name: true,
+            },
+            user: { id: true, nickname: true, profile_image: true },
           },
         },
         relations: ['restaurant', 'post'],
@@ -375,7 +483,7 @@ export class MyListService {
   }
 
   /*
-    ### 23.03.15
+    ### 23.03.17
     ### 표정훈
     ### MyList 포스팅 업데이트🔥
     */

@@ -9,7 +9,7 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { BookmarkService } from './bookmark.service';
@@ -17,6 +17,7 @@ import { BookmarPostDto } from './dto/bookmark-post.dto';
 import { BookmarRastaurantDto } from './dto/bookmark-restaurant.dto';
 import { CreateCollectionDto } from './dto/create-bookmark.dto';
 
+@ApiTags('Bookmarks')
 @Controller('bookmarks')
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
@@ -42,7 +43,7 @@ export class BookmarkController {
       ### 표정훈
       ### 컬렉션 상세 보기🔥
       */
-  @Get('/collections/:collectionId')
+  @Get('/collections/detail/:collectionId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 상세조회' })
   @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
