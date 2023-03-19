@@ -115,7 +115,7 @@ export class UserProfileService {
   }
 
   //유저 탈퇴하기 TypeORM이 제공하는 SoftDelete
-  async deleteUser(user, password) {
+  async deleteUser(user) {
     const existingUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
@@ -124,18 +124,25 @@ export class UserProfileService {
       throw new UnprocessableEntityException('존재하지 않는 유저입니다..');
     }
 
-    const passwordMatch = await this.comparePasswords(
-      password,
-      existingUser.password,
-    );
+    // const passwordMatch = await this.comparePasswords(
+    //   password,
+    //   existingUser.password,
+    // );
 
-    if (!passwordMatch) {
-      throw new UnprocessableEntityException('Incorrect password provided.');
+    // if (!passwordMatch) {
+    //   throw new UnprocessableEntityException('Incorrect password provided.');
+    // }
+
+    try {
+      const result = await this.userRepository.softDelete({ id: user.id });
+      console.log('result결과값', result);
+      return result.affected ? true : false;
+    } catch (error) {
+      console.error('Error in soft deleting the user:', error);
+      throw new InternalServerErrorException(
+        'An error occurred while soft deleting the user.',
+      );
     }
-
-    const result = await this.userRepository.softDelete({ id: user.id });
-    console.log(result);
-    return result.affected ? true : false;
   }
 
   async comparePasswords(
