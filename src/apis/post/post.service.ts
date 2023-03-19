@@ -18,7 +18,7 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
-type Image = string | Express.Multer.File;
+// type Image = string | Express.Multer.File;
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -344,7 +344,8 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
-    files: Image[],
+    newFiles: Express.Multer.File[],
+    originalFiles: string[],
   ) {
     try {
       const post = await this.postRepository.findOne({
@@ -410,39 +411,40 @@ export class PostService {
         { reload: true },
       );
 
-      // await this.imageRepository.updatePostImages(post, images);
-      const uploadedFiles = files.map(async (image) => {
-        try {
-          let file: Express.Multer.File;
-          if (typeof image === 'string') {
-            return image;
-          } else {
-            file = image;
+      if (!Array.isArray(originalFiles)) {
+        originalFiles = [originalFiles];
+      }
+
+      let newPostImages;
+      if (newFiles) {
+        const uploadedFiles = newFiles.map(async (image) => {
+          try {
             return await this.uploadService.uploadPostImageToS3(
               'yumyumdb-post',
-              file,
+              image,
+            );
+          } catch (err) {
+            console.error(err);
+            throw new InternalServerErrorException(
+              'Something went wrong while processing your request. Please try again later.',
             );
           }
-        } catch (err) {
-          console.error(err);
-          throw new InternalServerErrorException(
-            'Something went wrong while processing your request. Please try again later.',
-          );
-        }
-      });
-
-      const results = await Promise.all(uploadedFiles);
-      const postImages = results.map((result) => {
-        if (typeof result === 'string') {
-          return result;
-        } else {
+        });
+        const results = await Promise.all(uploadedFiles);
+        newPostImages = results.map((result) => {
           return result.postImage;
-        }
-      });
+        });
 
-      await this.imageRepository.updatePostImages(postImages, post);
+        // postImages = originalFiles.concat(
+        //   newPostImages.map((newPostImage) => newPostImage.postImage),
+        // );
+      }
 
-      // await this.imageRepository.updatePostImages(results.postImage, post);
+      await this.imageRepository.updatePostImages(
+        newPostImages,
+        originalFiles,
+        post,
+      );
 
       if (myListId) {
         await this.myListService.myListUpdatePosting(id, myListId);
