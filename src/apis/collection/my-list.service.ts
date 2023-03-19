@@ -28,10 +28,8 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
-    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
-  ) // private readonly likeService: PostLikeService,
-  // private imageRepository: ImageRepository,
-  // private readonly postHashtagService: PostHashtagService,
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>, // private readonly likeService: PostLikeService, // private imageRepository: ImageRepository,
+  ) // private readonly postHashtagService: PostHashtagService,
   // private readonly restaurantService: RestaurantService,
   // private readonly uploadService: UploadService,
   {}
@@ -42,7 +40,7 @@ export class MyListService {
     ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
     */
 
-  async getMyListDetail(userId: number, collectionId: number) {
+  async getMyListDetail(collectionId: number) {
     try {
       // 컬렉션 이름과 포스트 정보 가져오기
       const myList = await this.collectionRepository.find({
@@ -53,7 +51,7 @@ export class MyListService {
         },
         where: {
           id: collectionId,
-          user_id: userId,
+          // user_id: userId,
           deletedAt: null,
           type: 'myList',
         },

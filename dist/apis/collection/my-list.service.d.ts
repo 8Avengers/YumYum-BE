@@ -10,7 +10,7 @@ export declare class MyListService {
     private postRepository;
     private commentRepository;
     constructor(collectionRepository: Repository<Collection>, collectionItemRepository: Repository<CollectionItem>, postRepository: Repository<Post>, commentRepository: Repository<Comment>);
-    getMyListDetail(userId: number, collectionId: number): Promise<{
+    getMyListDetail(collectionId: number): Promise<{
         id: number;
         name: string;
         visibility: "public" | "private";
