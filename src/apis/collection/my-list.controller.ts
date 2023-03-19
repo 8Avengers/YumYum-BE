@@ -134,9 +134,27 @@ export class MyListController {
   }
 
   /*
+    ### 23.03.20
+    ### 표정훈
+    ### MyList 수정조회
+    */
+
+  @Get('/collections/update/:collectionId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 수정조회' })
+  @ApiResponse({ status: 200, description: 'MyList 수정조회 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 수정조회 실패' })
+  async getMyListInfo(
+    // @Param('userId') userId: number,
+    @Param('collectionId') collectionId: number,
+  ) {
+    return this.myListService.getMyListInfo(collectionId);
+  }
+
+  /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 수정
+    ### MyList 수정 
     */
 
   @Put('/collections/:collectionId')
