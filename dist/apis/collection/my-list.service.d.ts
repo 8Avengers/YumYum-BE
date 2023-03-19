@@ -1,0 +1,70 @@
+import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
+import { Collection } from './entities/collection.entity';
+import { Repository } from 'typeorm/repository/Repository';
+import { CollectionItem } from './entities/collection-item.entity';
+import { Post } from '../post/entities/post.entity';
+import { Comment } from '../comment/entities/comment.entity';
+export declare class MyListService {
+    private collectionRepository;
+    private collectionItemRepository;
+    private postRepository;
+    private commentRepository;
+    constructor(collectionRepository: Repository<Collection>, collectionItemRepository: Repository<CollectionItem>, postRepository: Repository<Post>, commentRepository: Repository<Comment>);
+    getMyListDetail(userId: number, collectionId: number): Promise<{
+        id: number;
+        name: string;
+        visibility: "public" | "private";
+        post: {
+            restaurant: Restaurant;
+            images: import("../post/entities/image.entity").Image[];
+            id: number;
+            content: string;
+            rating: number;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date;
+            visibility: "public" | "private";
+            postLikes: import("../post/entities/post-like.entity").PostLike[];
+            comments: Comment[];
+            user: import("../user/entities/user.entity").User;
+            hashtags: import("../post/entities/hashtag.entity").Hashtag[];
+            collectionItems: CollectionItem[];
+            postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
+        }[];
+    }[]>;
+    getMyListsName(userId: number): Promise<Collection[]>;
+    getMyListsMe(userId: number): Promise<{
+        collectionItems: CollectionItem[];
+        id: number;
+        type: string;
+        name: string;
+        description: string;
+        image: string;
+        user_id: number;
+        visibility: "public" | "private";
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date;
+        user: import("../user/entities/user.entity").User;
+    }[]>;
+    getMyListsAll(userId: number): Promise<{
+        collectionItems: CollectionItem[];
+        id: number;
+        type: string;
+        name: string;
+        description: string;
+        image: string;
+        user_id: number;
+        visibility: "public" | "private";
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date;
+        user: import("../user/entities/user.entity").User;
+    }[]>;
+    createMyList(userId: number, name: string, type: 'myList'): Promise<import("typeorm").InsertResult>;
+    updateMyList(userId: number, collectionId: number, name: string, image: string, description: string, visibility: 'public' | 'private'): Promise<void>;
+    deleteMyList(userId: number, id: number): Promise<void>;
+    myListPlusPosting(postId: number, collectionId: number[]): Promise<void>;
+    myListMinusPosting(postId: number, collectionId: number): Promise<void>;
+    myListUpdatePosting(postId: number, collectionId: number[]): Promise<void>;
+}
