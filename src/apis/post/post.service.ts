@@ -204,7 +204,7 @@ export class PostService {
         hashtags,
         isLiked,
         totalComments,
-        myList: post[0].collectionItems,
+        myList: post[0].collectionItems[0].collection,
         visibility: post[0].visibility,
       };
     } catch (err) {
@@ -435,12 +435,13 @@ export class PostService {
           return result.postImage;
         }
       });
+
       await this.imageRepository.updatePostImages(postImages, post);
 
       // await this.imageRepository.updatePostImages(results.postImage, post);
 
       if (myListId) {
-        await this.myListService.myListPlusPosting(id, myListId);
+        await this.myListService.myListUpdatePosting(id, myListId);
       }
 
       return { postId: id };
