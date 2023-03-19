@@ -350,21 +350,23 @@ export class PostService {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
 
-      const createdRestaurant = await this.restaurantService.createRestaurant(
-        address_name,
-        category_group_code,
-        category_group_name,
-        category_name,
-        kakao_place_id,
-        phone,
-        place_name,
-        road_address_name,
-        x,
-        y,
-      );
+      let createdRestaurant;
 
+      if (kakao_place_id) {
+        createdRestaurant = await this.restaurantService.createRestaurant(
+          address_name,
+          category_group_code,
+          category_group_name,
+          category_name,
+          kakao_place_id,
+          phone,
+          place_name,
+          road_address_name,
+          x,
+          y,
+        );
+      }
       const restaurantId = createdRestaurant;
-
       const updateData: any = {};
       if (restaurantId) {
         updateData.restaurant = { id: restaurantId };
