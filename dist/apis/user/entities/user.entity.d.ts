@@ -1,0 +1,31 @@
+import { Post } from '../../post/entities/post.entity';
+import { PostLike } from '../../post/entities/post-like.entity';
+import { Comment } from '../../comment/entities/comment.entity';
+import { PostUserTag } from '../../post/entities/post-usertag.entity';
+import { CommentLike } from '../../comment/entities/comment-like.entity';
+import { CommentUserTag } from '../../comment/entities/comment-usertag.entity';
+import { Collection } from '../../collection/entities/collection.entity';
+export declare class User {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+    nickname: string;
+    phone_number: string;
+    gender: 'M' | 'F';
+    birth: Date;
+    introduce: string;
+    profile_image: string;
+    followerCount: number;
+    followingCount: number;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date;
+    posts: Post[];
+    postLikes: PostLike[];
+    postUserTags: PostUserTag[];
+    comments: Comment[];
+    commentLikes: CommentLike[];
+    commentUserTags: CommentUserTag[];
+    collections: Collection[];
+}
