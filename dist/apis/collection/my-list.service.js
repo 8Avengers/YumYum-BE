@@ -27,7 +27,7 @@ let MyListService = class MyListService {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
     }
-    async getMyListDetail(userId, collectionId) {
+    async getMyListDetail(collectionId) {
         try {
             const myList = await this.collectionRepository.find({
                 relations: {
@@ -37,7 +37,6 @@ let MyListService = class MyListService {
                 },
                 where: {
                     id: collectionId,
-                    user_id: userId,
                     deletedAt: null,
                     type: 'myList',
                 },
