@@ -28,7 +28,7 @@ export class MyListController {
   /*
     ### 23.03.19
     ### 표정훈
-    ### MyList 상세보기
+    ### MyList 상세보기!
     */
   @Get('/collections/detail/:collectionId')
   // @UseGuards(AuthAccessGuard)
