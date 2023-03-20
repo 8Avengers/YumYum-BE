@@ -48,23 +48,23 @@ export class MyListController {
     ### 표정훈
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
-  // @Get('/collections/detail/posts/:collectionId/:restaurantId')
-  // @UseGuards(AuthAccessGuard)
-  // @ApiOperation({ summary: 'MyList 상세 더보기' })
-  // @ApiResponse({ status: 200, description: 'MyList 상세 더보기 성공' })
-  // @ApiResponse({ status: 400, description: 'MyList 상세 더보기 실패' })
-  // async getMyListsDetailPost(
-  //   @Param('restaurantId') restaurantId: number,
-  //   @Param('collectionId') collectionId: number,
-  //   @CurrentUser() currentUser: any,
-  // ) {
-  //   const myLists = await this.postService.getMyListsDetailPost(
-  //     currentUser.id,
-  //     restaurantId,
-  //     collectionId,
-  //   );
-  //   return await myLists;
-  // }
+  @Get('/collections/detail/posts/:collectionId/:restaurantId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 상세 더보기' })
+  @ApiResponse({ status: 200, description: 'MyList 상세 더보기 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 상세 더보기 실패' })
+  async getMyListsDetailPost(
+    @Param('restaurantId') restaurantId: number,
+    @Param('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    const myLists = await this.myListService.getMyListsDetailPost(
+      currentUser.id,
+      restaurantId,
+      collectionId,
+    );
+    return await myLists;
+  }
 
   /*
     ### 23.03.14

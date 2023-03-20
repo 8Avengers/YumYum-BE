@@ -35,7 +35,14 @@ import { PostModule } from '../post/post.module';
     forwardRef(() => PostModule),
   ],
   controllers: [BookmarkController, MyListController],
-  providers: [BookmarkService, MyListService],
+  providers: [
+    BookmarkService,
+    MyListService,
+    PostHashtagService,
+    PostService,
+    PostLikeService,
+    ImageRepository,
+  ],
   exports: [MyListService, TypeOrmModule],
 })
 export class CollectionModule {}
