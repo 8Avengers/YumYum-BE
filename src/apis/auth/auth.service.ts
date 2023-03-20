@@ -135,3 +135,40 @@ export class AuthService {
 //     },
 //   };
 // }
+
+// //소셜로그인 API TEST
+// async loginOauthTest({ user, res }) {
+//   console.log('oauth 끝나면 나오는 유저찍어보자', user);
+
+//   try {
+//     // 1. 가입확인
+//     const existingUser = await this.userSignupService.findOne({
+//       email: user.email,
+//     });
+
+//     // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
+//     if (!existingUser) {
+//       user = await this.userSignupService.createOauthUser({
+//         email: user.email,
+//         nickname: user.nickname,
+//         name: user.name,
+//       });
+//     }
+//   } catch (error) {
+//     if (error instanceof ConflictException) {
+//       console.error(`Error:  ${error.message}`);
+//     } else {
+//       throw error;
+//     }
+//   }
+
+//   // 3. 로그인 : 소셜 로그인했지만, 우리서비스에서 로그인한 것처럼 AT,RT발급
+//   const accessToken = await this.createAccessToken({ user });
+//   const refreshToken = await this.createRefreshToken({ user });
+
+//   this.createRefreshToken({ user }); //자기 자신의 리프레시 토큰을 가지고 오는 것이다.이제 req, res만 밖에서 받아오면 된다.
+//   res.redirect(
+//     'http://localhost:5501/frontend/social-login.html',
+//     //구글 로그인 성공후 처음 접속하게 될 페이지로 리다이렉트하는 것이다
+//   );
+// }

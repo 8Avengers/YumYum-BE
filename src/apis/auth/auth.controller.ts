@@ -164,3 +164,44 @@ export class AuthController {
 // }> {
 //   return this.authService.signupOauth({ user });
 // }
+
+// //구글로그인TEST
+// @loginGoogle() //스웨거전용커스텀데코레이터
+// @Get('/login/google')
+// @UseGuards(AuthGuard('google'))
+// async loginGoogle(
+//   @CurrentUser() user: OauthUserDto, //
+//   @Res() res: Response,
+// ) {
+//   this.authService.loginOauthTest({ user, res });
+// }
+
+// //카카오로그인TEST
+// @loginKakao() //스웨거전용커스텀데코레이터
+// @Get('/login/kakao')
+// @UseGuards(AuthGuard('kakao'))
+// async loginKakao(
+//   @CurrentUser() user: OauthUserDto, //
+//   @Res() res: Response,
+// ) {
+//   // this.authService.loginOauthTest({ user, res });
+
+//   res.redirect(
+//     'http://localhost:5501/frontend/social-login.html',
+//     //구글 로그인 성공후 처음 접속하게 될 페이지로 리다이렉트하는 것이다
+//   );
+// }
+
+// //네이버로그인TEST
+// @loginNaver() //스웨거전용커스텀데코레이터
+// @Get('/login/naver')
+// @UseGuards(AuthGuard('naver'))
+// async loginNaver(
+//   @CurrentUser() user: OauthUserDto, //
+//   @Res() res: Response,
+// ) {
+//   res.redirect(
+//     'http://localhost:5501/frontend/social-login.html',
+//     //구글 로그인 성공후 처음 접속하게 될 페이지로 리다이렉트하는 것이다
+//   );
+// }
