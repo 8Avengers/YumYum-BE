@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-kakao';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Injectable()
 export class JwtKakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   constructor() {
     super({
-      clientID: 'eeee492427b93e266e8aee30e1563978', //RESTAPI키
-      clientSecret: 'chGVh4I1tPP8Xfg86FOGcB1ph0WyXXY3', //활성화
-      callbackURL: 'http://localhost:3000/login/kakao',
+      clientID: process.env.KAKAO_CLIENTID_RESTAPI, //RESTAPI키
+      clientSecret: process.env.KAKAO_CLIENTSECRET, //활성화
+      callbackURL: process.env.KAKAO_CALLBACKURL,
       scope: ['account_email', 'profile_nickname'],
     });
   }

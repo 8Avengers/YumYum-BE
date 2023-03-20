@@ -43,47 +43,10 @@ let AuthService = class AuthService {
         });
         return refreshToken;
     }
-    async signupOauth({ user }) {
-        console.log('oauth 끝나면 나오는 유저찍어보자', user);
-        let existingUser = await this.userSignupService.findOne({
-            email: user.email,
-        });
-        if (existingUser)
-            throw new common_1.ConflictException('이미 등록된 이메일입니다. 소셜로그인해주세요.');
-        try {
-            if (!existingUser) {
-                user = await this.userSignupService.createOauthUser({
-                    email: user.email,
-                    nickname: user.nickname,
-                    name: user.name,
-                });
-            }
-        }
-        catch (error) {
-            if (error instanceof common_1.ConflictException) {
-                console.error(`Error:  ${error.message}`);
-            }
-            else {
-                throw error;
-            }
-        }
-        const accessToken = await this.createAccessToken({ user });
-        const refreshToken = await this.createRefreshToken({ user });
-        return {
-            refreshToken,
-            accessToken,
-            user: {
-                userId: user.id,
-                nickname: user.nickname,
-                email: user.email,
-                profileImage: user.profile_image,
-            },
-        };
-    }
     async loginOauth({ user }) {
         console.log('oauth 끝나면 나오는 유저찍어보자', user);
         try {
-            let existingUser = await this.userSignupService.findOne({
+            const existingUser = await this.userSignupService.findOne({
                 email: user.email,
             });
             if (!existingUser) {

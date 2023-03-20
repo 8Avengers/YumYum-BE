@@ -13,12 +13,14 @@ exports.JwtKakaoStrategy = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_kakao_1 = require("passport-kakao");
+const dotenv = require("dotenv");
+dotenv.config();
 let JwtKakaoStrategy = class JwtKakaoStrategy extends (0, passport_1.PassportStrategy)(passport_kakao_1.Strategy, 'kakao') {
     constructor() {
         super({
-            clientID: 'eeee492427b93e266e8aee30e1563978',
-            clientSecret: 'chGVh4I1tPP8Xfg86FOGcB1ph0WyXXY3',
-            callbackURL: 'http://localhost:3000/login/kakao',
+            clientID: process.env.KAKAO_CLIENTID_RESTAPI,
+            clientSecret: process.env.KAKAO_CLIENTSECRET,
+            callbackURL: process.env.KAKAO_CALLBACKURL,
             scope: ['account_email', 'profile_nickname'],
         });
     }

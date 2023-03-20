@@ -1,14 +1,16 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { Strategy, Profile } from 'passport-naver';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Injectable()
 export class JwtNaverStrategy extends PassportStrategy(Strategy, 'naver') {
   constructor() {
     super({
-      clientID: '3NECxObNoFoTyWJWe4bs',
-      clientSecret: '6aXyVRv8gB',
-      callbackURL: 'http://localhost:3000/login/naver',
+      clientID: process.env.NAVER_CLIENTID,
+      clientSecret: process.env.NAVER_CLIENTSECRET,
+      callbackURL: process.env.NAVER_CALLBACKURL,
       scope: ['email', 'profile'],
     });
   }

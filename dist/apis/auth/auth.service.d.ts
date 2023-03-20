@@ -12,18 +12,6 @@ export declare class AuthService {
     createRefreshToken({ user }: {
         user: any;
     }): string;
-    signupOauth({ user }: {
-        user: any;
-    }): Promise<{
-        refreshToken: string;
-        accessToken: string;
-        user: {
-            userId: any;
-            nickname: any;
-            email: any;
-            profileImage: any;
-        };
-    }>;
     loginOauth({ user }: {
         user: any;
     }): Promise<{

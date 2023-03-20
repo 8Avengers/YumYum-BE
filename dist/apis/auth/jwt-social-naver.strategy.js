@@ -13,12 +13,14 @@ exports.JwtNaverStrategy = void 0;
 const passport_1 = require("@nestjs/passport");
 const common_1 = require("@nestjs/common");
 const passport_naver_1 = require("passport-naver");
+const dotenv = require("dotenv");
+dotenv.config();
 let JwtNaverStrategy = class JwtNaverStrategy extends (0, passport_1.PassportStrategy)(passport_naver_1.Strategy, 'naver') {
     constructor() {
         super({
-            clientID: '3NECxObNoFoTyWJWe4bs',
-            clientSecret: '6aXyVRv8gB',
-            callbackURL: 'http://localhost:3000/login/naver',
+            clientID: process.env.NAVER_CLIENTID,
+            clientSecret: process.env.NAVER_CLIENTSECRET,
+            callbackURL: process.env.NAVER_CALLBACKURL,
             scope: ['email', 'profile'],
         });
     }

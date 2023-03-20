@@ -74,19 +74,6 @@ export class AuthController {
     };
   }
 
-  //구글회원가입
-  @signupGoogle() //스웨거전용커스텀데코레이터
-  @Get('/signup/google')
-  @UseGuards(AuthGuard('google'))
-  async signupGoogle(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.signupOauth({ user });
-  }
-
   //구글로그인
   @loginGoogle() //스웨거전용커스텀데코레이터
   @Get('/login/google')
@@ -100,17 +87,17 @@ export class AuthController {
     return this.authService.loginOauth({ user });
   }
 
-  //네이버회원가입
-  @signupNaver() //스웨거전용커스텀데코레이터
-  @Get('/signup/naver')
-  @UseGuards(AuthGuard('naver'))
-  async signupNaver(
+  //카카오로그인
+  @loginKakao() //스웨거전용커스텀데코레이터
+  @Get('/login/kakao')
+  @UseGuards(AuthGuard('kakao'))
+  async loginKakao(
     @CurrentUser() user: OauthUserDto, //
   ): Promise<{
     accessToken: string;
     refreshToken: string;
   }> {
-    return this.authService.signupOauth({ user });
+    return this.authService.loginOauth({ user });
   }
 
   //네이버로그인
@@ -126,53 +113,54 @@ export class AuthController {
     return this.authService.loginOauth({ user });
   }
 
-  //카카오회원가입
-  @signupKakao() //스웨거전용커스텀데코레이터
-  @Get('/signup/kakao')
-  @UseGuards(AuthGuard('kakao'))
-  async signupKakao(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.signupOauth({ user });
-  }
-
-  //카카오로그인
-  @loginKakao() //스웨거전용커스텀데코레이터
-  @Get('/login/naver')
-  @UseGuards(AuthGuard('kakao'))
-  async loginKakao(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.loginOauth({ user });
-  }
-
-  //AccessToken 재발급 API
-  // @UseGuards(AuthAccessGuard)
-  //userGuards를 통과하면, user가 통과되었다 refresh토큰에 user정보가 담겨!
-  //UseGuards 가 전역에서 사용이 가능할까?
-  //useGuards가 전역에서 사용이 가능하도록 해야한다.
-  //useGuards가 => 이걸 어떻게 전역에서 사용할 수 있을까?
-
-  // @UseGuards(AuthAccessGuard)
   @UseGuards(AuthRefreshGuard)
   @restoreAccessToken() //스웨거전용커스텀데코레이터
   @Post('/restore-access-token')
   async restoreAccessToken(
     @CurrentUser() currentUser: any, // @Req() req, // @Request() req,//
   ) {
-    // console.log('UseGuards통과한후 req::::::: 찍어보자 ', req.user);
-    // console.log('currentUser::::::::::::::::::::', currentUser);
-    // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
-
     const accessToken = this.authService.createAccessToken({
       user: currentUser,
     });
     return { accessToken };
   }
 }
+
+// //구글회원가입
+// @signupGoogle() //스웨거전용커스텀데코레이터
+// @Get('/signup/google')
+// @UseGuards(AuthGuard('google'))
+// async signupGoogle(
+//   @CurrentUser() user: OauthUserDto, //
+// ): Promise<{
+//   accessToken: string;
+//   refreshToken: string;
+// }> {
+//   return this.authService.signupOauth({ user });
+// }
+
+// //네이버회원가입
+// @signupNaver() //스웨거전용커스텀데코레이터
+// @Get('/signup/naver')
+// @UseGuards(AuthGuard('naver'))
+// async signupNaver(
+//   @CurrentUser() user: OauthUserDto, //
+// ): Promise<{
+//   accessToken: string;
+//   refreshToken: string;
+// }> {
+//   return this.authService.signupOauth({ user });
+// }
+
+// //카카오회원가입
+// @signupKakao() //스웨거전용커스텀데코레이터
+// @Get('/signup/kakao')
+// @UseGuards(AuthGuard('kakao'))
+// async signupKakao(
+//   @CurrentUser() user: OauthUserDto, //
+// ): Promise<{
+//   accessToken: string;
+//   refreshToken: string;
+// }> {
+//   return this.authService.signupOauth({ user });
+// }

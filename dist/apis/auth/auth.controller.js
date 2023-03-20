@@ -54,22 +54,13 @@ let AuthController = class AuthController {
             },
         };
     }
-    async signupGoogle(user) {
-        return this.authService.signupOauth({ user });
-    }
     async loginGoogle(user) {
         return this.authService.loginOauth({ user });
     }
-    async signupNaver(user) {
-        return this.authService.signupOauth({ user });
-    }
-    async loginNaver(user) {
+    async loginKakao(user) {
         return this.authService.loginOauth({ user });
     }
-    async signupKakao(user) {
-        return this.authService.signupOauth({ user });
-    }
-    async loginKakao(user) {
+    async loginNaver(user) {
         return this.authService.loginOauth({ user });
     }
     async restoreAccessToken(currentUser) {
@@ -88,15 +79,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginEmail", null);
 __decorate([
-    (0, auth_decorators_1.signupGoogle)(),
-    (0, common_1.Get)('/signup/google'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "signupGoogle", null);
-__decorate([
     (0, auth_decorators_1.loginGoogle)(),
     (0, common_1.Get)('/login/google'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
@@ -106,14 +88,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginGoogle", null);
 __decorate([
-    (0, auth_decorators_1.signupNaver)(),
-    (0, common_1.Get)('/signup/naver'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('naver')),
+    (0, auth_decorators_1.loginKakao)(),
+    (0, common_1.Get)('/login/kakao'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "signupNaver", null);
+], AuthController.prototype, "loginKakao", null);
 __decorate([
     (0, auth_decorators_1.loginNaver)(),
     (0, common_1.Get)('/login/naver'),
@@ -123,24 +105,6 @@ __decorate([
     __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginNaver", null);
-__decorate([
-    (0, auth_decorators_1.signupKakao)(),
-    (0, common_1.Get)('/signup/kakao'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "signupKakao", null);
-__decorate([
-    (0, auth_decorators_1.loginKakao)(),
-    (0, common_1.Get)('/login/naver'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "loginKakao", null);
 __decorate([
     (0, common_1.UseGuards)(auth_guards_1.AuthRefreshGuard),
     (0, auth_decorators_1.restoreAccessToken)(),

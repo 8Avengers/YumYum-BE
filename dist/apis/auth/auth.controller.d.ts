@@ -16,27 +16,15 @@ export declare class AuthController {
             profileImage: string;
         };
     }>;
-    signupGoogle(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
     loginGoogle(user: OauthUserDto): Promise<{
         accessToken: string;
         refreshToken: string;
     }>;
-    signupNaver(user: OauthUserDto): Promise<{
+    loginKakao(user: OauthUserDto): Promise<{
         accessToken: string;
         refreshToken: string;
     }>;
     loginNaver(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    signupKakao(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    loginKakao(user: OauthUserDto): Promise<{
         accessToken: string;
         refreshToken: string;
     }>;
