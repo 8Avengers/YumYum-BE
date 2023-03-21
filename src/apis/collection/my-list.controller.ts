@@ -44,8 +44,8 @@ export class MyListController {
   }
 
   /*
-    ### 23.03.15
-    ### 표정훈
+    ### 23.03.20
+    ### 표정훈/이드보라
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
   @Get('/collections/detail/posts/:collectionId/:restaurantId')
@@ -248,12 +248,31 @@ export class MyListController {
   ) {
     return this.myListService.myListUpdatePosting(postId, data.collectionId);
   }
+
+  /*
+    ### 23.03.20
+    ### 표정훈
+    ### [Main] 요즘 뜨는 맛집리스트🔥
+    */
+  @Get('/collections/hot/mylists')
+  @ApiOperation({ summary: '요즘 뜨는 맛집리스트' })
+  @ApiResponse({ status: 200, description: '요즘 뜨는 맛집리스트 성공' })
+  @ApiResponse({ status: 400, description: '요즘 뜨는 맛집리스트 실패' })
+  async HotMyList() {
+    return this.myListService.HotMyList();
+  }
+
+  /*
+    ### 23.03.21
+    ### 표정훈
+    ### 내 친구의 맛집리스트
+    */
+  // @Get('/collections/followers/mylists')
+  // @UseGuards(AuthAccessGuard)
+  // @ApiOperation({ summary: '내 친구의 맛집리스트' })
+  // @ApiResponse({ status: 200, description: '내 친구의 맛집리스트 성공' })
+  // @ApiResponse({ status: 400, description: '내 친구의 맛집리스트 실패' })
+  // async FollowersMyList(@CurrentUser() currentUser: any) {
+  //   return this.myListService.FollowersMyList(currentUser);
+  // }
 }
-
-//일단 이거 커밋해서 푸쉬해야함
-
-//1번문제 배열로 collectionId 받는거 해결🔥
-//2번문제 collectionId가 없는 경우 에러문구 발생 해결(일단 제외)
-//3번문제 마이리스트 내껏만 아니라 남도 조회해야하니, params추가 해결🔥
-//4번문제 전체조회에서 레스토랑 아이디를 가져오는 방법 해결 (대량조회)🔥
-//5번문제 나의 맛집리스트 전체보기 PAGE 1페이지에서 최근 추가한 게시물 3개만 보여주세요.

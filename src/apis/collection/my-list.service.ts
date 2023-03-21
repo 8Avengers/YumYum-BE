@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
-import { In } from 'typeorm';
+import { In, MoreThan } from 'typeorm';
 import { Comment } from '../comment/entities/comment.entity';
 import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
@@ -98,18 +98,12 @@ export class MyListService {
   }
 
   /*
-    ### 23.03.15
-    ### 표정훈
+    ### 23.03.20
+    ### 표정훈/이드보라
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
+    - 뉴스피드 형식으로 이드보라님 코드 가져옴
     */
 
-  /* 로직 설명
-      1. 맛집상세리스트 PAGE2에 있는 맛집을 클릭한다. (레스토랑ID)
-      2. 콜렉션 아이템에 있는 레스토랑아이디와 콜렉션아이디가 둘다 일치하는 정보를 찾는다.
-      3. 레스토랑의 정보와 게시물 정보를 가져온다
-      레스토랑 정보: 가게이름, 업종(카페), 주소
-      포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등
-    */
   async getMyListsDetailPost(
     userId: number,
     restaurantId: number,
@@ -358,19 +352,8 @@ export class MyListService {
     visibility: 'public' | 'private',
   ) {
     try {
-      // id와 type이 모두 일치하는 Collection 엔티티를 찾는다.
-      const myList = await this.collectionRepository.find({
-        relations: {
-          user: true,
-        },
-      });
-
-      if (!myList) {
-        throw new NotFoundException('마이리스트가 없습니다.');
-      }
-
-      await this.collectionRepository.update(
-        { id: collectionId },
+      const myList = await this.collectionRepository.update(
+        { id: collectionId, type: 'myList' }, //user: { id: userId }  => "Unknown column 'email' in 'where clause'"
         {
           name,
           image,
@@ -523,4 +506,126 @@ export class MyListService {
       }
     }
   }
+
+  /*
+    ### 23.03.20
+    ### 표정훈
+    ### [Main] 요즘 뜨는 맛집리스트🔥
+    */
+  async HotMyList() {
+    try {
+      // 1달 전 날짜를 구한다
+      const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+      // 컬렉션과 게시물, 좋아요 정보를 가져온다
+      const myListSumLikes = await this.collectionItemRepository.find({
+        relations: {
+          post: {
+            postLikes: true,
+            user: true,
+            images: true,
+          },
+          collection: {
+            user: true,
+          },
+        },
+        where: {
+          // 컬렉션 타입이 myList 이면서 삭제되지 않은 것을 가져온다
+          collection: {
+            type: 'myList',
+            deletedAt: null,
+          },
+          post: {
+            // 좋아요가 삭제되지 않았고, 1달 이내에 좋아요 업데이트된 게시물만 가져온다
+            postLikes: {
+              deleted_at: null,
+              updated_at: MoreThan(oneMonthAgo),
+            },
+          },
+        },
+        select: {
+          id: true,
+          post: {
+            id: true,
+            images: { id: true, file_url: true },
+            postLikes: {
+              id: true,
+            },
+            user: {
+              id: true,
+              nickname: true,
+            },
+          },
+          collection: {
+            id: true,
+            name: true,
+          },
+        },
+      });
+
+      // 컬렉션별 좋아요 수를 합산하여 그룹화한다
+      const groupedData = myListSumLikes.reduce((groups: any, item: any) => {
+        const collectionId = item.collection.id;
+        if (!groups[collectionId]) {
+          groups[collectionId] = {
+            collection: item.collection,
+            user: item.collection.user,
+            sumLikes: 0,
+          };
+        }
+        groups[collectionId].sumLikes += item.post?.postLikes?.length ?? 0;
+
+        // 게시물에 포함된 이미지 URL 정보를 가져온다
+        const images = item.post?.images ?? [];
+        const fileUrls = images.map((image: any) => image.file_url);
+        groups[collectionId].images = fileUrls;
+
+        return groups;
+      }, {});
+
+      // 컬렉션별 좋아요 합산값에 따라 내림차순으로 정렬한다
+      const collectionSumLikes: any = Object.values(groupedData);
+      collectionSumLikes.sort((a: any, b: any) => b.sumLikes - a.sumLikes);
+
+      // 상위 10개 컬렉션 정보를 구성하여 반환한다
+      const top3Collections = collectionSumLikes
+        .slice(0, 10)
+        .map(({ collection, user, sumLikes, images }: any) => {
+          return {
+            id: collection.id,
+            name: collection.name,
+            user: {
+              id: user.id,
+              nickname: user.nickname,
+            },
+            sumLikes,
+            images,
+          };
+        });
+
+      return top3Collections;
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
+  /*
+    ### 23.03.21
+    ### 표정훈
+    ### [Main] 내 친구의 맛집리스트
+    */
+  // async FollowersMyList(userId: number) {
+  //   const myListFollwers = await this.collectionItemRepository.find({
+  //     relations: {},
+  //     where: {},
+  //     select: {},
+  //   });
+  // }
 }
