@@ -16,7 +16,7 @@ export class MyFeedController {
   @UseGuards(AuthAccessGuard)
   async getMyFeed(@CurrentUser() currentUser: any) {
     const userId = currentUser.id;
-    const myPosts = await this.postService.getPostsByUserId(userId);
+    const myPosts = await this.postService.getPostsByMyId(userId);
     return myPosts;
   }
 }
