@@ -250,12 +250,13 @@ export class MyListService {
   // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
   async getMyListsMe(userId: number, page: string) {
     try {
-      let pageNum = Number(page) - 1;
-      const myListInOnePage = 3; //세준님에게 물어보기
+      // let pageNum = Number(page) - 1;
+      // const myListInOnePage = 3;
 
-      if (isNaN(pageNum) || pageNum < 0) {
-        pageNum = 0;
-      }
+      // //이미지, 레스토랑 id, place_name
+      // if (isNaN(pageNum) || pageNum < 0) {
+      //   pageNum = 0;
+      // }
 
       const myLists = await this.collectionRepository.find({
         relations: {
@@ -266,8 +267,8 @@ export class MyListService {
         },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
         select: { id: true, name: true, description: true, image: true },
-        skip: pageNum * myListInOnePage,
-        take: myListInOnePage,
+        // skip: pageNum * myListInOnePage,
+        // take: myListInOnePage,
       });
 
       return myLists;
@@ -284,38 +285,46 @@ export class MyListService {
     ### 표정훈
     ### MyList 전체조회(남의꺼)
     */
-
-  // 해결해야할 사항 fix:16 fix30
-  // 1. post에서 id: 1인 값만 가져옴 => 데이터베이스 수정으로 해결완료🔥
-  // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
   async getMyListsAll(userId: number, page: string) {
     try {
-      let pageNum = Number(page) - 1;
-      const myListInOnePage = 3; //세준님에게 물어보기
+      // let pageNum = Number(page) - 1;
+      // const myListInOnePage = 3; //세준님에게 물어보기
 
-      if (isNaN(pageNum) || pageNum < 0) {
-        pageNum = 0;
-      }
+      // if (isNaN(pageNum) || pageNum < 0) {
+      //   pageNum = 0;
+      // }
 
       const myLists = await this.collectionRepository.find({
         relations: {
           collectionItems: {
-            post: true,
-            restaurant: true,
+            post: {
+              images: true,
+              restaurant: true,
+            },
           },
         },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
-        select: { id: true, name: true, description: true, image: true },
-        skip: pageNum * myListInOnePage,
-        take: myListInOnePage,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          collectionItems: {
+            id: true,
+            post: {
+              id: true,
+              images: { id: true, file_url: true },
+              restaurant: {
+                place_name: true,
+              },
+            },
+          },
+        },
       });
 
-      return myLists;
-
-      // return myLists.map((collection) => ({
-      //   ...collection,
-      //   collectionItems: collection.collectionItems.slice(0, 3),
-      // }));
+      return myLists.map((collection) => ({
+        ...collection,
+        collectionItems: collection.collectionItems.slice(0, 3),
+      }));
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -456,7 +465,6 @@ export class MyListService {
       for (let i = 0; i < collectionId.length; i++) {
         const item = collectionId[i];
 
-        // 같은 컬렉션 안에 동일한 포스트는 안들어가는 기능 => 폐기(중복되야함)
         const existingItem = await this.collectionItemRepository.findOne({
           where: {
             post: { id: postId },
@@ -473,6 +481,7 @@ export class MyListService {
           collection: { id: item },
         });
         await this.collectionItemRepository.save(collectionItem);
+        return collectionItem;
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -608,8 +617,13 @@ export class MyListService {
           collection: {
             id: true,
             name: true,
+            user: {
+              id: true,
+              nickname: true,
+            },
           },
         },
+        take: 2,
       });
 
       // 컬렉션별 좋아요 수를 합산하여 그룹화한다
@@ -638,7 +652,7 @@ export class MyListService {
 
       // 상위 10개 컬렉션 정보를 구성하여 반환한다
       const top3Collections = collectionSumLikes
-        .slice(0, 10)
+        // .slice(0, 10)
         .map(({ collection, user, sumLikes, images }: any) => {
           return {
             id: collection.id,
@@ -685,9 +699,11 @@ export class MyListService {
         },
       });
 
-      const followingIds = followerId.map((f) => f.following.id);
+      const followingIds = followerId
+        .map((f) => f.following.id)
+        .filter((id) => !isNaN(id));
 
-      const myListFollwers = await this.collectionItemRepository.findOne({
+      const myListFollwers = await this.collectionItemRepository.find({
         relations: {
           post: {
             user: true,
@@ -705,7 +721,6 @@ export class MyListService {
           },
         },
         select: {
-          id: true,
           post: {
             id: true,
             images: { id: true, file_url: true },
@@ -717,10 +732,17 @@ export class MyListService {
           collection: {
             id: true,
             name: true,
+            user: {
+              id: true,
+              nickname: true,
+            },
           },
         },
       });
-      console.log('🔥🔥콘솔로그🔥🔥', followingIds, myListFollwers);
+
+      //랜덤하게 값 가져오기
+      myListFollwers.sort(() => Math.random() - 0.5);
+
       return myListFollwers;
     } catch (err) {
       if (err instanceof NotFoundException) {
