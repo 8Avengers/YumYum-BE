@@ -19,7 +19,7 @@ import { IsEnum } from 'class-validator';
 
 import { Collection } from '../../collection/entities/collection.entity';
 @Entity()
-@Unique(['nickname'])
+// @Unique(['nickname'])
 @Unique(['email'])
 export class User {
   @PrimaryGeneratedColumn()

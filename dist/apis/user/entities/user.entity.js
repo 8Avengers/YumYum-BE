@@ -118,7 +118,6 @@ __decorate([
 ], User.prototype, "collections", void 0);
 User = User_1 = __decorate([
     (0, typeorm_1.Entity)(),
-    (0, typeorm_1.Unique)(['nickname']),
     (0, typeorm_1.Unique)(['email'])
 ], User);
 exports.User = User;

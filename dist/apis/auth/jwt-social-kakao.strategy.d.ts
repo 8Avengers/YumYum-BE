@@ -4,7 +4,7 @@ export declare class JwtKakaoStrategy extends JwtKakaoStrategy_base {
     constructor();
     validate(accessToken: string, refreshToken: string, profile: Profile): {
         email: any;
-        name: string;
+        nickname: string;
     };
 }
 export {};
