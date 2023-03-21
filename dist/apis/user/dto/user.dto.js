@@ -21,25 +21,21 @@ __decorate([
 ], UserDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: String, description: 'Password of the user' }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.Length)(60),
     __metadata("design:type", String)
 ], UserDto.prototype, "password", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: String, description: 'Nickname of the user' }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UserDto.prototype, "nickname", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: String, description: 'Name of the user' }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UserDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: String, description: 'Gender of the user (M or F)' }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.Matches)(/^(M|F)$/),
     __metadata("design:type", String)
 ], UserDto.prototype, "gender", void 0);
@@ -48,7 +44,6 @@ __decorate([
         type: String,
         description: 'Birth date of the user in the format of YYYYMMDD',
     }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.Matches)(/^\d{8}$/),
     __metadata("design:type", String)
 ], UserDto.prototype, "birth", void 0);
@@ -57,13 +52,11 @@ __decorate([
         type: String,
         description: 'Phone number of the user in the format of 11 digits',
     }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.Matches)(/^\d{11}$/),
     __metadata("design:type", String)
 ], UserDto.prototype, "phone_number", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: String, description: 'Profile image of the user' }),
-    (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UserDto.prototype, "profile_image", void 0);
