@@ -15,6 +15,7 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { LocationDto } from './dto/location.dto';
 import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -199,5 +200,20 @@ export class PostController {
   @Get('/main/trending')
   async getTrendingPostsByCategory() {
     return this.postService.getTrendingPosts();
+  }
+
+  /*
+    ### 23.03.21
+    ### 이드보라
+    ### 내 주변 피드
+   */
+  @ApiOperation({ summary: '내 주변 피드' })
+  @Get('/feed/aroundMe')
+  @UseGuards(AuthAccessGuard)
+  async getPostsAroundMe(
+    @Body() data: Partial<LocationDto>,
+    @CurrentUser() currentUser: any,
+  ) {
+    return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id);
   }
 }
