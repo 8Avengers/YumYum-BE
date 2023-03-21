@@ -65,6 +65,42 @@ export class MapService {
     // );
   }
 
+  async getFollowerPostingList(userId: number) {
+    let followerPostingResult = [];
+    const followerList = await this.followRepository.find({
+      relations: ['following'],
+      where: { follower: { id: userId } },
+      select: { following: { id: true } },
+    });
+    console.log('followerList : ', followerList);
+    for (let following of followerList) {
+      const followerPost = await this.postRepository.find({
+        relations: ['restaurant', 'user'],
+        where: { user: { id: following.following.id } },
+        select: {
+          id: true,
+          rating: true,
+          content: true,
+          images: true,
+          updated_at: true,
+          restaurant: {
+            place_name: true,
+            kakao_place_id: true,
+            category_name: true,
+            x: true,
+            y: true,
+          },
+          user: { id: true, nickname: true, profile_image: true },
+        },
+        order: {
+          updated_at: 'DESC',
+        },
+      });
+      followerPostingResult.push(...followerPost);
+    }
+    return followerPostingResult;
+  }
+
   async getMyPosting(userId: number, collectionId: number) {
     return await this.postRepository.find({
       relations: ['user', 'collectionItems', 'restaurant'],
@@ -85,8 +121,8 @@ export class MapService {
     });
   }
 
-  async getLocationRestaurant(x: string, y: string) {
-    const locationRestaurant = await this.restaurantRepository
+  async getNearRestaurant(x: string, y: string) {
+    const nearRestaurant = await this.restaurantRepository
       .createQueryBuilder('restaurant')
       .leftJoin('restaurant.posts', 'post')
       .leftJoin('post.images', 'image')
@@ -106,6 +142,6 @@ export class MapService {
       .orderBy('rand()')
       .limit(3)
       .getRawMany();
-    return locationRestaurant;
+    return nearRestaurant;
   }
 }

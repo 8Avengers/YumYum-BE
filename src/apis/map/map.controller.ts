@@ -17,6 +17,13 @@ export class MapController {
     return await this.mapService.getFollowerPosting(currentUser.id);
   }
 
+  @ApiOperation({ summary: '맵 탐색 페이지 리스트' })
+  @UseGuards(AuthAccessGuard)
+  @Get('/follower-posting-list')
+  async getFollowerSearchInMapList(@CurrentUser() currentUser: any) {
+    return await this.mapService.getFollowerPostingList(currentUser.id);
+  }
+
   @ApiOperation({ summary: '내 포스팅 지도' })
   @UseGuards(AuthAccessGuard)
   @Get('/myListPosting/:collectionId')
@@ -28,8 +35,8 @@ export class MapController {
   }
 
   @ApiOperation({ summary: '메인 페이지' })
-  @Get('/locationRestaurant')
+  @Get('/main/near-restaurant')
   async getCloseRestaurant(@Body() data: Partial<LocationRestaurantDto>) {
-    return await this.mapService.getLocationRestaurant(data.x, data.y);
+    return await this.mapService.getNearRestaurant(data.x, data.y);
   }
 }
