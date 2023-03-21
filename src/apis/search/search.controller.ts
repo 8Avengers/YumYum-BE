@@ -14,9 +14,11 @@ export class SearchController {
     */
   @ApiOperation({ summary: '회원 검색 및 데이터 받기' })
   @Get('/user')
-  async getUserSearch(@Query('keyword') keyword: string) {
-    console.log(keyword);
-    return await this.searchService.getUserSearch(keyword);
+  async getUserSearch(
+    @Query('keyword') keyword: string,
+    @Query('page') page: string,
+  ) {
+    return await this.searchService.getUserSearch(keyword, page);
   }
 
   /*
@@ -26,8 +28,11 @@ export class SearchController {
     */
   @ApiOperation({ summary: '음식점 정보 검색 및 데이터 받기' })
   @Get('/restaurant')
-  async getRestaurantSearch(@Query('keyword') keyword: string) {
-    return await this.searchService.getRestaurantSearch(keyword);
+  async getRestaurantSearch(
+    @Query('keyword') keyword: string,
+    @Query('page') page: string,
+  ) {
+    return await this.searchService.getRestaurantSearch(keyword, page);
   }
 
   /*
@@ -37,8 +42,11 @@ export class SearchController {
     */
   @ApiOperation({ summary: '해시태그 정보 검색 및 데이터 받기' })
   @Get('/hashtag')
-  async getHashtagSearch(@Query('keyword') keyword: string) {
-    return await this.searchService.getHashtagSearch(keyword);
+  async getHashtagSearch(
+    @Query('keyword') keyword: string,
+    @Query('page') page: string,
+  ) {
+    return await this.searchService.getHashtagSearch(keyword, page);
   }
 
   /*
@@ -48,7 +56,10 @@ export class SearchController {
     */
   @ApiOperation({ summary: '해시태그를 기반으로 포스팅 불러오기' })
   @Get('/post')
-  async getPostSearchByHashtag(@Query('hashtag') hashtag: string) {
-    return await this.searchService.getPostSearchByHashtag(hashtag);
+  async getPostSearchByHashtag(
+    @Query('hashtag') hashtag: string,
+    @Query('page') page: string,
+  ) {
+    return await this.searchService.getPostSearchByHashtag(hashtag, page);
   }
 }
