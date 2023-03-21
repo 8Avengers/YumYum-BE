@@ -7,12 +7,11 @@ import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
-import { JwtAccessStrategy } from './jwt-access.strategy';
-import { JwtRefreshStrategy } from './jwt-refresh.strategy';
-import { JwtGoogleStrategy } from './jwt-social-google.strategy';
-import { JwtKakaoStrategy } from './jwt-social-kakao.strategy';
-import { JwtNaverStrategy } from './jwt-social-naver.strategy';
-
+import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
+import { JwtGoogleStrategy } from './strategies/jwt-social-google.strategy';
+import { JwtKakaoStrategy } from './strategies/jwt-social-kakao.strategy';
+import { JwtNaverStrategy } from './strategies/jwt-social-naver.strategy';
 @Module({
   imports: [
     JwtModule.register({}),

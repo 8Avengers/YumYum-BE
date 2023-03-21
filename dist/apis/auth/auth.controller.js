@@ -23,9 +23,9 @@ const user_profile_service_1 = require("../user/user-profile.service");
 const login_user_dto_1 = require("../user/dto/login-user.dto");
 const passport_1 = require("@nestjs/passport");
 const auth_guards_1 = require("./guards/auth.guards");
-const oauth_user_dto_1 = require("../user/dto/oauth-user.dto");
 const auth_decorators_1 = require("./auth.decorators");
 const swagger_1 = require("@nestjs/swagger");
+const oauth_passport_dto_1 = require("./dto/oauth-passport.dto");
 let AuthController = class AuthController {
     constructor(userProfileService, authService) {
         this.userProfileService = userProfileService;
@@ -84,7 +84,7 @@ __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
+    __metadata("design:paramtypes", [oauth_passport_dto_1.OauthPassportDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginGoogle", null);
 __decorate([
@@ -92,7 +92,7 @@ __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
+    __metadata("design:paramtypes", [oauth_passport_dto_1.OauthPassportDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginKakao", null);
 __decorate([
@@ -101,7 +101,7 @@ __decorate([
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('naver')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
+    __metadata("design:paramtypes", [oauth_passport_dto_1.OauthPassportDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginNaver", null);
 __decorate([

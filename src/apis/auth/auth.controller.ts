@@ -8,7 +8,6 @@ import { UserProfileService } from '../user/user-profile.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthRefreshGuard } from './guards/auth.guards';
-import { OauthUserDto } from '../user/dto/oauth-user.dto';
 
 import {
   loginEmail,
@@ -18,6 +17,7 @@ import {
   restoreAccessToken,
 } from './auth.decorators';
 import { ApiTags } from '@nestjs/swagger';
+import { OauthPassportDto } from './dto/oauth-passport.dto';
 
 @ApiTags('Auth')
 @Controller('/')
@@ -32,8 +32,6 @@ export class AuthController {
   @Post('/login')
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
-    // @Req() req, //
-    // @Res() res, // res 를 써주지 않으면 무한로딩한다.
   ) {
     const { email, password } = loginUserDto;
     const user = await this.userProfileService.findByEmail({ email });
@@ -67,7 +65,7 @@ export class AuthController {
   @Get('/login/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
-    @CurrentUser() user: OauthUserDto, //
+    @CurrentUser() user: OauthPassportDto, //
   ): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -80,7 +78,7 @@ export class AuthController {
   @Get('/login/kakao')
   @UseGuards(AuthGuard('kakao'))
   async loginKakao(
-    @CurrentUser() user: OauthUserDto, //
+    @CurrentUser() user: OauthPassportDto, //
   ): Promise<{
     accessToken: string;
     refreshToken: string;
@@ -94,7 +92,7 @@ export class AuthController {
   @Get('/login/naver')
   @UseGuards(AuthGuard('naver'))
   async loginNaver(
-    @CurrentUser() user: OauthUserDto, //
+    @CurrentUser() user: OauthPassportDto, //
   ): Promise<{
     accessToken: string;
     refreshToken: string;

@@ -7,7 +7,7 @@
 //   'name',
 // ]) {}
 
-export class OauthUserDto {
+export class OauthPassportDto {
   readonly name?: string;
 
   readonly email?: string;

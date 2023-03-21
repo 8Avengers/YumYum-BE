@@ -15,11 +15,11 @@ const user_signup_service_1 = require("../user/user-signup.service");
 const user_module_1 = require("../user/user.module");
 const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
-const jwt_access_strategy_1 = require("./jwt-access.strategy");
-const jwt_refresh_strategy_1 = require("./jwt-refresh.strategy");
-const jwt_social_google_strategy_1 = require("./jwt-social-google.strategy");
-const jwt_social_kakao_strategy_1 = require("./jwt-social-kakao.strategy");
-const jwt_social_naver_strategy_1 = require("./jwt-social-naver.strategy");
+const jwt_access_strategy_1 = require("./strategies/jwt-access.strategy");
+const jwt_refresh_strategy_1 = require("./strategies/jwt-refresh.strategy");
+const jwt_social_google_strategy_1 = require("./strategies/jwt-social-google.strategy");
+const jwt_social_kakao_strategy_1 = require("./strategies/jwt-social-kakao.strategy");
+const jwt_social_naver_strategy_1 = require("./strategies/jwt-social-naver.strategy");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([

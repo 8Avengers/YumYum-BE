@@ -1,7 +1,7 @@
 import { AuthService } from './auth.service';
 import { UserProfileService } from '../user/user-profile.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
-import { OauthUserDto } from '../user/dto/oauth-user.dto';
+import { OauthPassportDto } from './dto/oauth-passport.dto';
 export declare class AuthController {
     private readonly userProfileService;
     private readonly authService;
@@ -16,17 +16,17 @@ export declare class AuthController {
             profileImage: string;
         };
     }>;
-    loginGoogle(user: OauthUserDto): Promise<{
+    loginGoogle(user: OauthPassportDto): Promise<{
         accessToken: string;
         refreshToken: string;
         user: any;
     }>;
-    loginKakao(user: OauthUserDto): Promise<{
+    loginKakao(user: OauthPassportDto): Promise<{
         accessToken: string;
         refreshToken: string;
         user: any;
     }>;
-    loginNaver(user: OauthUserDto): Promise<{
+    loginNaver(user: OauthPassportDto): Promise<{
         accessToken: string;
         refreshToken: string;
         user: any;
