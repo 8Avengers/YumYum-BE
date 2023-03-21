@@ -117,7 +117,7 @@ export class PostController {
   @Patch('/:postId')
   @UseGuards(AuthAccessGuard)
   @UseInterceptors(FilesInterceptor('files'))
-  async updateArticle(
+  async updatePost(
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Param('postId') postId: number,
     @Body() data: Partial<UpdatePostDto>,
@@ -168,6 +168,7 @@ export class PostController {
       data.visibility,
       parsedHashtagNames,
       files,
+      data.files,
     );
   }
 

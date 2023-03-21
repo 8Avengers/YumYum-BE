@@ -9,26 +9,32 @@ export class ImageRepository extends Repository<Image> {
     super(Image, dataSource.createEntityManager());
   }
 
-  async updatePostImages(imagesData: string[], post: Post) {
+  async updatePostImages(
+    newImages: string[],
+    originalImages: string[],
+    post: Post,
+  ) {
     try {
       const imagesToDelete = post.images.filter(
-        (image) => !imagesData.includes(image.file_url),
+        (image) => !originalImages.includes(image.file_url),
       );
 
       if (imagesToDelete.length > 0) {
         await this.remove(imagesToDelete);
       }
 
-      const newImages = imagesData
-        .filter(
-          (image) =>
-            !post.images.some(
-              (existingImage) => existingImage.file_url === image,
-            ),
-        )
-        .map((image) => ({ file_url: image, post }));
+      // const newImages = imagesData
+      //   .filter(
+      //     (image) =>
+      //       !post.images.some(
+      //         (existingImage) => existingImage.file_url === image,
+      //       ),
+      //   )
+      //   .map((image) => ({ file_url: image, post }));
 
-      await this.save(newImages);
+      await this.save(
+        newImages.map((imageUrl) => ({ file_url: imageUrl, post })),
+      );
 
       return;
     } catch (err) {

@@ -9,6 +9,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
+import { In } from 'typeorm';
+import { Comment } from '../comment/entities/comment.entity';
+import { PostLikeService } from '../post/post-like.service';
+import { ImageRepository } from '../post/image.repository';
+import { PostHashtagService } from '../post/post-hashtag.service';
+import { RestaurantService } from '../restaurant/restaurant.service';
+import { UploadService } from '../upload/upload.service';
+import { FindOptionsRelations } from 'typeorm';
+import { FindManyOptions } from 'typeorm';
 
 @Injectable()
 export class MyListService {
@@ -19,6 +28,12 @@ export class MyListService {
     private collectionItemRepository: Repository<CollectionItem>,
     @InjectRepository(Post)
     private postRepository: Repository<Post>,
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    private readonly likeService: PostLikeService,
+    private imageRepository: ImageRepository,
+    private readonly postHashtagService: PostHashtagService,
+    private readonly restaurantService: RestaurantService,
+    private readonly uploadService: UploadService,
   ) {}
 
   /*
@@ -27,43 +42,53 @@ export class MyListService {
     ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
     */
 
-  async getMyListsDetail(userId: number, collectionId: number) {
+  async getMyListDetail(collectionId: number) {
     try {
-      const myLists = await this.collectionRepository.find({
+      // 컬렉션 이름과 포스트 정보 가져오기
+      const myList = await this.collectionRepository.find({
         relations: {
           collectionItems: {
-            post: true,
-            restaurant: true,
+            post: { images: true, restaurant: true },
           },
         },
         where: {
-          user_id: userId,
+          id: collectionId,
+          // user_id: userId,
           deletedAt: null,
           type: 'myList',
-          id: collectionId,
         },
-        select: { name: true, description: true, image: true },
+        select: {
+          id: true,
+          name: true,
+          visibility: true,
+          collectionItems: {
+            id: true,
+            post: {
+              id: true,
+              content: true,
+              rating: true,
+              images: true,
+              restaurant: {
+                id: true,
+                x: true,
+                y: true,
+                place_name: true,
+              },
+            },
+          },
+        },
       });
 
-      // post가 null일 경우 rating 대신 null 값을 반환
-      const myListsDetail = myLists.map((list) => ({
-        name: list.name,
-        description: list.description,
-        image: list.image,
-        collectionItems: list.collectionItems.map((item) => ({
-          id: item.id,
-          post: {
-            id: item.post?.id ?? null,
-            rating: item.post?.rating ?? null,
-          },
-          restaurant: {
-            id: item.restaurant?.id ?? null,
-            place_name: item.restaurant?.place_name ?? null,
-          },
+      return myList.map((myList) => ({
+        id: myList.id,
+        name: myList.name,
+        visibility: myList.visibility,
+        post: myList.collectionItems.map((item) => ({
+          ...item.post,
+          restaurant: item.post.restaurant,
+          images: item.post.images,
         })),
       }));
-      console.log(myListsDetail);
-      return myListsDetail;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -71,6 +96,7 @@ export class MyListService {
       );
     }
   }
+
   /*
     ### 23.03.15
     ### 표정훈
@@ -82,36 +108,88 @@ export class MyListService {
       2. 콜렉션 아이템에 있는 레스토랑아이디와 콜렉션아이디가 둘다 일치하는 정보를 찾는다.
       3. 레스토랑의 정보와 게시물 정보를 가져온다
       레스토랑 정보: 가게이름, 업종(카페), 주소
-      포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등 
+      포스팅 정보: 설명, 이미지, 평점 ,좋아요, 댓글 등
     */
   async getMyListsDetailPost(
     userId: number,
     restaurantId: number,
     collectionId: number,
   ) {
+    //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
     try {
-      //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
-      const existRestaurant = await this.collectionItemRepository.find({
+      const posts = await this.postRepository.find({
         where: {
+          deleted_at: null,
+          visibility: 'public',
+          user: { id: userId },
           restaurant: { id: restaurantId },
-          collection: { id: collectionId },
+          collectionItems: { collection: { id: collectionId } },
         },
         select: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          visibility: true,
           restaurant: {
-            id: true,
-            category_group_name: true,
-            road_address_name: true,
+            kakao_place_id: true,
+            address_name: true,
+            category_name: true,
             place_name: true,
+            road_address_name: true,
           },
-          post: {
-            content: true,
-            rating: true,
+          user: { id: true, nickname: true, profile_image: true },
+          images: { id: true, file_url: true },
+          collectionItems: { id: true, collection: { id: true } },
+        },
+        relations: {
+          user: true,
+          restaurant: true,
+          hashtags: true,
+          comments: true,
+          images: true,
+          collectionItems: {
+            collection: true,
           },
         },
-        relations: ['restaurant', 'post'],
+        order: { created_at: 'desc' },
       });
+      if (!posts || posts.length === 0) {
+        return [];
+      }
+      const postIds = posts.map((post) => post.id);
 
-      return existRestaurant;
+      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+
+      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+        postIds,
+        userId,
+      );
+
+      return posts.map((post) => {
+        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
+        const likes =
+          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+        const isLiked =
+          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+          'False';
+        const totalComments = post.comments ? post.comments.length : 0;
+        return {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: post.user,
+          restaurant: post.restaurant,
+          images: post.images,
+          hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+          myList: post.collectionItems,
+          visibility: post.visibility,
+        };
+      });
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -232,6 +310,39 @@ export class MyListService {
   }
 
   /*
+    ### 23.03.20
+    ### 표정훈
+    ### MyList 수정조회
+    */
+
+  async getMyListInfo(collectionId: number) {
+    try {
+      const myListCheck = await this.collectionRepository.findOne({
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          image: true,
+        },
+        where: {
+          id: collectionId,
+        },
+      });
+
+      return myListCheck;
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
+
+  /*
     ### 23.03.10
     ### 표정훈
     ### MyList 수정
@@ -313,17 +424,17 @@ export class MyListService {
       for (let i = 0; i < collectionId.length; i++) {
         const item = collectionId[i];
 
-        // // 같은 컬렉션 안에 동일한 포스트는 안들어가는 기능 => 폐기(중복되야함)
-        // const existingItem = await this.collectionItemRepository.findOne({
-        //   where: {
-        //     post: { id: postId },
-        //     collection: { id: item },
-        //   },
-        // });
+        // 같은 컬렉션 안에 동일한 포스트는 안들어가는 기능 => 폐기(중복되야함)
+        const existingItem = await this.collectionItemRepository.findOne({
+          where: {
+            post: { id: postId },
+            collection: { id: item },
+          },
+        });
 
-        // if (existingItem) {
-        //   continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
-        // }
+        if (existingItem) {
+          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
+        }
 
         const collectionItem = this.collectionItemRepository.create({
           post: { id: postId },
@@ -374,36 +485,33 @@ export class MyListService {
   }
 
   /*
-    ### 23.03.15
+    ### 23.03.17
     ### 표정훈
-    ### MyList 포스팅 업데이트(미구현)
+    ### MyList 포스팅 업데이트🔥
     */
 
-  //put이라면 collection 아이디값만 변경하는것 될듯함
-  // 컬렉션 해제한 것은 삭제.....는 어떻게 하지?
-
+  /* 로직 설명
+      1. 입력받은 값으로 컬렉션에 있는 포스트아이디를 모두 찾는다
+      2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
+      3. 입력 받은 값을 저장한다.
+      이슈: 자신의 포스터만 마이리스트에 저장할 수 있기에 가능, 데이터 낭비코드이긴 함ㅠㅠ
+      */
   async myListUpdatePosting(postId: number, collectionId: number[]) {
     try {
-      for (let i = 0; i < collectionId.length; i++) {
-        const item = collectionId[i];
-        const existingItem = await this.collectionItemRepository.findOne({
-          where: {
-            post: { id: postId },
-            collection: { id: item },
-          },
-        });
-        //중복된 값이 있다면 안들어감 => 이기능은 필요한가? 중복값 받아야겠지?
-        if (existingItem) {
-          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
-        }
-
-        //이부분을 업데이트로 해서 컬렉션 값만 바꾸면 될듯?
-        const collectionItem = this.collectionItemRepository.create({
+      // 1. 입력받은 값으로 컬렉션아이템에 있는 포스트아이디를 모두 찾는다.
+      const findPostId = await this.collectionItemRepository.find({
+        relations: ['post', 'collection'],
+        where: {
           post: { id: postId },
-          collection: { id: item },
-        });
-        await this.collectionItemRepository.save(collectionItem);
-      }
+          collection: { type: 'myList' }, //마이리스트 일때만!
+        },
+      });
+
+      // 2. 컬렉션아이템에서 해당 포스트 아이디로 검색되는거 다지운다.
+      await this.collectionItemRepository.remove(findPostId);
+      // 3. 입력받은 정보로 모두 넣어준다.
+      await this.myListPlusPosting(postId, collectionId);
+      return;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

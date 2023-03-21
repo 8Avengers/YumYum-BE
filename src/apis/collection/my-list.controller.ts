@@ -16,29 +16,30 @@ import { addCollectionPostingDto } from './dto/add-my-list-posting.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
+import { PostService } from '../post/post.service';
 
 @Controller('my-list')
 export class MyListController {
-  constructor(private readonly myListService: MyListService) {}
+  constructor(
+    private readonly myListService: MyListService,
+    private readonly postService: PostService,
+  ) {}
 
   /*
-    ### 23.03.14
+    ### 23.03.19
     ### 표정훈
-    ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
+    ### MyList 상세보기!
     */
-  @Get('/collections/datail/:collectionId')
-  @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
-  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
-  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
-  async getMyListsDetail(
+  @Get('/collections/detail/:collectionId')
+  // @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 상세보기' })
+  @ApiResponse({ status: 200, description: 'MyList 상세보기 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 상세보기 실패' })
+  async getMyListDetail(
     @Param('collectionId') collectionId: number,
-    @CurrentUser() currentUser: any,
+    // @CurrentUser() currentUser: any,
   ) {
-    const myLists = await this.myListService.getMyListsDetail(
-      currentUser.id,
-      collectionId,
-    );
+    const myLists = await this.myListService.getMyListDetail(collectionId);
     return await myLists;
   }
 
@@ -47,20 +48,20 @@ export class MyListController {
     ### 표정훈
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
-  @Get('/collections/posts/:restaurantId')
+  @Get('/collections/detail/posts/:collectionId/:restaurantId')
   @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
-  @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
-  @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
+  @ApiOperation({ summary: 'MyList 상세 더보기' })
+  @ApiResponse({ status: 200, description: 'MyList 상세 더보기 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 상세 더보기 실패' })
   async getMyListsDetailPost(
     @Param('restaurantId') restaurantId: number,
-    @Body() data: DetailMylistDto,
+    @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
   ) {
     const myLists = await this.myListService.getMyListsDetailPost(
       currentUser.id,
       restaurantId,
-      data.collectionId,
+      collectionId,
     );
     return await myLists;
   }
@@ -133,9 +134,27 @@ export class MyListController {
   }
 
   /*
+    ### 23.03.20
+    ### 표정훈
+    ### MyList 수정조회
+    */
+
+  @Get('/collections/update/:collectionId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: 'MyList 수정조회' })
+  @ApiResponse({ status: 200, description: 'MyList 수정조회 성공' })
+  @ApiResponse({ status: 400, description: 'MyList 수정조회 실패' })
+  async getMyListInfo(
+    // @Param('userId') userId: number,
+    @Param('collectionId') collectionId: number,
+  ) {
+    return this.myListService.getMyListInfo(collectionId);
+  }
+
+  /*
     ### 23.03.10
     ### 표정훈
-    ### MyList 수정
+    ### MyList 수정 
     */
 
   @Put('/collections/:collectionId')
@@ -214,11 +233,11 @@ export class MyListController {
   }
 
   /*
-    ### 23.03.15
+    ### 23.03.17
     ### 표정훈
-    ### MyList 포스팅 업데이트(미구현)
+    ### MyList 포스팅 업데이트🔥
     */
-  @Put('/collections/plus/:postId')
+  @Post('/collections/update/:postId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 포스팅 업데이트' })
   @ApiResponse({ status: 200, description: 'MyList 포스팅 업데이트 성공' })
@@ -227,7 +246,7 @@ export class MyListController {
     @Param('postId') postId: number,
     @Body() data: addCollectionPostingDto,
   ) {
-    return this.myListService.myListPlusPosting(postId, data.collectionId);
+    return this.myListService.myListUpdatePosting(postId, data.collectionId);
   }
 }
 
