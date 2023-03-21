@@ -1,4 +1,4 @@
-import { CollectionItem } from './../collection/entities/collection-item.entity';
+import { Restaurant } from './../restaurant/entities/restaurant.entity';
 import { Follow } from 'src/apis/user/entities/follow.entity';
 import { Post } from 'src/apis/post/entities/post.entity';
 import { Repository } from 'typeorm/repository/Repository';
@@ -10,6 +10,8 @@ export class MapService {
   constructor(
     @InjectRepository(Post) private postRepository: Repository<Post>,
     @InjectRepository(Follow) private followRepository: Repository<Follow>,
+    @InjectRepository(Restaurant)
+    private restaurantRepository: Repository<Restaurant>,
   ) {}
 
   async getFollowerPosting(userId: number) {
@@ -46,6 +48,7 @@ export class MapService {
     }
     return followerPostingResult;
 
+    // 팔로워 마다 리스트가 묶여있어서 데이터 뽑기가 힘들다.
     // return await Promise.all(
     //   followerList.map(async (follower) => {
     //     let followerPost = await this.postRepository.find({
@@ -80,5 +83,29 @@ export class MapService {
         updated_at: 'DESC',
       },
     });
+  }
+
+  async getLocationRestaurant(x: string, y: string) {
+    const locationRestaurant = await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .leftJoin('restaurant.posts', 'post')
+      .leftJoin('post.images', 'image')
+      .select([
+        'restaurant.id',
+        'restaurant.place_name',
+        'restaurant.x',
+        'restaurant.y',
+        'post.rating',
+        'image.file_url',
+      ])
+      .addSelect(
+        `6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`,
+        'distance',
+      )
+      .having(`distance <= 2`)
+      .orderBy('rand()')
+      .limit(3)
+      .getRawMany();
+    return locationRestaurant;
   }
 }
