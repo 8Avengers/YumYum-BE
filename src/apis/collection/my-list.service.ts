@@ -617,6 +617,10 @@ export class MyListService {
           collection: {
             id: true,
             name: true,
+            user: {
+              id: true,
+              nickname: true,
+            },
           },
         },
       });
@@ -716,7 +720,6 @@ export class MyListService {
           },
         },
         select: {
-          id: true,
           post: {
             id: true,
             images: { id: true, file_url: true },
@@ -728,6 +731,10 @@ export class MyListService {
           collection: {
             id: true,
             name: true,
+            user: {
+              id: true,
+              nickname: true,
+            },
           },
         },
       });
