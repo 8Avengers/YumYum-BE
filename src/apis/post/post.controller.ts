@@ -182,4 +182,14 @@ export class PostController {
   async deletePost(@Param('postId') postId: number) {
     return this.postService.deletePost(postId);
   }
+
+  /*
+    ### 23.03.20
+    ### 이드보라
+    ### 회원들의 추천 맛집
+   */
+  @Get('/main/trending')
+  async getTrendingPostsByCategory() {
+    return this.postService.getTrendingPosts();
+  }
 }
