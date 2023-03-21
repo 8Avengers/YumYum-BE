@@ -142,9 +142,16 @@ export class UserProfileController {
   }
 
   //그 사람이 작성한 모든 포스트들
+  @UseGuards(AuthAccessGuard)
   @Get('/:userId/posts')
-  async getUserIdPosts(@Param('userId') userId: number) {
-    const allPostsByUserId = await this.postService.getPostsByUserId(userId);
+  async getUserIdPosts(
+    @Param('userId') userId: number,
+    @CurrentUser() currentUser: User,
+  ) {
+    const allPostsByUserId = await this.postService.getPostsByOtherUserId(
+      userId,
+      currentUser.id,
+    );
 
     return allPostsByUserId;
   }
