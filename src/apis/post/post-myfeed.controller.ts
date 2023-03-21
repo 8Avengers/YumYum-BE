@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
@@ -12,6 +12,7 @@ export class MyFeedController {
     private readonly postService: PostService, //
   ) {}
 
+  @ApiOperation({ summary: '내 피드 게시글 불러오기' })
   @Get('/myfeed')
   @UseGuards(AuthAccessGuard)
   async getMyFeed(@CurrentUser() currentUser: any) {
