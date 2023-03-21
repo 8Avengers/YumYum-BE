@@ -20,6 +20,7 @@ const create_restaurant_dto_1 = require("../restaurant/dto/create-restaurant.dto
 const auth_guards_1 = require("../auth/guards/auth.guards");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const platform_express_1 = require("@nestjs/platform-express");
+const swagger_1 = require("@nestjs/swagger");
 let PostController = class PostController {
     constructor(postService) {
         this.postService = postService;
@@ -55,8 +56,15 @@ let PostController = class PostController {
     async deletePost(postId) {
         return this.postService.deletePost(postId);
     }
+    async getTrendingPostsByCategory() {
+        return this.postService.getTrendingPosts();
+    }
+    async getPostsAroundMe(data, currentUser) {
+        return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id);
+    }
 };
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '포스팅 상세보기' }),
     (0, common_1.Get)('/:postId'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('postId')),
@@ -66,6 +74,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "getPostById", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '모든 최신 포스팅 불러오기' }),
     (0, common_1.Get)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -74,6 +83,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "getPosts", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '포스트 작성하기' }),
     (0, common_1.Post)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files')),
@@ -88,6 +98,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PostController.prototype, "createPost", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '포스트 수정하기' }),
     (0, common_1.Patch)('/:postId'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files')),
@@ -100,6 +111,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "updatePost", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '포스트 삭제하기' }),
     (0, common_1.Delete)('/:postId'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('postId')),
@@ -107,7 +119,25 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "deletePost", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: '회원들의 추천 맛집 불러오기' }),
+    (0, common_1.Get)('/main/trending'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PostController.prototype, "getTrendingPostsByCategory", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: '내 주변 피드' }),
+    (0, common_1.Get)('/feed/aroundMe'),
+    (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], PostController.prototype, "getPostsAroundMe", null);
 PostController = __decorate([
+    (0, swagger_1.ApiTags)('Post'),
     (0, common_1.Controller)('posts'),
     __metadata("design:paramtypes", [post_service_1.PostService])
 ], PostController);

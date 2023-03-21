@@ -19,38 +19,54 @@ const user_entity_1 = require("./../user/entities/user.entity");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const Repository_1 = require("typeorm/repository/Repository");
-const Like_1 = require("typeorm/find-options/operator/Like");
+const typeorm_2 = require("typeorm");
 let SearchService = class SearchService {
     constructor(userRepository, restaurantRepository, hashtagRepository) {
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
         this.hashtagRepository = hashtagRepository;
     }
-    async getUserSearch(keyword) {
-        const userSearchResult = await this.userRepository.findBy({
-            nickname: (0, Like_1.Like)(`${keyword}%`),
-            deleted_at: null,
+    async getUserSearch(keyword, page) {
+        const pageNum = Number(page) - 1;
+        const userInOnePage = 15;
+        const userSearchResult = await this.userRepository.find({
+            where: { nickname: (0, typeorm_2.ILike)(`${keyword}%`), deleted_at: null },
+            select: { id: true, nickname: true, profile_image: true },
+            skip: pageNum * userInOnePage,
+            take: userInOnePage,
         });
         return userSearchResult;
     }
-    async getRestaurantSearch(keyword) {
-        const restaurantSearchResult = await this.restaurantRepository.findBy({
-            place_name: (0, Like_1.Like)(`${keyword}%`),
-            deleted_at: null,
+    async getRestaurantSearch(keyword, page) {
+        const pageNum = Number(page) - 1;
+        const restaurantInOnePage = 15;
+        const restaurantSearchResult = await this.restaurantRepository.find({
+            where: { place_name: (0, typeorm_2.ILike)(`${keyword}%`), deleted_at: null },
+            select: { id: true, place_name: true },
+            skip: pageNum * restaurantInOnePage,
+            take: restaurantInOnePage,
         });
         return restaurantSearchResult;
     }
-    async getHashtagSearch(keyword) {
-        const hashtagSearchResult = await this.hashtagRepository.findBy({
-            name: (0, Like_1.Like)(`${keyword}%`),
-            deleted_at: null,
+    async getHashtagSearch(keyword, page) {
+        const pageNum = Number(page) - 1;
+        const hashtagInOnePage = 15;
+        const hashtagSearchResult = await this.hashtagRepository.find({
+            where: { name: (0, typeorm_2.ILike)(`%${keyword}%`), deleted_at: null },
+            select: { id: true, name: true },
+            skip: pageNum * hashtagInOnePage,
+            take: hashtagInOnePage,
         });
         return hashtagSearchResult;
     }
-    async getPostSearchByHashtag(hashtag) {
+    async getPostSearchByHashtag(hashtag, page) {
+        const pageNum = Number(page) - 1;
+        const postInOnePageWithSearchHashtag = 15;
         const postSearchByHashtagResult = await this.hashtagRepository.find({
             relations: ['posts'],
             where: [{ deleted_at: null }, { name: hashtag }],
+            skip: pageNum * postInOnePageWithSearchHashtag,
+            take: postInOnePageWithSearchHashtag,
         });
         return postSearchByHashtagResult;
     }

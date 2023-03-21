@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const comment_like_service_1 = require("./comment-like.service");
 const auth_guards_1 = require("../auth/guards/auth.guards");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const swagger_1 = require("@nestjs/swagger");
 let CommentLikeController = class CommentLikeController {
     constructor(commentLikeService) {
         this.commentLikeService = commentLikeService;
@@ -29,6 +30,7 @@ let CommentLikeController = class CommentLikeController {
     }
 };
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '댓글 좋아요하기' }),
     (0, common_1.Post)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('commentId')),
@@ -38,6 +40,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CommentLikeController.prototype, "likeComment", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '댓글 좋아요 취소' }),
     (0, common_1.Delete)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('commentId')),
@@ -47,6 +50,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CommentLikeController.prototype, "unlikeComment", null);
 CommentLikeController = __decorate([
+    (0, swagger_1.ApiTags)('CommentLike'),
     (0, common_1.Controller)('posts/:postId/comments/:commentId/like'),
     __metadata("design:paramtypes", [comment_like_service_1.CommentLikeService])
 ], CommentLikeController);

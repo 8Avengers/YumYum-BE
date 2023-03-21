@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const post_like_service_1 = require("./post-like.service");
 const auth_guards_1 = require("../auth/guards/auth.guards");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const swagger_1 = require("@nestjs/swagger");
 let PostLikeController = class PostLikeController {
     constructor(postLikeService) {
         this.postLikeService = postLikeService;
@@ -29,6 +30,7 @@ let PostLikeController = class PostLikeController {
     }
 };
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '포스트 좋아요하기' }),
     (0, common_1.Post)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('postId')),
@@ -38,6 +40,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostLikeController.prototype, "likePost", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '포스트 좋아요취소하기' }),
     (0, common_1.Delete)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('postId')),
@@ -47,6 +50,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PostLikeController.prototype, "unlikePost", null);
 PostLikeController = __decorate([
+    (0, swagger_1.ApiTags)('PostLike'),
     (0, common_1.Controller)('posts/:postId/like'),
     __metadata("design:paramtypes", [post_like_service_1.PostLikeService])
 ], PostLikeController);

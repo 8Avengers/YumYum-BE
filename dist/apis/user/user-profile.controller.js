@@ -88,8 +88,8 @@ let UserProfileController = class UserProfileController {
         };
         return response;
     }
-    async getUserIdPosts(userId) {
-        const allPostsByUserId = await this.postService.getPostsByUserId(userId);
+    async getUserIdPosts(userId, currentUser) {
+        const allPostsByUserId = await this.postService.getPostsByOtherUserId(userId, currentUser.id);
         return allPostsByUserId;
     }
     async followUser(follower, followingId) {
@@ -155,10 +155,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getUserProfile", null);
 __decorate([
+    (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     (0, common_1.Get)('/:userId/posts'),
     __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, user_entity_1.User]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getUserIdPosts", null);
 __decorate([

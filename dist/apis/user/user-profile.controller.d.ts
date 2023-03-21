@@ -27,7 +27,7 @@ export declare class UserProfileController {
         profile_image: string;
         follow_relationship: any;
     }>;
-    getUserIdPosts(userId: number): Promise<{
+    getUserIdPosts(userId: number, currentUser: User): Promise<{
         id: number;
         content: string;
         rating: number;

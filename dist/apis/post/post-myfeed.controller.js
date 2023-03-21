@@ -24,11 +24,12 @@ let MyFeedController = class MyFeedController {
     }
     async getMyFeed(currentUser) {
         const userId = currentUser.id;
-        const myPosts = await this.postService.getPostsByUserId(userId);
+        const myPosts = await this.postService.getPostsByMyId(userId);
         return myPosts;
     }
 };
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: '내 피드 게시글 불러오기' }),
     (0, common_1.Get)('/myfeed'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),

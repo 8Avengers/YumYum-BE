@@ -29,20 +29,24 @@ let MyListController = class MyListController {
         this.myListService = myListService;
         this.postService = postService;
     }
-    async getMyListDetail(collectionId) {
-        const myLists = await this.myListService.getMyListDetail(collectionId);
+    async getMyListDetail(collectionId, page) {
+        const myLists = await this.myListService.getMyListDetail(collectionId, page);
+        return await myLists;
+    }
+    async getMyListsDetailPost(restaurantId, collectionId, currentUser, page) {
+        const myLists = await this.myListService.getMyListsDetailPost(currentUser.id, restaurantId, collectionId, page);
         return await myLists;
     }
     async getMyListsName(currentUser) {
         const myLists = await this.myListService.getMyListsName(currentUser.id);
         return await myLists;
     }
-    async getMyListsMe(currentUser) {
-        const myLists = await this.myListService.getMyListsMe(currentUser.id);
+    async getMyListsMe(currentUser, page) {
+        const myLists = await this.myListService.getMyListsMe(currentUser.id, page);
         return await myLists;
     }
-    async getMyListsAll(userId) {
-        const myLists = await this.myListService.getMyListsAll(userId);
+    async getMyListsAll(userId, page) {
+        const myLists = await this.myListService.getMyListsAll(userId, page);
         return await myLists;
     }
     async createMyList(data, currentUser) {
@@ -52,7 +56,14 @@ let MyListController = class MyListController {
         return this.myListService.getMyListInfo(collectionId);
     }
     async updateMyList(collectionId, data, currentUser) {
-        return this.myListService.updateMyList(currentUser, collectionId, data.name, data.image, data.description, data.visibility);
+        const updateMyList = await this.myListService.updateMyList(currentUser.id, collectionId, data.name, data.image, data.description, data.visibility);
+        const result = {
+            name: updateMyList.name,
+            image: updateMyList.image,
+            description: updateMyList.description,
+            visibility: updateMyList.visibility,
+        };
+        return result;
     }
     async deleteMyList(collectionId, currentUser) {
         return this.myListService.deleteMyList(currentUser, collectionId);
@@ -66,6 +77,12 @@ let MyListController = class MyListController {
     async myListUpdatePosting(postId, data) {
         return this.myListService.myListUpdatePosting(postId, data.collectionId);
     }
+    async HotMyList() {
+        return this.myListService.HotMyList();
+    }
+    async FollowersMyList(currentUser) {
+        return this.myListService.FollowersMyList(currentUser.id);
+    }
 };
 __decorate([
     (0, common_1.Get)('/collections/detail/:collectionId'),
@@ -73,10 +90,25 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 상세보기 성공' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 상세보기 실패' }),
     __param(0, (0, decorators_1.Param)('collectionId')),
+    __param(1, (0, decorators_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "getMyListDetail", null);
+__decorate([
+    (0, common_1.Get)('/collections/detail/posts/:collectionId/:restaurantId'),
+    (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'MyList 상세 더보기' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 상세 더보기 성공' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 상세 더보기 실패' }),
+    __param(0, (0, decorators_1.Param)('restaurantId')),
+    __param(1, (0, decorators_1.Param)('collectionId')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __param(3, (0, decorators_1.Query)('page')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, Number, Object, String]),
+    __metadata("design:returntype", Promise)
+], MyListController.prototype, "getMyListsDetailPost", null);
 __decorate([
     (0, common_1.Get)('/collections/name'),
     (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),
@@ -95,18 +127,20 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 전체조회(내꺼) 성공' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 전체조회(내꺼) 실패' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, decorators_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "getMyListsMe", null);
 __decorate([
     (0, common_1.Get)('/collections/:userId'),
-    (0, swagger_1.ApiOperation)({ summary: 'MyList 전체조회' }),
+    (0, swagger_1.ApiOperation)({ summary: 'MyList 전체조회(남의꺼)' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 전체조회 성공' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 전체조회 실패' }),
     __param(0, (0, decorators_1.Param)('userId')),
+    __param(1, (0, decorators_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "getMyListsAll", null);
 __decorate([
@@ -194,7 +228,28 @@ __decorate([
     __metadata("design:paramtypes", [Number, add_my_list_posting_dto_1.addCollectionPostingDto]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "myListUpdatePosting", null);
+__decorate([
+    (0, common_1.Get)('/collections/main/hot'),
+    (0, swagger_1.ApiOperation)({ summary: '요즘 뜨는 맛집리스트' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '요즘 뜨는 맛집리스트 성공' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: '요즘 뜨는 맛집리스트 실패' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], MyListController.prototype, "HotMyList", null);
+__decorate([
+    (0, common_1.Get)('/collections/main/followers'),
+    (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),
+    (0, swagger_1.ApiOperation)({ summary: '내 친구의 맛집리스트' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '내 친구의 맛집리스트 성공' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: '내 친구의 맛집리스트 실패' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], MyListController.prototype, "FollowersMyList", null);
 MyListController = __decorate([
+    (0, swagger_1.ApiTags)('my-list'),
     (0, common_1.Controller)('my-list'),
     __metadata("design:paramtypes", [my_list_service_1.MyListService,
         post_service_1.PostService])

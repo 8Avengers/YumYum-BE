@@ -8,7 +8,7 @@ export declare class MyListController {
     private readonly myListService;
     private readonly postService;
     constructor(myListService: MyListService, postService: PostService);
-    getMyListDetail(collectionId: number): Promise<{
+    getMyListDetail(collectionId: number, page: string): Promise<{
         id: number;
         name: string;
         visibility: "public" | "private";
@@ -30,22 +30,24 @@ export declare class MyListController {
             postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
         }[];
     }[]>;
-    getMyListsName(currentUser: any): Promise<import("./entities/collection.entity").Collection[]>;
-    getMyListsMe(currentUser: any): Promise<{
-        collectionItems: import("./entities/collection-item.entity").CollectionItem[];
+    getMyListsDetailPost(restaurantId: number, collectionId: number, currentUser: any, page: string): Promise<{
         id: number;
-        type: string;
-        name: string;
-        description: string;
-        image: string;
-        user_id: number;
-        visibility: "public" | "private";
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date;
+        content: string;
+        rating: number;
+        updated_at: Date;
         user: import("../user/entities/user.entity").User;
+        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
+        images: import("../post/entities/image.entity").Image[];
+        hashtags: string[];
+        totalLikes: number;
+        isLiked: any;
+        totalComments: number;
+        myList: import("./entities/collection-item.entity").CollectionItem[];
+        visibility: "public" | "private";
     }[]>;
-    getMyListsAll(userId: number): Promise<{
+    getMyListsName(currentUser: any): Promise<import("./entities/collection.entity").Collection[]>;
+    getMyListsMe(currentUser: any, page: string): Promise<import("./entities/collection.entity").Collection[]>;
+    getMyListsAll(userId: number, page: string): Promise<{
         collectionItems: import("./entities/collection-item.entity").CollectionItem[];
         id: number;
         type: string;
@@ -61,9 +63,16 @@ export declare class MyListController {
     }[]>;
     createMyList(data: CreateMyListDto, currentUser: any): Promise<import("typeorm").InsertResult>;
     getMyListInfo(collectionId: number): Promise<import("./entities/collection.entity").Collection>;
-    updateMyList(collectionId: number, data: UpdateMyListDto, currentUser: any): Promise<void>;
+    updateMyList(collectionId: number, data: UpdateMyListDto, currentUser: any): Promise<{
+        name: string;
+        image: string;
+        description: string;
+        visibility: "public" | "private";
+    }>;
     deleteMyList(collectionId: number, currentUser: any): Promise<void>;
-    myListPlusPosting(postId: number, data: addCollectionPostingDto): Promise<void>;
+    myListPlusPosting(postId: number, data: addCollectionPostingDto): Promise<import("./entities/collection-item.entity").CollectionItem>;
     myListMinusPosting(postId: number, data: minusCollectionPostingDto, currentUser: any): Promise<void>;
     myListUpdatePosting(postId: number, data: addCollectionPostingDto): Promise<void>;
+    HotMyList(): Promise<any>;
+    FollowersMyList(currentUser: any): Promise<import("./entities/collection-item.entity").CollectionItem[]>;
 }

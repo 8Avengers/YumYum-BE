@@ -20,50 +20,53 @@ let SearchController = class SearchController {
     constructor(searchService) {
         this.searchService = searchService;
     }
-    async getUserSearch(keyword) {
-        console.log(keyword);
-        return await this.searchService.getUserSearch(keyword);
+    async getUserSearch(keyword, page) {
+        return await this.searchService.getUserSearch(keyword, page);
     }
-    async getRestaurantSearch(keyword) {
-        return await this.searchService.getRestaurantSearch(keyword);
+    async getRestaurantSearch(keyword, page) {
+        return await this.searchService.getRestaurantSearch(keyword, page);
     }
-    async getHashtagSearch(keyword) {
-        return await this.searchService.getHashtagSearch(keyword);
+    async getHashtagSearch(keyword, page) {
+        return await this.searchService.getHashtagSearch(keyword, page);
     }
-    async getPostSearchByHashtag(hashtag) {
-        return await this.searchService.getPostSearchByHashtag(hashtag);
+    async getPostSearchByHashtag(hashtag, page) {
+        return await this.searchService.getPostSearchByHashtag(hashtag, page);
     }
 };
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '회원 검색 및 데이터 받기' }),
     (0, common_1.Get)('/user'),
     __param(0, (0, common_1.Query)('keyword')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], SearchController.prototype, "getUserSearch", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '음식점 정보 검색 및 데이터 받기' }),
     (0, common_1.Get)('/restaurant'),
     __param(0, (0, common_1.Query)('keyword')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], SearchController.prototype, "getRestaurantSearch", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '해시태그 정보 검색 및 데이터 받기' }),
     (0, common_1.Get)('/hashtag'),
     __param(0, (0, common_1.Query)('keyword')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], SearchController.prototype, "getHashtagSearch", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '해시태그를 기반으로 포스팅 불러오기' }),
     (0, common_1.Get)('/post'),
     __param(0, (0, common_1.Query)('hashtag')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], SearchController.prototype, "getPostSearchByHashtag", null);
 SearchController = __decorate([
