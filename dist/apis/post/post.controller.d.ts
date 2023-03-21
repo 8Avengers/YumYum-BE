@@ -2,6 +2,7 @@
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { LocationDto } from './dto/location.dto';
 import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 export declare class PostController {
     private readonly postService;
@@ -47,4 +48,20 @@ export declare class PostController {
         postId: number;
     }>;
     deletePost(postId: number): Promise<void>;
+    getTrendingPostsByCategory(): Promise<any>;
+    getPostsAroundMe(data: Partial<LocationDto>, currentUser: any): Promise<{
+        id: number;
+        content: string;
+        rating: number;
+        updated_at: Date;
+        user: import("../user/entities/user.entity").User;
+        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
+        images: import("./entities/image.entity").Image[];
+        hashtags: import("./entities/hashtag.entity").Hashtag[];
+        totalLikes: number;
+        isLiked: any;
+        totalComments: number;
+        myList: any;
+        visibility: "public" | "private";
+    }[]>;
 }

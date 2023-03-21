@@ -13,15 +13,17 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapService = void 0;
+const restaurant_entity_1 = require("./../restaurant/entities/restaurant.entity");
 const follow_entity_1 = require("../user/entities/follow.entity");
 const post_entity_1 = require("../post/entities/post.entity");
 const Repository_1 = require("typeorm/repository/Repository");
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 let MapService = class MapService {
-    constructor(postRepository, followRepository) {
+    constructor(postRepository, followRepository, restaurantRepository) {
         this.postRepository = postRepository;
         this.followRepository = followRepository;
+        this.restaurantRepository = restaurantRepository;
     }
     async getFollowerPosting(userId) {
         let followerPostingResult = [];
@@ -39,6 +41,41 @@ let MapService = class MapService {
                     id: true,
                     rating: true,
                     content: true,
+                    updated_at: true,
+                    restaurant: {
+                        place_name: true,
+                        kakao_place_id: true,
+                        category_name: true,
+                        x: true,
+                        y: true,
+                    },
+                    user: { id: true, nickname: true, profile_image: true },
+                },
+                order: {
+                    updated_at: 'DESC',
+                },
+            });
+            followerPostingResult.push(...followerPost);
+        }
+        return followerPostingResult;
+    }
+    async getFollowerPostingList(userId) {
+        let followerPostingResult = [];
+        const followerList = await this.followRepository.find({
+            relations: ['following'],
+            where: { follower: { id: userId } },
+            select: { following: { id: true } },
+        });
+        console.log('followerList : ', followerList);
+        for (let following of followerList) {
+            const followerPost = await this.postRepository.find({
+                relations: ['restaurant', 'user'],
+                where: { user: { id: following.following.id } },
+                select: {
+                    id: true,
+                    rating: true,
+                    content: true,
+                    images: true,
                     updated_at: true,
                     restaurant: {
                         place_name: true,
@@ -76,12 +113,34 @@ let MapService = class MapService {
             },
         });
     }
+    async getNearRestaurant(x, y) {
+        const nearRestaurant = await this.restaurantRepository
+            .createQueryBuilder('restaurant')
+            .leftJoin('restaurant.posts', 'post')
+            .leftJoin('post.images', 'image')
+            .select([
+            'restaurant.id',
+            'restaurant.place_name',
+            'restaurant.x',
+            'restaurant.y',
+            'post.rating',
+            'image.file_url',
+        ])
+            .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
+            .having(`distance <= 2`)
+            .orderBy('rand()')
+            .limit(3)
+            .getRawMany();
+        return nearRestaurant;
+    }
 };
 MapService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(post_entity_1.Post)),
     __param(1, (0, typeorm_1.InjectRepository)(follow_entity_1.Follow)),
+    __param(2, (0, typeorm_1.InjectRepository)(restaurant_entity_1.Restaurant)),
     __metadata("design:paramtypes", [Repository_1.Repository,
+        Repository_1.Repository,
         Repository_1.Repository])
 ], MapService);
 exports.MapService = MapService;

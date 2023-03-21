@@ -9,24 +9,27 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
+import { PostLike } from './entities/post-like.entity';
+import { Restaurant } from '../restaurant/entities/restaurant.entity';
 export declare class PostService {
     private postRepository;
     private commentRepository;
     private collectionItemRepository;
+    private postLikeRepository;
     private imageRepository;
     private readonly likeService;
     private readonly postHashtagService;
     private readonly myListService;
     private readonly restaurantService;
     private readonly uploadService;
-    constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, collectionItemRepository: Repository<CollectionItem>, imageRepository: ImageRepository, likeService: PostLikeService, postHashtagService: PostHashtagService, myListService: MyListService, restaurantService: RestaurantService, uploadService: UploadService);
+    constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, collectionItemRepository: Repository<CollectionItem>, postLikeRepository: Repository<PostLike>, imageRepository: ImageRepository, likeService: PostLikeService, postHashtagService: PostHashtagService, myListService: MyListService, restaurantService: RestaurantService, uploadService: UploadService);
     getPosts(userId: number): Promise<{
         id: number;
         content: string;
         rating: number;
         updated_at: Date;
         user: import("../user/entities/user.entity").User;
-        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
+        restaurant: Restaurant;
         images: import("./entities/image.entity").Image[];
         hashtags: string[];
         totalLikes: number;
@@ -41,7 +44,7 @@ export declare class PostService {
         rating: number;
         updated_at: Date;
         user: import("../user/entities/user.entity").User;
-        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
+        restaurant: Restaurant;
         images: import("./entities/image.entity").Image[];
         totalLikes: number;
         hashtags: {
@@ -61,19 +64,50 @@ export declare class PostService {
         postId: number;
     }>;
     deletePost(id: number): Promise<void>;
-    getPostsByUserId(userId: number): Promise<{
+    getPostsByMyId(userId: number): Promise<{
         id: number;
         content: string;
         rating: number;
         updated_at: Date;
         user: import("../user/entities/user.entity").User;
-        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
+        restaurant: Restaurant;
         images: import("./entities/image.entity").Image[];
         hashtags: string[];
         totalLikes: number;
         isLiked: any;
         totalComments: number;
         myList: CollectionItem[];
+        visibility: "public" | "private";
+    }[]>;
+    getPostsByOtherUserId(userId: number, myUserId: number): Promise<{
+        id: number;
+        content: string;
+        rating: number;
+        updated_at: Date;
+        user: import("../user/entities/user.entity").User;
+        restaurant: Restaurant;
+        images: import("./entities/image.entity").Image[];
+        hashtags: string[];
+        totalLikes: number;
+        isLiked: any;
+        totalComments: number;
+        myList: CollectionItem[];
+        visibility: "public" | "private";
+    }[]>;
+    getTrendingPosts(): Promise<any>;
+    getPostsAroundMe(x: string, y: string, userId: any): Promise<{
+        id: number;
+        content: string;
+        rating: number;
+        updated_at: Date;
+        user: import("../user/entities/user.entity").User;
+        restaurant: Restaurant;
+        images: import("./entities/image.entity").Image[];
+        hashtags: import("./entities/hashtag.entity").Hashtag[];
+        totalLikes: number;
+        isLiked: any;
+        totalComments: number;
+        myList: any;
         visibility: "public" | "private";
     }[]>;
 }

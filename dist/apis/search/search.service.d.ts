@@ -7,8 +7,8 @@ export declare class SearchService {
     private restaurantRepository;
     private hashtagRepository;
     constructor(userRepository: Repository<User>, restaurantRepository: Repository<Restaurant>, hashtagRepository: Repository<Hashtag>);
-    getUserSearch(keyword: string): Promise<User[]>;
-    getRestaurantSearch(keyword: string): Promise<Restaurant[]>;
-    getHashtagSearch(keyword: string): Promise<Hashtag[]>;
-    getPostSearchByHashtag(hashtag: string): Promise<Hashtag[]>;
+    getUserSearch(keyword: string, page: string): Promise<User[]>;
+    getRestaurantSearch(keyword: string, page: string): Promise<Restaurant[]>;
+    getHashtagSearch(keyword: string, page: string): Promise<Hashtag[]>;
+    getPostSearchByHashtag(hashtag: string, page: string): Promise<Hashtag[]>;
 }

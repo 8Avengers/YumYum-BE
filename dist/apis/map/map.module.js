@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapModule = void 0;
-const collection_item_entity_1 = require("./../collection/entities/collection-item.entity");
+const restaurant_entity_1 = require("../restaurant/entities/restaurant.entity");
 const follow_entity_1 = require("../user/entities/follow.entity");
 const post_entity_1 = require("../post/entities/post.entity");
 const typeorm_1 = require("@nestjs/typeorm");
@@ -18,7 +18,7 @@ let MapModule = class MapModule {
 };
 MapModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([post_entity_1.Post, follow_entity_1.Follow, collection_item_entity_1.CollectionItem])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([post_entity_1.Post, follow_entity_1.Follow, restaurant_entity_1.Restaurant])],
         controllers: [map_controller_1.MapController],
         providers: [map_service_1.MapService],
     })
