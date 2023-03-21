@@ -1,12 +1,13 @@
 import { minusCollectionPostingDto } from './dto/minus-bookmark-posting.dto';
 
 import { Controller, Post, Get, Put, Delete } from '@nestjs/common';
-import { Body, Param, UseGuards } from '@nestjs/common/decorators';
+import { Body, Param, Query, UseGuards } from '@nestjs/common/decorators';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CreateMyListDto } from './dto/create-my-list.dto';
@@ -18,6 +19,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
 import { PostService } from '../post/post.service';
 
+@ApiTags('my-list')
 @Controller('my-list')
 export class MyListController {
   constructor(
@@ -31,15 +33,17 @@ export class MyListController {
     ### MyList 상세보기!
     */
   @Get('/collections/detail/:collectionId')
-  // @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 상세보기' })
   @ApiResponse({ status: 200, description: 'MyList 상세보기 성공' })
   @ApiResponse({ status: 400, description: 'MyList 상세보기 실패' })
   async getMyListDetail(
     @Param('collectionId') collectionId: number,
-    // @CurrentUser() currentUser: any,
+    @Query('page') page: string,
   ) {
-    const myLists = await this.myListService.getMyListDetail(collectionId);
+    const myLists = await this.myListService.getMyListDetail(
+      collectionId,
+      page,
+    );
     return await myLists;
   }
 
@@ -57,11 +61,13 @@ export class MyListController {
     @Param('restaurantId') restaurantId: number,
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
+    @Query('page') page: string,
   ) {
     const myLists = await this.myListService.getMyListsDetailPost(
       currentUser.id,
       restaurantId,
       collectionId,
+      page,
     );
     return await myLists;
   }
@@ -93,8 +99,11 @@ export class MyListController {
   @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
-  async getMyListsMe(@CurrentUser() currentUser: any) {
-    const myLists = await this.myListService.getMyListsMe(currentUser.id);
+  async getMyListsMe(
+    @CurrentUser() currentUser: any,
+    @Query('page') page: string,
+  ) {
+    const myLists = await this.myListService.getMyListsMe(currentUser.id, page);
     return await myLists;
   }
 
@@ -105,11 +114,14 @@ export class MyListController {
     */
 
   @Get('/collections/:userId')
-  @ApiOperation({ summary: 'MyList 전체조회' })
+  @ApiOperation({ summary: 'MyList 전체조회(남의꺼)' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회 실패' })
-  async getMyListsAll(@Param('userId') userId: number) {
-    const myLists = await this.myListService.getMyListsAll(userId);
+  async getMyListsAll(
+    @Param('userId') userId: number,
+    @Query('page') page: string,
+  ) {
+    const myLists = await this.myListService.getMyListsAll(userId, page);
     return await myLists;
   }
   /*
@@ -168,15 +180,23 @@ export class MyListController {
     @Body() data: UpdateMyListDto,
     @CurrentUser() currentUser: any,
   ) {
-    return this.myListService.updateMyList(
-      currentUser,
+    const updateMyList = await this.myListService.updateMyList(
+      currentUser.id,
       collectionId,
       data.name,
       data.image,
       data.description,
       data.visibility,
     );
+    const result = {
+      name: updateMyList.name,
+      image: updateMyList.image,
+      description: updateMyList.description,
+      visibility: updateMyList.visibility,
+    };
+    return result;
   }
+
   /*
     ### 23.03.10
     ### 표정훈
@@ -267,12 +287,13 @@ export class MyListController {
     ### 표정훈
     ### 내 친구의 맛집리스트
     */
-  // @Get('/collections/followers/mylists')
-  // @UseGuards(AuthAccessGuard)
-  // @ApiOperation({ summary: '내 친구의 맛집리스트' })
-  // @ApiResponse({ status: 200, description: '내 친구의 맛집리스트 성공' })
-  // @ApiResponse({ status: 400, description: '내 친구의 맛집리스트 실패' })
-  // async FollowersMyList(@CurrentUser() currentUser: any) {
-  //   return this.myListService.FollowersMyList(currentUser);
-  // }
+  @Get('/collections/followers/mylists')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: '내 친구의 맛집리스트' })
+  @ApiResponse({ status: 200, description: '내 친구의 맛집리스트 성공' })
+  @ApiResponse({ status: 400, description: '내 친구의 맛집리스트 실패' })
+  async FollowersMyList(@CurrentUser() currentUser: any) {
+    //애니는 안된다. dto필요해!
+    return this.myListService.FollowersMyList(currentUser.id);
+  }
 }

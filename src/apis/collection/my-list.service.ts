@@ -1,3 +1,4 @@
+import { Follow } from './../user/entities/follow.entity';
 import { Restaurant } from 'src/apis/restaurant/entities/restaurant.entity';
 import { Collection } from './entities/collection.entity';
 import {
@@ -18,6 +19,7 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { UploadService } from '../upload/upload.service';
 import { FindOptionsRelations } from 'typeorm';
 import { FindManyOptions } from 'typeorm';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class MyListService {
@@ -30,6 +32,10 @@ export class MyListService {
     private postRepository: Repository<Post>,
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     private readonly likeService: PostLikeService,
+    @InjectRepository(Follow)
+    private followRepository: Repository<Follow>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private imageRepository: ImageRepository,
     private readonly postHashtagService: PostHashtagService,
     private readonly restaurantService: RestaurantService,
@@ -42,8 +48,15 @@ export class MyListService {
     ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
     */
 
-  async getMyListDetail(collectionId: number) {
+  async getMyListDetail(collectionId: number, page: string) {
     try {
+      let pageNum = Number(page) - 1;
+      const myListInOnePage = 1; //세준님에게 물어보기
+
+      if (isNaN(pageNum) || pageNum < 0) {
+        pageNum = 0;
+      }
+
       // 컬렉션 이름과 포스트 정보 가져오기
       const myList = await this.collectionRepository.find({
         relations: {
@@ -77,6 +90,8 @@ export class MyListService {
             },
           },
         },
+        skip: pageNum * myListInOnePage,
+        take: myListInOnePage,
       });
 
       return myList.map((myList) => ({
@@ -108,9 +123,17 @@ export class MyListService {
     userId: number,
     restaurantId: number,
     collectionId: number,
+    page: string,
   ) {
     //컬렉션아이템에서 맛집아이디에 관한 정보 찾기
     try {
+      let pageNum = Number(page) - 1;
+      const myListInOnePage = 3; //세준님에게 물어보기
+
+      if (isNaN(pageNum) || pageNum < 0) {
+        pageNum = 0;
+      }
+
       const posts = await this.postRepository.find({
         where: {
           deleted_at: null,
@@ -146,7 +169,9 @@ export class MyListService {
             collection: true,
           },
         },
-        order: { created_at: 'desc' },
+        // order: { created_at: 'desc' },
+        skip: pageNum * myListInOnePage,
+        take: myListInOnePage,
       });
       if (!posts || posts.length === 0) {
         return [];
@@ -223,8 +248,15 @@ export class MyListService {
   // 해결해야할 사항 fix:16 fix30
   // 1. post에서 id: 1인 값만 가져옴 => 데이터베이스 수정으로 해결완료🔥
   // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
-  async getMyListsMe(userId: number) {
+  async getMyListsMe(userId: number, page: string) {
     try {
+      let pageNum = Number(page) - 1;
+      const myListInOnePage = 3; //세준님에게 물어보기
+
+      if (isNaN(pageNum) || pageNum < 0) {
+        pageNum = 0;
+      }
+
       const myLists = await this.collectionRepository.find({
         relations: {
           collectionItems: {
@@ -233,13 +265,12 @@ export class MyListService {
           },
         },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
-        select: { name: true, description: true, image: true },
+        select: { id: true, name: true, description: true, image: true },
+        skip: pageNum * myListInOnePage,
+        take: myListInOnePage,
       });
 
-      return myLists.map((collection) => ({
-        ...collection,
-        collectionItems: collection.collectionItems.slice(0, 3),
-      }));
+      return myLists;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -257,8 +288,15 @@ export class MyListService {
   // 해결해야할 사항 fix:16 fix30
   // 1. post에서 id: 1인 값만 가져옴 => 데이터베이스 수정으로 해결완료🔥
   // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
-  async getMyListsAll(userId: number) {
+  async getMyListsAll(userId: number, page: string) {
     try {
+      let pageNum = Number(page) - 1;
+      const myListInOnePage = 3; //세준님에게 물어보기
+
+      if (isNaN(pageNum) || pageNum < 0) {
+        pageNum = 0;
+      }
+
       const myLists = await this.collectionRepository.find({
         relations: {
           collectionItems: {
@@ -267,13 +305,17 @@ export class MyListService {
           },
         },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
-        select: { name: true, description: true, image: true },
+        select: { id: true, name: true, description: true, image: true },
+        skip: pageNum * myListInOnePage,
+        take: myListInOnePage,
       });
 
-      return myLists.map((collection) => ({
-        ...collection,
-        collectionItems: collection.collectionItems.slice(0, 3),
-      }));
+      return myLists;
+
+      // return myLists.map((collection) => ({
+      //   ...collection,
+      //   collectionItems: collection.collectionItems.slice(0, 3),
+      // }));
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -353,7 +395,7 @@ export class MyListService {
   ) {
     try {
       const myList = await this.collectionRepository.update(
-        { id: collectionId, type: 'myList' }, //user: { id: userId }  => "Unknown column 'email' in 'where clause'"
+        { id: collectionId, type: 'myList', user: { id: userId } },
         {
           name,
           image,
@@ -361,6 +403,13 @@ export class MyListService {
           visibility,
         },
       );
+
+      return {
+        name,
+        image,
+        description,
+        visibility,
+      };
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -621,11 +670,67 @@ export class MyListService {
     ### 표정훈
     ### [Main] 내 친구의 맛집리스트
     */
-  // async FollowersMyList(userId: number) {
-  //   const myListFollwers = await this.collectionItemRepository.find({
-  //     relations: {},
-  //     where: {},
-  //     select: {},
-  //   });
-  // }
+  async FollowersMyList(userId: number) {
+    try {
+      //팔로잉 아이디 찾기
+      const followerId = await this.followRepository.find({
+        where: {
+          follower: { id: userId },
+        },
+        select: {
+          following: { id: true },
+        },
+        relations: {
+          following: true,
+        },
+      });
+
+      const followingIds = followerId.map((f) => f.following.id);
+
+      const myListFollwers = await this.collectionItemRepository.findOne({
+        relations: {
+          post: {
+            user: true,
+            images: true,
+          },
+          collection: {
+            user: true,
+          },
+        },
+        where: {
+          collection: {
+            type: 'myList',
+            deletedAt: null,
+            user_id: In(followingIds), //팔로워들의 아이디
+          },
+        },
+        select: {
+          id: true,
+          post: {
+            id: true,
+            images: { id: true, file_url: true },
+            user: {
+              id: true,
+              nickname: true,
+            },
+          },
+          collection: {
+            id: true,
+            name: true,
+          },
+        },
+      });
+      console.log('🔥🔥콘솔로그🔥🔥', followingIds, myListFollwers);
+      return myListFollwers;
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 }

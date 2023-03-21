@@ -18,6 +18,8 @@ import { ImageRepository } from '../post/image.repository';
 import { PostHashtagService } from '../post/post-hashtag.service';
 import { Image } from '../post/entities/image.entity';
 import { PostModule } from '../post/post.module';
+import { Follow } from '../user/entities/follow.entity';
+import { User } from '../user/entities/user.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,8 @@ import { PostModule } from '../post/post.module';
       Comment,
       Image,
       Hashtag,
+      Follow,
+      User,
     ]),
     RestaurantModule,
     UploadModule,
