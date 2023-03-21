@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { Repository } from 'typeorm';
+import { Repository, Between, MoreThan } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { PostLikeService } from './post-like.service';
 import { PostHashtagService } from './post-hashtag.service';
@@ -18,6 +18,11 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
+import shuffle from 'lodash/shuffle';
+import { PostLike } from './entities/post-like.entity';
+import { subMonths } from 'date-fns';
+import { Restaurant } from '../restaurant/entities/restaurant.entity';
+// import { fromSubQuery} from
 // type Image = string | Express.Multer.File;
 // import { PostUserTag } from './entities/post-usertag.entity';
 // import { PostUserTagService } from './post-user-tag.service';
@@ -29,6 +34,8 @@ export class PostService {
     @InjectRepository(Comment) private commentRepository: Repository<Comment>,
     @InjectRepository(CollectionItem)
     private collectionItemRepository: Repository<CollectionItem>,
+    @InjectRepository(PostLike)
+    private postLikeRepository: Repository<PostLike>,
     private imageRepository: ImageRepository,
     private readonly likeService: PostLikeService,
     private readonly postHashtagService: PostHashtagService,
@@ -88,19 +95,6 @@ export class PostService {
         postIds,
         userId,
       );
-
-      // const collectionItemIds = posts.reduce((ids, post) => {
-      //   post.collectionItems.forEach((collectionItem) => {
-      //     ids.add(collectionItem.collection.id);
-      //   });
-      //   return ids;
-      // }, new Set());
-      //
-      // const collections = await this.collectionItemRepository.find({
-      //   where: { id: collectionItemIds },
-      //   select: { collection: { id: true } },
-      //   relations: ['collection'],
-      // });
 
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
@@ -654,4 +648,207 @@ export class PostService {
       }
     }
   }
+
+  async getTrendingPosts(): Promise<any> {
+    try {
+      const trendingPostsByCategory = [];
+
+      const date = new Date();
+      date.setMonth(date.getMonth() - 1);
+
+      const trendingPosts = await this.postRepository
+        .createQueryBuilder('post')
+        .select('post.id')
+        .addSelect('post.content')
+        .addSelect('post.rating')
+        .leftJoin('post.postLikes', 'postLikes')
+        .leftJoin('post.restaurant', 'restaurant')
+        .leftJoin('post.user', 'user')
+        .groupBy(
+          "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname",
+        )
+        .orderBy('COUNT(postLikes.id)', 'DESC')
+        // .addOrderBy('RAND()')
+        .where('post.visibility = :visibility', { visibility: 'public' })
+        .where('postLikes.updated_at >= :date', { date })
+        .addSelect(
+          "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END)",
+          'category',
+        )
+        .addSelect('restaurant.place_name')
+        .addSelect('user.profile_image')
+        .addSelect('user.nickname')
+        .getRawAndEntities();
+
+      trendingPosts.entities.forEach((post, index) => {
+        const category = trendingPosts.raw[index].category;
+        const postObj = {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          restaurant: {
+            category: category,
+            place_name: post.restaurant.place_name,
+          },
+          user: {
+            profile_image: post.user.profile_image,
+            nickname: post.user.nickname,
+          },
+        };
+
+        const existingCategoryIndex = trendingPostsByCategory.findIndex(
+          (categoryObj) => categoryObj.category === category,
+        );
+
+        if (existingCategoryIndex === -1) {
+          trendingPostsByCategory.push({
+            category: category,
+            posts: [postObj],
+          });
+        } else {
+          trendingPostsByCategory[existingCategoryIndex].posts.push(postObj);
+        }
+      });
+
+      for (const categoryObj of trendingPostsByCategory) {
+        categoryObj.posts.sort((a, b) => {
+          const aLikes = a.postLikes ? a.postLikes.length : 0;
+          const bLikes = b.postLikes ? b.postLikes.length : 0;
+          return bLikes - aLikes;
+        });
+        categoryObj.posts = categoryObj.posts.slice(0, 10);
+      }
+
+      return trendingPostsByCategory;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  async getPostsAroundMe(x: string, y: string, userId) {
+    try {
+      const postsAroundMe = await this.postRepository
+        .createQueryBuilder('post')
+        .leftJoin('post.restaurant', 'restaurant')
+        .leftJoin('post.images', 'image')
+        .leftJoinAndSelect('post.hashtags', 'hashtags')
+        .leftJoin('post.user', 'user')
+        .leftJoinAndSelect('post.collectionItems', 'collectionItem')
+        .leftJoinAndSelect('collectionItem.collection', 'collection')
+        .select([
+          'post.id',
+          'post.content',
+          'post.rating',
+          'post.updated_at',
+          'post.visibility',
+        ])
+        .addSelect([
+          'restaurant.kakao_place_id',
+          'restaurant.address_name',
+          'restaurant.category_name',
+          'restaurant.place_name',
+          'restaurant.road_address_name',
+        ])
+        .addSelect(['user.id', 'user.nickname', 'user.profile_image'])
+        .addSelect(
+          `6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`,
+          'distance',
+        )
+        .addSelect('hashtags.name')
+        .addSelect('image.file_url')
+        // .addSelect('collectionItem.collection')
+        .addSelect('collection.id', 'collection_id')
+        .having(`distance <= 5`)
+        .orderBy('post.created_at', 'DESC')
+        .getRawAndEntities();
+
+      console.log('********', postsAroundMe);
+
+      if (!postsAroundMe) {
+        throw new NotFoundException('포스트가 없습니다.');
+      }
+
+      const postIds = postsAroundMe.entities.map((post) => post.id);
+
+      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+
+      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+        postIds,
+        userId,
+      );
+
+      return postsAroundMe.entities.map((post, index) => {
+        const likes =
+          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+        const isLiked =
+          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+          'False';
+        const totalComments = post.comments ? post.comments.length : 0;
+        const myList = postsAroundMe.raw[index].collection_id;
+        return {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: post.user,
+          restaurant: post.restaurant,
+          images: post.images,
+          hashtags: post.hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+          myList,
+          visibility: post.visibility,
+        };
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 }
+
+// if (!posts || posts.length === 0) {
+//        throw new NotFoundException('포스트가 없습니다.');
+//      }
+//      const postIds = posts.map((post) => post.id);
+//
+//      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+//
+//      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+//        postIds,
+//        userId,
+//      );
+//
+//      return posts.map((post) => {
+//        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
+//        const likes =
+//          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+//        const isLiked =
+//          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+//          'False';
+//        const totalComments = post.comments ? post.comments.length : 0;
+//        return {
+//          id: post.id,
+//          content: post.content,
+//          rating: post.rating,
+//          updated_at: post.updated_at,
+//          user: post.user,
+//          restaurant: post.restaurant,
+//          images: post.images,
+//          hashtags,
+//          totalLikes: likes,
+//          isLiked,
+//          totalComments,
+//          myList: post.collectionItems,
+//          visibility: post.visibility,
+//        };

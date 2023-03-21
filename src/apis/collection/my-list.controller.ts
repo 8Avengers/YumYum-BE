@@ -1,12 +1,13 @@
 import { minusCollectionPostingDto } from './dto/minus-bookmark-posting.dto';
 
 import { Controller, Post, Get, Put, Delete } from '@nestjs/common';
-import { Body, Param, UseGuards } from '@nestjs/common/decorators';
+import { Body, Param, Query, UseGuards } from '@nestjs/common/decorators';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CreateMyListDto } from './dto/create-my-list.dto';
@@ -18,6 +19,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
 import { PostService } from '../post/post.service';
 
+@ApiTags('my-list')
 @Controller('my-list')
 export class MyListController {
   constructor(
@@ -31,21 +33,23 @@ export class MyListController {
     ### MyList 상세보기!
     */
   @Get('/collections/detail/:collectionId')
-  // @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: 'MyList 상세보기' })
   @ApiResponse({ status: 200, description: 'MyList 상세보기 성공' })
   @ApiResponse({ status: 400, description: 'MyList 상세보기 실패' })
   async getMyListDetail(
     @Param('collectionId') collectionId: number,
-    // @CurrentUser() currentUser: any,
+    @Query('page') page: string,
   ) {
-    const myLists = await this.myListService.getMyListDetail(collectionId);
+    const myLists = await this.myListService.getMyListDetail(
+      collectionId,
+      page,
+    );
     return await myLists;
   }
 
   /*
-    ### 23.03.15
-    ### 표정훈
+    ### 23.03.20
+    ### 표정훈/이드보라
     ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
     */
   @Get('/collections/detail/posts/:collectionId/:restaurantId')
@@ -57,11 +61,13 @@ export class MyListController {
     @Param('restaurantId') restaurantId: number,
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
+    @Query('page') page: string,
   ) {
     const myLists = await this.myListService.getMyListsDetailPost(
       currentUser.id,
       restaurantId,
       collectionId,
+      page,
     );
     return await myLists;
   }
@@ -93,8 +99,11 @@ export class MyListController {
   @ApiOperation({ summary: 'MyList 전체조회(내꺼)' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회(내꺼) 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회(내꺼) 실패' })
-  async getMyListsMe(@CurrentUser() currentUser: any) {
-    const myLists = await this.myListService.getMyListsMe(currentUser.id);
+  async getMyListsMe(
+    @CurrentUser() currentUser: any,
+    @Query('page') page: string,
+  ) {
+    const myLists = await this.myListService.getMyListsMe(currentUser.id, page);
     return await myLists;
   }
 
@@ -105,11 +114,14 @@ export class MyListController {
     */
 
   @Get('/collections/:userId')
-  @ApiOperation({ summary: 'MyList 전체조회' })
+  @ApiOperation({ summary: 'MyList 전체조회(남의꺼)' })
   @ApiResponse({ status: 200, description: 'MyList 전체조회 성공' })
   @ApiResponse({ status: 400, description: 'MyList 전체조회 실패' })
-  async getMyListsAll(@Param('userId') userId: number) {
-    const myLists = await this.myListService.getMyListsAll(userId);
+  async getMyListsAll(
+    @Param('userId') userId: number,
+    @Query('page') page: string,
+  ) {
+    const myLists = await this.myListService.getMyListsAll(userId, page);
     return await myLists;
   }
   /*
@@ -168,15 +180,23 @@ export class MyListController {
     @Body() data: UpdateMyListDto,
     @CurrentUser() currentUser: any,
   ) {
-    return this.myListService.updateMyList(
-      currentUser,
+    const updateMyList = await this.myListService.updateMyList(
+      currentUser.id,
       collectionId,
       data.name,
       data.image,
       data.description,
       data.visibility,
     );
+    const result = {
+      name: updateMyList.name,
+      image: updateMyList.image,
+      description: updateMyList.description,
+      visibility: updateMyList.visibility,
+    };
+    return result;
   }
+
   /*
     ### 23.03.10
     ### 표정훈
@@ -248,12 +268,32 @@ export class MyListController {
   ) {
     return this.myListService.myListUpdatePosting(postId, data.collectionId);
   }
+
+  /*
+    ### 23.03.20
+    ### 표정훈
+    ### [Main] 요즘 뜨는 맛집리스트🔥
+    */
+  @Get('/collections/hot/mylists')
+  @ApiOperation({ summary: '요즘 뜨는 맛집리스트' })
+  @ApiResponse({ status: 200, description: '요즘 뜨는 맛집리스트 성공' })
+  @ApiResponse({ status: 400, description: '요즘 뜨는 맛집리스트 실패' })
+  async HotMyList() {
+    return this.myListService.HotMyList();
+  }
+
+  /*
+    ### 23.03.21
+    ### 표정훈
+    ### 내 친구의 맛집리스트
+    */
+  @Get('/collections/followers/mylists')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: '내 친구의 맛집리스트' })
+  @ApiResponse({ status: 200, description: '내 친구의 맛집리스트 성공' })
+  @ApiResponse({ status: 400, description: '내 친구의 맛집리스트 실패' })
+  async FollowersMyList(@CurrentUser() currentUser: any) {
+    //애니는 안된다. dto필요해!
+    return this.myListService.FollowersMyList(currentUser.id);
+  }
 }
-
-//일단 이거 커밋해서 푸쉬해야함
-
-//1번문제 배열로 collectionId 받는거 해결🔥
-//2번문제 collectionId가 없는 경우 에러문구 발생 해결(일단 제외)
-//3번문제 마이리스트 내껏만 아니라 남도 조회해야하니, params추가 해결🔥
-//4번문제 전체조회에서 레스토랑 아이디를 가져오는 방법 해결 (대량조회)🔥
-//5번문제 나의 맛집리스트 전체보기 PAGE 1페이지에서 최근 추가한 게시물 3개만 보여주세요.
