@@ -623,6 +623,7 @@ export class MyListService {
             },
           },
         },
+        take: 2,
       });
 
       // 컬렉션별 좋아요 수를 합산하여 그룹화한다
@@ -651,7 +652,7 @@ export class MyListService {
 
       // 상위 10개 컬렉션 정보를 구성하여 반환한다
       const top3Collections = collectionSumLikes
-        .slice(0, 10)
+        // .slice(0, 10)
         .map(({ collection, user, sumLikes, images }: any) => {
           return {
             id: collection.id,
