@@ -274,7 +274,7 @@ export class MyListController {
     ### 표정훈
     ### [Main] 요즘 뜨는 맛집리스트🔥
     */
-  @Get('/collections/hot/mylists')
+  @Get('/collections/main/hot')
   @ApiOperation({ summary: '요즘 뜨는 맛집리스트' })
   @ApiResponse({ status: 200, description: '요즘 뜨는 맛집리스트 성공' })
   @ApiResponse({ status: 400, description: '요즘 뜨는 맛집리스트 실패' })
@@ -287,7 +287,7 @@ export class MyListController {
     ### 표정훈
     ### 내 친구의 맛집리스트
     */
-  @Get('/collections/followers/mylists')
+  @Get('/collections/main/followers')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '내 친구의 맛집리스트' })
   @ApiResponse({ status: 200, description: '내 친구의 맛집리스트 성공' })
