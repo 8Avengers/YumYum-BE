@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  Req,
-  Res,
-  UseGuards,
-  Get,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +7,6 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserProfileService } from '../user/user-profile.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Response } from 'express';
 import { AuthRefreshGuard } from './guards/auth.guards';
 import { OauthUserDto } from '../user/dto/oauth-user.dto';
 
@@ -25,9 +16,6 @@ import {
   loginKakao,
   loginNaver,
   restoreAccessToken,
-  signupGoogle,
-  signupKakao,
-  signupNaver,
 } from './auth.decorators';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -83,12 +71,12 @@ export class AuthController {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
+    user: any;
   }> {
     return this.authService.loginOauth({ user });
   }
 
   //카카오로그인
-  @loginKakao() //스웨거전용커스텀데코레이터
   @Get('/login/kakao')
   @UseGuards(AuthGuard('kakao'))
   async loginKakao(
@@ -96,6 +84,7 @@ export class AuthController {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
+    user: any;
   }> {
     return this.authService.loginOauth({ user });
   }
@@ -109,15 +98,17 @@ export class AuthController {
   ): Promise<{
     accessToken: string;
     refreshToken: string;
+    user: any;
   }> {
     return this.authService.loginOauth({ user });
   }
 
+  //액세스토큰복구
   @UseGuards(AuthRefreshGuard)
   @restoreAccessToken() //스웨거전용커스텀데코레이터
   @Post('/restore-access-token')
   async restoreAccessToken(
-    @CurrentUser() currentUser: any, // @Req() req, // @Request() req,//
+    @CurrentUser() currentUser: any, //
   ) {
     const accessToken = this.authService.createAccessToken({
       user: currentUser,
@@ -125,83 +116,3 @@ export class AuthController {
     return { accessToken };
   }
 }
-
-// //구글회원가입
-// @signupGoogle() //스웨거전용커스텀데코레이터
-// @Get('/signup/google')
-// @UseGuards(AuthGuard('google'))
-// async signupGoogle(
-//   @CurrentUser() user: OauthUserDto, //
-// ): Promise<{
-//   accessToken: string;
-//   refreshToken: string;
-// }> {
-//   return this.authService.signupOauth({ user });
-// }
-
-// //네이버회원가입
-// @signupNaver() //스웨거전용커스텀데코레이터
-// @Get('/signup/naver')
-// @UseGuards(AuthGuard('naver'))
-// async signupNaver(
-//   @CurrentUser() user: OauthUserDto, //
-// ): Promise<{
-//   accessToken: string;
-//   refreshToken: string;
-// }> {
-//   return this.authService.signupOauth({ user });
-// }
-
-// //카카오회원가입
-// @signupKakao() //스웨거전용커스텀데코레이터
-// @Get('/signup/kakao')
-// @UseGuards(AuthGuard('kakao'))
-// async signupKakao(
-//   @CurrentUser() user: OauthUserDto, //
-// ): Promise<{
-//   accessToken: string;
-//   refreshToken: string;
-// }> {
-//   return this.authService.signupOauth({ user });
-// }
-
-// //구글로그인TEST
-// @loginGoogle() //스웨거전용커스텀데코레이터
-// @Get('/login/google')
-// @UseGuards(AuthGuard('google'))
-// async loginGoogle(
-//   @CurrentUser() user: OauthUserDto, //
-//   @Res() res: Response,
-// ) {
-//   this.authService.loginOauthTest({ user, res });
-// }
-
-// //카카오로그인TEST
-// @loginKakao() //스웨거전용커스텀데코레이터
-// @Get('/login/kakao')
-// @UseGuards(AuthGuard('kakao'))
-// async loginKakao(
-//   @CurrentUser() user: OauthUserDto, //
-//   @Res() res: Response,
-// ) {
-//   // this.authService.loginOauthTest({ user, res });
-
-//   res.redirect(
-//     'http://localhost:5501/frontend/social-login.html',
-//     //구글 로그인 성공후 처음 접속하게 될 페이지로 리다이렉트하는 것이다
-//   );
-// }
-
-// //네이버로그인TEST
-// @loginNaver() //스웨거전용커스텀데코레이터
-// @Get('/login/naver')
-// @UseGuards(AuthGuard('naver'))
-// async loginNaver(
-//   @CurrentUser() user: OauthUserDto, //
-//   @Res() res: Response,
-// ) {
-//   res.redirect(
-//     'http://localhost:5501/frontend/social-login.html',
-//     //구글 로그인 성공후 처음 접속하게 될 페이지로 리다이렉트하는 것이다
-//   );
-// }

@@ -19,14 +19,17 @@ export declare class AuthController {
     loginGoogle(user: OauthUserDto): Promise<{
         accessToken: string;
         refreshToken: string;
+        user: any;
     }>;
     loginKakao(user: OauthUserDto): Promise<{
         accessToken: string;
         refreshToken: string;
+        user: any;
     }>;
     loginNaver(user: OauthUserDto): Promise<{
         accessToken: string;
         refreshToken: string;
+        user: any;
     }>;
     restoreAccessToken(currentUser: any): Promise<{
         accessToken: string;

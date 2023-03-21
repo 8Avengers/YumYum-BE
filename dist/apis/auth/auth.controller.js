@@ -88,7 +88,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginGoogle", null);
 __decorate([
-    (0, auth_decorators_1.loginKakao)(),
     (0, common_1.Get)('/login/kakao'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),

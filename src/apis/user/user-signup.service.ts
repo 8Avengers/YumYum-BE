@@ -105,13 +105,14 @@ export class UserSignupService {
 
       if (user) throw new ConflictException('이미 등록된 이메일입니다.');
 
-      const nicknameExists = await this.userRepository.findOne({
-        where: { nickname },
-      });
+      if (nickname) {
+        const nicknameExists = await this.userRepository.findOne({
+          where: { nickname },
+        });
 
-      if (nicknameExists)
-        throw new ConflictException('이미 사용중인 nickname입니다.');
-
+        if (nicknameExists)
+          throw new ConflictException('닉네임이 이미 사용중입니다.');
+      }
       const newUser = await this.userRepository.save({
         email,
         nickname,

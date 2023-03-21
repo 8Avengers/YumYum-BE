@@ -24,6 +24,7 @@ export class JwtNaverStrategy extends PassportStrategy(Strategy, 'naver') {
     console.log('네이버 프로필찍어보자:::::::::::::::::::', profile);
     return {
       email: profile._json.email,
+      nickname: profile._json.nickname,
     };
   }
 }

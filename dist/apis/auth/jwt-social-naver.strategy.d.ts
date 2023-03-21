@@ -4,6 +4,7 @@ export declare class JwtNaverStrategy extends JwtNaverStrategy_base {
     constructor();
     validate(accessToken: string, refreshToken: string, profile: Profile): {
         email: string;
+        nickname: string;
     };
 }
 export {};
