@@ -74,7 +74,7 @@ export class AuthService {
         user = await this.userSignupService.createOauthUser({
           email: userEmailFromKakao,
           nickname: userNicknameFromKakao,
-          name: info.name,
+          // name: info.name, 카카오는 이름이 없음
           provider: provider,
           provider_id: providerId,
         });
@@ -161,7 +161,7 @@ export class AuthService {
 
       // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
       if (!existingUser) {
-        user = await this.userSignupService.createOauthUser({
+        user = await this.userSignupService.createUserWithPassport({
           email: user.email,
           nickname: user.nickname,
           name: user.name,
