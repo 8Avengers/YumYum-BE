@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -137,10 +138,12 @@ export class UserProfileController {
   async getUserIdPosts(
     @Param('userId') userId: number,
     @CurrentUser() currentUser: User,
+    @Query('page') page: string,
   ) {
     const allPostsByUserId = await this.postService.getPostsByOtherUserId(
       userId,
       currentUser.id,
+      page,
     );
 
     return allPostsByUserId;
