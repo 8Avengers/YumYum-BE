@@ -32,15 +32,17 @@ let AuthController = class AuthController {
         this.userProfileService = userProfileService;
         this.authService = authService;
     }
-    async oauthSignUpGoogle(params, body) {
-        const { provider } = params;
+    async oauthSignIn(provider, body) {
         console.log('들어오나 확인', provider, body);
-        return await this.authService.oauthLoginGoogle(provider, body);
-    }
-    async oauthSignUpKakao(params, body) {
-        const { provider } = params;
-        console.log('들어오나 확인', provider, body);
-        return await this.authService.oauthLoginKakao(provider, body);
+        if (provider === 'google') {
+            return await this.authService.oauthLoginGoogle(provider, body);
+        }
+        else if (provider === 'kakao') {
+            return await this.authService.oauthLoginKakao(provider, body);
+        }
+        else {
+            throw new common_1.BadRequestException(`Invalid provider: ${provider}`);
+        }
     }
     async loginEmail(loginUserDto) {
         const { email, password } = loginUserDto;
@@ -82,25 +84,14 @@ let AuthController = class AuthController {
     }
 };
 __decorate([
-    (0, common_1.Post)('oauth/login/:google'),
+    (0, common_1.Post)('oauth/login/:provider'),
     (0, common_1.HttpCode)(200),
-    __param(0, (0, common_1.Param)()),
+    __param(0, (0, common_1.Param)('provider')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [social_login_dto_1.SocialLoginProviderDTO,
-        social_login_dto_1.SocialLoginBodyDTO]),
+    __metadata("design:paramtypes", [String, social_login_dto_1.SocialLoginBodyDTO]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "oauthSignUpGoogle", null);
-__decorate([
-    (0, common_1.Post)('oauth/login/:kakao'),
-    (0, common_1.HttpCode)(200),
-    __param(0, (0, common_1.Param)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [social_login_dto_1.SocialLoginProviderDTO,
-        social_login_dto_1.SocialLoginBodyDTO]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "oauthSignUpKakao", null);
+], AuthController.prototype, "oauthSignIn", null);
 __decorate([
     (0, auth_decorators_1.loginEmail)(),
     (0, common_1.Post)('/login'),
