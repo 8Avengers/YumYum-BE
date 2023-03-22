@@ -9,7 +9,7 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { BookmarkService } from './bookmark.service';
@@ -17,14 +17,15 @@ import { BookmarPostDto } from './dto/bookmark-post.dto';
 import { BookmarRastaurantDto } from './dto/bookmark-restaurant.dto';
 import { CreateCollectionDto } from './dto/create-bookmark.dto';
 
+@ApiTags('bookmarks')
 @Controller('bookmarks')
 export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
   /*
-    ### 23.03.13
+    ### 23.03.22
     ### 표정훈
-    ### 컬렉션 전체 보기🔥
+    ### 북마크 전체 보기🔥
     */
 
   @Get('/collections')
@@ -34,15 +35,15 @@ export class BookmarkController {
   @ApiResponse({ status: 400, description: '북마크 전체조회 실패' })
   async getBookmarks(@CurrentUser() currentUser: any) {
     const bookmarks = await this.bookmarkService.getBookmarks(currentUser.id);
-    return await bookmarks;
+    return bookmarks;
   }
 
   /*
-      ### 23.03.13
+      ### 23.03.22
       ### 표정훈
-      ### 컬렉션 상세 보기🔥
+      ### 북마크 상세 보기
       */
-  @Get('/collections/:collectionId')
+  @Get('/collections/detail/:collectionId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 상세조회' })
   @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
@@ -55,7 +56,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 생성🔥
+      ### 북마크 생성
       */
   @Post('/collections')
   @UseGuards(AuthAccessGuard)
@@ -76,7 +77,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 수정🔥
+      ### 북마크 수정
       */
 
   @Put('/collections/:collectionId')
@@ -94,7 +95,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 삭제🔥
+      ### 북마크 삭제
       */
   @Delete('/collections/:collectionId')
   @UseGuards(AuthAccessGuard)
@@ -106,9 +107,9 @@ export class BookmarkController {
   }
 
   /*
-    ### 23.03.13
+    ### 23.03.22
     ### 표정훈
-    ### 컬렉션에 포스팅 더하기🔥
+    ### 북마크에 포스팅 더하기
     */
   @Post('/collections/plus/post/:postId')
   @UseGuards(AuthAccessGuard)
@@ -128,7 +129,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션에 포스팅 빼기🔥
+      ### 북마크에 포스팅 빼기
       */
   @Delete('/collections/minus/post/:postId')
   @UseGuards(AuthAccessGuard)
@@ -148,7 +149,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션에 맛집 더하기🔥
+      ### 북마크에 맛집 더하기
       */
 
   @Post('/collections/plus/restaurant/:restaurantId')
@@ -169,7 +170,7 @@ export class BookmarkController {
   /*
         ### 23.03.13
         ### 표정훈
-        ### 컬렉션에 맛집 빼기🔥
+        ### 북마크에 맛집 빼기
         */
   @Delete('/collections/minus/restaurant/:restaurantId')
   @UseGuards(AuthAccessGuard)

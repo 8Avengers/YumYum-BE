@@ -132,6 +132,65 @@ export class UploadService {
     }
   }
 
+  //마이리스트 이미지관련 함수
+  async uploadMyListImageToS3(
+    folder: string,
+    file: Express.Multer.File,
+  ): Promise<{
+    key: string;
+    s3Object: PromiseResult<AWS.S3.PutObjectOutput, AWS.AWSError>;
+    contentType: string;
+    myListImage: string;
+  }> {
+    try {
+      const sharp = require('sharp');
+      const inputImageBuffer = file.buffer;
+
+      //sharp 라이브러리로 이미지 리사이징
+      const resizedImageBuffer = await sharp(inputImageBuffer)
+        .resize(300, 300, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
+        .toBuffer()
+        .catch((error) => {
+          console.error(error);
+          throw new BadRequestException(
+            `이미지 리사이징을 다시 해주세요.: ${error}`,
+          );
+        });
+
+      // const filePath = `${Date.now()}_${path.basename(
+      //   file.originalname,
+      // )}`.replace(/ /g, '');
+
+      // const key = `${folder}/${filePath}`; // 데이터베이스에 넣을 filePath
+
+      const key = `${folder}/${Date.now()}_${path.basename(
+        file.originalname,
+      )}`.replace(/ /g, '');
+
+      const s3Object = await this.awsS3
+        .putObject({
+          Bucket: this.S3_BUCKET_NAME,
+          Key: key,
+          Body: resizedImageBuffer, //리사이징 프로필사이즈용
+          ACL: 'public-read',
+          ContentType: file.mimetype,
+        })
+        .promise();
+
+      console.log('s3Object가 뭘까?::', s3Object);
+      const myListImage = `https://${this.S3_BUCKET_NAME}.s3.${this.awsS3.config.region}.amazonaws.com/${key}`;
+
+      return { key, s3Object, contentType: file.mimetype, myListImage };
+    } catch (error) {
+      throw new BadRequestException(
+        `파일 업로드를 올바르게 다시 해주세요. : ${error}`,
+      );
+    }
+  }
+
   async deleteS3Object(
     key: string,
     callback?: (err: AWS.AWSError, data: AWS.S3.DeleteObjectOutput) => void,

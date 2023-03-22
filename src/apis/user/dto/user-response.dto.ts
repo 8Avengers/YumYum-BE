@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  Length,
-  Matches,
-} from 'class-validator';
+import { IsEmail, IsString, Length, Matches } from 'class-validator';
 
 export class UserDto {
   @ApiProperty({ type: String, description: 'Email address of the user' })
@@ -13,22 +7,18 @@ export class UserDto {
   email: string;
 
   @ApiProperty({ type: String, description: 'Password of the user' })
-  @IsNotEmpty()
   @Length(60)
   password: string;
 
   @ApiProperty({ type: String, description: 'Nickname of the user' })
-  @IsNotEmpty()
   @IsString()
   nickname: string;
 
   @ApiProperty({ type: String, description: 'Name of the user' })
-  @IsNotEmpty()
   @IsString()
   name: string;
 
   @ApiProperty({ type: String, description: 'Gender of the user (M or F)' })
-  @IsNotEmpty()
   @Matches(/^(M|F)$/)
   gender: 'M' | 'F';
 
@@ -36,7 +26,6 @@ export class UserDto {
     type: String,
     description: 'Birth date of the user in the format of YYYYMMDD',
   })
-  @IsNotEmpty()
   @Matches(/^\d{8}$/)
   birth: string;
 
@@ -44,12 +33,10 @@ export class UserDto {
     type: String,
     description: 'Phone number of the user in the format of 11 digits',
   })
-  @IsNotEmpty()
   @Matches(/^\d{11}$/)
   phone_number: string;
 
   @ApiProperty({ type: String, description: 'Profile image of the user' })
-  @IsNotEmpty()
   @IsString()
   profile_image: string;
 

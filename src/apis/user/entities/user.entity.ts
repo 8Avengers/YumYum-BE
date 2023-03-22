@@ -19,7 +19,6 @@ import { IsEnum } from 'class-validator';
 
 import { Collection } from '../../collection/entities/collection.entity';
 @Entity()
-@Unique(['nickname'])
 @Unique(['email'])
 export class User {
   @PrimaryGeneratedColumn()
@@ -34,7 +33,7 @@ export class User {
   @Column({ nullable: true })
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   nickname: string;
 
   @Column({ nullable: true })

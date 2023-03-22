@@ -2,10 +2,10 @@ import {
   Controller,
   Post,
   Body,
-  Req,
-  Res,
   UseGuards,
   Get,
+  HttpCode,
+  Param,
 } from '@nestjs/common';
 import { UnprocessableEntityException } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -15,9 +15,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserProfileService } from '../user/user-profile.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { Response } from 'express';
 import { AuthRefreshGuard } from './guards/auth.guards';
-import { OauthUserDto } from '../user/dto/oauth-user.dto';
 
 import {
   loginEmail,
@@ -25,11 +23,13 @@ import {
   loginKakao,
   loginNaver,
   restoreAccessToken,
-  signupGoogle,
-  signupKakao,
-  signupNaver,
 } from './auth.decorators';
 import { ApiTags } from '@nestjs/swagger';
+import { OauthPassportDto } from './dto/oauth-passport.dto';
+import {
+  SocialLoginProviderDTO,
+  SocialLoginBodyDTO,
+} from './dto/social-login.dto';
 
 @ApiTags('Auth')
 @Controller('/')
@@ -39,13 +39,29 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
+  //소셜로그인API-Passport미사용
+  @Post('oauth/login/:provider')
+  @HttpCode(200)
+  async oauthSignIn(
+    @Param() params: SocialLoginProviderDTO,
+    @Body() body: SocialLoginBodyDTO,
+  ) {
+    const { provider } = params;
+    console.log('들어오나 확인', provider, body);
+    return await this.authService.oauthLogin(provider, body);
+  }
+
+  /*
+
+
+  
+  */
+
   //TODO: 이미 소셜로그인 완료했는데, 이메일로 또 로그인하려는 경우 에러처리해야한다.
   @loginEmail() //스웨거전용커스텀데코레이터
   @Post('/login')
   async loginEmail(
     @Body(ValidationPipe) loginUserDto: LoginUserDto, //
-    // @Req() req, //
-    // @Res() res, // res 를 써주지 않으면 무한로딩한다.
   ) {
     const { email, password } = loginUserDto;
     const user = await this.userProfileService.findByEmail({ email });
@@ -74,105 +90,57 @@ export class AuthController {
     };
   }
 
-  //구글회원가입
-  @signupGoogle() //스웨거전용커스텀데코레이터
-  @Get('/signup/google')
-  @UseGuards(AuthGuard('google'))
-  async signupGoogle(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.signupOauth({ user });
-  }
-
-  //구글로그인
-  @loginGoogle() //스웨거전용커스텀데코레이터
-  @Get('/login/google')
-  @UseGuards(AuthGuard('google'))
-  async loginGoogle(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.loginOauth({ user });
-  }
-
-  //네이버회원가입
-  @signupNaver() //스웨거전용커스텀데코레이터
-  @Get('/signup/naver')
-  @UseGuards(AuthGuard('naver'))
-  async signupNaver(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.signupOauth({ user });
-  }
-
-  //네이버로그인
-  @loginNaver() //스웨거전용커스텀데코레이터
-  @Get('/login/naver')
-  @UseGuards(AuthGuard('naver'))
-  async loginNaver(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.loginOauth({ user });
-  }
-
-  //카카오회원가입
-  @signupKakao() //스웨거전용커스텀데코레이터
-  @Get('/signup/kakao')
-  @UseGuards(AuthGuard('kakao'))
-  async signupKakao(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.signupOauth({ user });
-  }
-
-  //카카오로그인
-  @loginKakao() //스웨거전용커스텀데코레이터
-  @Get('/login/naver')
-  @UseGuards(AuthGuard('kakao'))
-  async loginKakao(
-    @CurrentUser() user: OauthUserDto, //
-  ): Promise<{
-    accessToken: string;
-    refreshToken: string;
-  }> {
-    return this.authService.loginOauth({ user });
-  }
-
-  //AccessToken 재발급 API
-  // @UseGuards(AuthAccessGuard)
-  //userGuards를 통과하면, user가 통과되었다 refresh토큰에 user정보가 담겨!
-  //UseGuards 가 전역에서 사용이 가능할까?
-  //useGuards가 전역에서 사용이 가능하도록 해야한다.
-  //useGuards가 => 이걸 어떻게 전역에서 사용할 수 있을까?
-
-  // @UseGuards(AuthAccessGuard)
+  //액세스토큰복구
   @UseGuards(AuthRefreshGuard)
   @restoreAccessToken() //스웨거전용커스텀데코레이터
   @Post('/restore-access-token')
   async restoreAccessToken(
-    @CurrentUser() currentUser: any, // @Req() req, // @Request() req,//
+    @CurrentUser() currentUser: any, //
   ) {
-    // console.log('UseGuards통과한후 req::::::: 찍어보자 ', req.user);
-    // console.log('currentUser::::::::::::::::::::', currentUser);
-    // useGuards 에서 다 로그인한 user가 통과되니깐  데코레이터는 필요가 없다.
-
     const accessToken = this.authService.createAccessToken({
       user: currentUser,
     });
     return { accessToken };
+  }
+
+  //구글로그인-Passport 사용
+  // @loginGoogle() //스웨거전용커스텀데코레이터
+  @Get('/login/google')
+  @UseGuards(AuthGuard('google'))
+  async loginGoogle(
+    @CurrentUser() user: OauthPassportDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: any;
+  }> {
+    return this.authService.loginOauthByPassport({ user });
+  }
+
+  //카카오로그인-Passport 사용
+  @Get('/login/kakao')
+  @UseGuards(AuthGuard('kakao'))
+  async loginKakao(
+    @CurrentUser() user: OauthPassportDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: any;
+  }> {
+    return this.authService.loginOauthByPassport({ user });
+  }
+
+  //네이버로그인-passport 사용
+  // @loginNaver() //스웨거전용커스텀데코레이터
+  @Get('/login/naver')
+  @UseGuards(AuthGuard('naver'))
+  async loginNaver(
+    @CurrentUser() user: OauthPassportDto, //
+  ): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    user: any;
+  }> {
+    return this.authService.loginOauthByPassport({ user });
   }
 }

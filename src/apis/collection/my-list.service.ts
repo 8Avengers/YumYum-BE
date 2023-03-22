@@ -94,7 +94,8 @@ export class MyListService {
         take: myListInOnePage,
       });
 
-      return myList.map((myList) => ({
+      //첫 대괄호 없애기위해 객체 형태로 변경
+      const [myListDetail] = myList.map((myList) => ({
         id: myList.id,
         name: myList.name,
         visibility: myList.visibility,
@@ -104,6 +105,8 @@ export class MyListService {
           images: item.post.images,
         })),
       }));
+
+      return myListDetail;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -250,12 +253,13 @@ export class MyListService {
   // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
   async getMyListsMe(userId: number, page: string) {
     try {
-      let pageNum = Number(page) - 1;
-      const myListInOnePage = 3; //세준님에게 물어보기
+      // let pageNum = Number(page) - 1;
+      // const myListInOnePage = 3;
 
-      if (isNaN(pageNum) || pageNum < 0) {
-        pageNum = 0;
-      }
+      // //이미지, 레스토랑 id, place_name
+      // if (isNaN(pageNum) || pageNum < 0) {
+      //   pageNum = 0;
+      // }
 
       const myLists = await this.collectionRepository.find({
         relations: {
@@ -266,8 +270,8 @@ export class MyListService {
         },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
         select: { id: true, name: true, description: true, image: true },
-        skip: pageNum * myListInOnePage,
-        take: myListInOnePage,
+        // skip: pageNum * myListInOnePage,
+        // take: myListInOnePage,
       });
 
       return myLists;
@@ -284,38 +288,47 @@ export class MyListService {
     ### 표정훈
     ### MyList 전체조회(남의꺼)
     */
-
-  // 해결해야할 사항 fix:16 fix30
-  // 1. post에서 id: 1인 값만 가져옴 => 데이터베이스 수정으로 해결완료🔥
-  // 2. post를 3개까지만 제한해서 가져오고 싶음 => map으로 해결완료🔥
   async getMyListsAll(userId: number, page: string) {
     try {
-      let pageNum = Number(page) - 1;
-      const myListInOnePage = 3; //세준님에게 물어보기
+      // let pageNum = Number(page) - 1;
+      // const myListInOnePage = 3; //세준님에게 물어보기
 
-      if (isNaN(pageNum) || pageNum < 0) {
-        pageNum = 0;
-      }
+      // if (isNaN(pageNum) || pageNum < 0) {
+      //   pageNum = 0;
+      // }
 
       const myLists = await this.collectionRepository.find({
         relations: {
           collectionItems: {
-            post: true,
-            restaurant: true,
+            post: {
+              images: true,
+              restaurant: true,
+            },
           },
         },
         where: { user_id: userId, deletedAt: null, type: 'myList' },
-        select: { id: true, name: true, description: true, image: true },
-        skip: pageNum * myListInOnePage,
-        take: myListInOnePage,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          collectionItems: {
+            id: true,
+            post: {
+              id: true,
+              rating: true,
+              images: { id: true, file_url: true },
+              restaurant: {
+                place_name: true,
+              },
+            },
+          },
+        },
       });
 
-      return myLists;
-
-      // return myLists.map((collection) => ({
-      //   ...collection,
-      //   collectionItems: collection.collectionItems.slice(0, 3),
-      // }));
+      return myLists.map((collection) => ({
+        ...collection,
+        collectionItems: collection.collectionItems.slice(0, 3),
+      }));
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -392,23 +405,42 @@ export class MyListService {
     image: string,
     description: string,
     visibility: 'public' | 'private',
+    file,
   ) {
     try {
-      const myList = await this.collectionRepository.update(
-        { id: collectionId, type: 'myList', user: { id: userId } },
-        {
-          name,
-          image,
-          description,
-          visibility,
+      // 이미 생성된 컬렉션을 찾는다.
+      const myListInfo = await this.collectionRepository.findOne({
+        where: {
+          id: collectionId,
+          type: 'myList',
+          user: { id: userId },
         },
-      );
+      });
+
+      // 입력받은 정보를 myListInfo에 담는다.
+      if (myListInfo) {
+        myListInfo.name = name;
+        myListInfo.description = description;
+        myListInfo.visibility = visibility;
+        if (file) {
+          const uploadedFile = await this.uploadService.uploadMyListImageToS3(
+            'yumyumdb-myList', //AmazonS3의 저장되는 폴더명
+            file,
+          );
+          myListInfo.image = uploadedFile.myListImage;
+        }
+      } else {
+        myListInfo.image = myListInfo.image;
+      }
+      // 담은 정보를 저장한다.
+      const updateMyListInfo = await this.collectionRepository.save(myListInfo);
+      console.log('updateMyListInfo 정보:::::::::', updateMyListInfo);
 
       return {
-        name,
-        image,
-        description,
-        visibility,
+        name: updateMyListInfo.name,
+        image: updateMyListInfo.image,
+        description: updateMyListInfo.description,
+        visibility: updateMyListInfo.visibility,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -427,12 +459,17 @@ export class MyListService {
     ### 표정훈
     ### MyList 삭제
     */
-  async deleteMyList(userId: number, id: number) {
+  async deleteMyList(collectionId: number) {
     try {
-      const result = await this.collectionRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
-      if (result.affected === 0) {
+      const deleteResult = await this.collectionItemRepository.delete({
+        collection: { id: collectionId },
+      });
+
+      if (deleteResult.affected === 0) {
         throw new NotFoundException('마이리스트가 없습니다.');
       }
+
+      return deleteResult;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -453,10 +490,11 @@ export class MyListService {
 
   async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
+      const collectionItems = [];
+
       for (let i = 0; i < collectionId.length; i++) {
         const item = collectionId[i];
 
-        // 같은 컬렉션 안에 동일한 포스트는 안들어가는 기능 => 폐기(중복되야함)
         const existingItem = await this.collectionItemRepository.findOne({
           where: {
             post: { id: postId },
@@ -465,15 +503,19 @@ export class MyListService {
         });
 
         if (existingItem) {
-          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
+          continue;
         }
 
         const collectionItem = this.collectionItemRepository.create({
           post: { id: postId },
           collection: { id: item },
         });
+
         await this.collectionItemRepository.save(collectionItem);
+        collectionItems.push(collectionItem);
       }
+
+      return collectionItems;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -608,8 +650,13 @@ export class MyListService {
           collection: {
             id: true,
             name: true,
+            user: {
+              id: true,
+              nickname: true,
+            },
           },
         },
+        take: 2,
       });
 
       // 컬렉션별 좋아요 수를 합산하여 그룹화한다
@@ -638,7 +685,7 @@ export class MyListService {
 
       // 상위 10개 컬렉션 정보를 구성하여 반환한다
       const top3Collections = collectionSumLikes
-        .slice(0, 10)
+        // .slice(0, 10)
         .map(({ collection, user, sumLikes, images }: any) => {
           return {
             id: collection.id,
@@ -685,9 +732,11 @@ export class MyListService {
         },
       });
 
-      const followingIds = followerId.map((f) => f.following.id);
+      const followingIds = followerId
+        .map((f) => f.following.id)
+        .filter((id) => !isNaN(id));
 
-      const myListFollwers = await this.collectionItemRepository.findOne({
+      const myListFollwers = await this.collectionItemRepository.find({
         relations: {
           post: {
             user: true,
@@ -705,7 +754,6 @@ export class MyListService {
           },
         },
         select: {
-          id: true,
           post: {
             id: true,
             images: { id: true, file_url: true },
@@ -717,10 +765,17 @@ export class MyListService {
           collection: {
             id: true,
             name: true,
+            user: {
+              id: true,
+              nickname: true,
+            },
           },
         },
       });
-      console.log('🔥🔥콘솔로그🔥🔥', followingIds, myListFollwers);
+
+      //랜덤하게 값 가져오기
+      myListFollwers.sort(() => Math.random() - 0.5);
+
       return myListFollwers;
     } catch (err) {
       if (err instanceof NotFoundException) {

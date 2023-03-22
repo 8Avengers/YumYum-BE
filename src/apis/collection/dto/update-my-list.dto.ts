@@ -7,13 +7,13 @@ export class UpdateMyListDto {
 
   @IsString()
   @IsOptional()
-  readonly image?: string;
-
-  @IsString()
-  @IsOptional()
   readonly description?: string;
 
   @IsString()
   @IsOptional()
   readonly visibility?: 'public' | 'private';
+
+  @IsString({ message: 'Image must be a string.' })
+  @IsOptional()
+  image?: string;
 }

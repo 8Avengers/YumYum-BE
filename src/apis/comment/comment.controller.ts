@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 
@@ -32,8 +33,13 @@ export class CommentController {
   async getAllComments(
     @Param('postId') postId: number,
     @CurrentUser() currentUser: any,
+    @Query('page') page: string,
   ) {
-    return await this.commentService.getAllComments(postId, currentUser.id);
+    return await this.commentService.getAllComments(
+      postId,
+      currentUser.id,
+      page,
+    );
   }
 
   /*

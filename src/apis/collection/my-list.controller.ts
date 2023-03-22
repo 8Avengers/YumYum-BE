@@ -1,6 +1,15 @@
 import { minusCollectionPostingDto } from './dto/minus-bookmark-posting.dto';
 
-import { Controller, Post, Get, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Body, Param, Query, UseGuards } from '@nestjs/common/decorators';
 import {
   ApiCreatedResponse,
@@ -18,6 +27,7 @@ import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { DetailMylistDto } from './dto/my-list.detail.dto';
 import { PostService } from '../post/post.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('my-list')
 @Controller('my-list')
@@ -174,10 +184,12 @@ export class MyListController {
   @ApiOperation({ summary: 'MyList 수정' })
   @ApiResponse({ status: 200, description: 'MyList 수정 성공' })
   @ApiResponse({ status: 400, description: 'MyList 수정 실패' })
+  @UseInterceptors(FileInterceptor('file')) //이미지관련
   async updateMyList(
     // @Param('userId') userId: number,
     @Param('collectionId') collectionId: number,
-    @Body() data: UpdateMyListDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Body(ValidationPipe) data: UpdateMyListDto,
     @CurrentUser() currentUser: any,
   ) {
     const updateMyList = await this.myListService.updateMyList(
@@ -187,6 +199,7 @@ export class MyListController {
       data.image,
       data.description,
       data.visibility,
+      file,
     );
     const result = {
       name: updateMyList.name,
@@ -211,7 +224,7 @@ export class MyListController {
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
   ) {
-    return this.myListService.deleteMyList(currentUser, collectionId);
+    return this.myListService.deleteMyList(collectionId);
   }
 
   /*
@@ -274,7 +287,7 @@ export class MyListController {
     ### 표정훈
     ### [Main] 요즘 뜨는 맛집리스트🔥
     */
-  @Get('/collections/hot/mylists')
+  @Get('/collections/main/hot')
   @ApiOperation({ summary: '요즘 뜨는 맛집리스트' })
   @ApiResponse({ status: 200, description: '요즘 뜨는 맛집리스트 성공' })
   @ApiResponse({ status: 400, description: '요즘 뜨는 맛집리스트 실패' })
@@ -287,7 +300,7 @@ export class MyListController {
     ### 표정훈
     ### 내 친구의 맛집리스트
     */
-  @Get('/collections/followers/mylists')
+  @Get('/collections/main/followers')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '내 친구의 맛집리스트' })
   @ApiResponse({ status: 200, description: '내 친구의 맛집리스트 성공' })
