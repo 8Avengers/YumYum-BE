@@ -25,6 +25,14 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
+    (0, typeorm_1.Column)('varchar', { nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "provider_id", void 0);
+__decorate([
+    (0, typeorm_1.Column)('varchar', { nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "provider", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], User.prototype, "name", void 0);
@@ -118,7 +126,8 @@ __decorate([
 ], User.prototype, "collections", void 0);
 User = User_1 = __decorate([
     (0, typeorm_1.Entity)(),
-    (0, typeorm_1.Unique)(['email'])
+    (0, typeorm_1.Unique)(['email']),
+    (0, typeorm_1.Unique)(['provider_id'])
 ], User);
 exports.User = User;
 //# sourceMappingURL=user.entity.js.map

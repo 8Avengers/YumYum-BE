@@ -46,6 +46,22 @@ let BookmarkService = class BookmarkService {
                     },
                 },
                 where: { id: collectionId, deletedAt: null, type: 'bookmark' },
+                select: {
+                    id: true,
+                    type: true,
+                    collectionItems: {
+                        id: true,
+                        post: {
+                            id: true,
+                            content: true,
+                            rating: true,
+                        },
+                        restaurant: {
+                            id: true,
+                            place_name: true,
+                        },
+                    },
+                },
             });
             return bookmark;
         }
@@ -56,11 +72,12 @@ let BookmarkService = class BookmarkService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    createCollection(userId, name, type) {
+    createCollection(userId, name, type, visibility) {
         return this.collectionRepository.insert({
             user_id: userId,
             name: name,
             type: 'bookmark',
+            visibility: 'private',
         });
     }
     async updateCollection(collectionId, name) {
@@ -68,6 +85,9 @@ let BookmarkService = class BookmarkService {
             const bookmarkUpdate = await this.collectionRepository.update({ id: collectionId }, {
                 name: name,
             });
+            if (bookmarkUpdate.affected === 0) {
+                throw new common_1.NotFoundException('북마크가 없습니다.');
+            }
             return bookmarkUpdate;
         }
         catch (err) {
@@ -113,6 +133,7 @@ let BookmarkService = class BookmarkService {
                 post: { id: postId },
             });
             await this.collectionItemRepository.save(collectionItem);
+            return collectionItem;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {
@@ -126,10 +147,11 @@ let BookmarkService = class BookmarkService {
     }
     async collectionMinusPosting(collectionId, postId) {
         try {
-            await this.collectionItemRepository.delete({
+            const deletePost = await this.collectionItemRepository.delete({
                 collection: { id: collectionId },
                 post: { id: postId },
             });
+            return deletePost;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {
@@ -149,14 +171,15 @@ let BookmarkService = class BookmarkService {
                     restaurant: { id: restaurantId },
                 },
             });
-            console.log('북마크 레스토링', existingItem);
             if (existingItem) {
                 return;
             }
-            await this.collectionItemRepository.insert({
+            const collectionItem = await this.collectionItemRepository.create({
                 collection: { id: collectionId },
                 restaurant: { id: restaurantId },
             });
+            await this.collectionItemRepository.save(collectionItem);
+            return collectionItem;
         }
         catch (err) {
             if (err instanceof common_1.HttpException) {
@@ -170,10 +193,11 @@ let BookmarkService = class BookmarkService {
     }
     async collectionMinusRestaurant(collectionId, restaurantId) {
         try {
-            await this.collectionItemRepository.delete({
+            const deleteRestaurant = await this.collectionItemRepository.delete({
                 collection: { id: collectionId },
                 restaurant: { id: restaurantId },
             });
+            return deleteRestaurant;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {

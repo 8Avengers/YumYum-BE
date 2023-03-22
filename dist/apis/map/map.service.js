@@ -113,26 +113,6 @@ let MapService = class MapService {
             },
         });
     }
-    async getNearRestaurant(x, y) {
-        const nearRestaurant = await this.restaurantRepository
-            .createQueryBuilder('restaurant')
-            .leftJoin('restaurant.posts', 'post')
-            .leftJoin('post.images', 'image')
-            .select([
-            'restaurant.id',
-            'restaurant.place_name',
-            'restaurant.x',
-            'restaurant.y',
-            'post.rating',
-            'image.file_url',
-        ])
-            .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
-            .having(`distance <= 2`)
-            .orderBy('rand()')
-            .limit(3)
-            .getRawMany();
-        return nearRestaurant;
-    }
 };
 MapService = __decorate([
     (0, common_1.Injectable)(),

@@ -15,7 +15,7 @@ class SocialLoginProviderDTO {
 }
 __decorate([
     (0, class_validator_1.IsIn)(['kakao', 'naver'], {
-        message: '소셜 로그인은 kakao와 naver만 지원합니다.',
+        message: '소셜 로그인은 kakao와 naver와 google만 지원합니다.',
     }),
     __metadata("design:type", String)
 ], SocialLoginProviderDTO.prototype, "provider", void 0);

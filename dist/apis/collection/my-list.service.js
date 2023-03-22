@@ -83,12 +83,25 @@ let MyListService = class MyListService {
                 skip: pageNum * myListInOnePage,
                 take: myListInOnePage,
             });
-            const [myListDetail] = myList.map((myList) => ({
-                id: myList.id,
-                name: myList.name,
-                visibility: myList.visibility,
-                post: myList.collectionItems.map((item) => (Object.assign(Object.assign({}, item.post), { restaurant: item.post.restaurant, images: item.post.images }))),
-            }));
+            const [myListDetail] = myList.map((myList) => {
+                let sum = 0;
+                let count = 0;
+                for (const item of myList.collectionItems) {
+                    const rating = item.post.rating;
+                    if (typeof rating === 'number') {
+                        sum += rating;
+                        count++;
+                    }
+                }
+                const avgRating = count > 0 ? (sum / count).toFixed(1) : null;
+                return {
+                    id: myList.id,
+                    name: myList.name,
+                    visibility: myList.visibility,
+                    post: myList.collectionItems.map((item) => (Object.assign(Object.assign({}, item.post), { restaurant: item.post.restaurant, images: item.post.images }))),
+                    AvgRating: avgRating,
+                };
+            });
             return myListDetail;
         }
         catch (err) {
@@ -123,6 +136,7 @@ let MyListService = class MyListService {
                         category_name: true,
                         place_name: true,
                         road_address_name: true,
+                        category_group_name: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },

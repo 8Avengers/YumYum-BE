@@ -15,13 +15,14 @@ class CreateCollectionDto {
 }
 __decorate([
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)({ message: 'name은(는) 필수 입력 항목입니다.' }),
+    __metadata("design:type", String)
+], CreateCollectionDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCollectionDto.prototype, "type", void 0);
-__decorate([
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateCollectionDto.prototype, "name", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),

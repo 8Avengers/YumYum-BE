@@ -27,7 +27,7 @@ let UserSignupController = class UserSignupController {
             const { email, password, nickname, name, gender, birth, phoneNumber } = createUserDto;
             console.log(createUserDto);
             const hashedPassword = await bcrypt.hash(password, 12);
-            const response = await this.userSignupService.createUser({
+            const response = await this.userSignupService.createLocalUser({
                 email,
                 hashedPassword,
                 nickname,

@@ -30,6 +30,7 @@ export declare class MyListController {
             collectionItems: import("./entities/collection-item.entity").CollectionItem[];
             postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
         }[];
+        AvgRating: string;
     }>;
     getMyListsDetailPost(restaurantId: number, collectionId: number, currentUser: any, page: string): Promise<{
         id: number;

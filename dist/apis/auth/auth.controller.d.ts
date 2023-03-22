@@ -7,7 +7,17 @@ export declare class AuthController {
     private readonly userProfileService;
     private readonly authService;
     constructor(userProfileService: UserProfileService, authService: AuthService);
-    oauthSignIn(params: SocialLoginProviderDTO, body: SocialLoginBodyDTO): Promise<{
+    oauthSignUpGoogle(params: SocialLoginProviderDTO, body: SocialLoginBodyDTO): Promise<{
+        refreshToken: string;
+        accessToken: string;
+        user: {
+            userId: any;
+            nickname: any;
+            email: any;
+            profileImage: any;
+        };
+    }>;
+    oauthSignUpKakao(params: SocialLoginProviderDTO, body: SocialLoginBodyDTO): Promise<{
         refreshToken: string;
         accessToken: string;
         user: {

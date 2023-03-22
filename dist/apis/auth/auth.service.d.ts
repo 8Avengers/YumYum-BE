@@ -2,16 +2,28 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserSignupService } from '../user/user-signup.service';
 import { SocialLoginBodyDTO } from './dto/social-login.dto';
-import { SocialKakaoService } from './social.kakao.service';
-import { SocialNaverService } from './social.naver.service';
+import { SocialGoogleService } from './social-google.service';
+import { SocialKakaoService } from './social-kakao.service';
+import { SocialNaverService } from './social-naver.service';
 export declare class AuthService {
     private readonly jwtService;
     private readonly configService;
     private readonly userSignupService;
     private socialKaKaoService;
     private socialNaverService;
-    constructor(jwtService: JwtService, configService: ConfigService, userSignupService: UserSignupService, socialKaKaoService: SocialKakaoService, socialNaverService: SocialNaverService);
-    oauthLogin(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO): Promise<{
+    private readonly socialGoogleService;
+    constructor(jwtService: JwtService, configService: ConfigService, userSignupService: UserSignupService, socialKaKaoService: SocialKakaoService, socialNaverService: SocialNaverService, socialGoogleService: SocialGoogleService);
+    oauthLoginGoogle(provider: 'kakao' | 'naver' | 'google', body: SocialLoginBodyDTO): Promise<{
+        refreshToken: string;
+        accessToken: string;
+        user: {
+            userId: any;
+            nickname: any;
+            email: any;
+            profileImage: any;
+        };
+    }>;
+    oauthLoginKakao(provider: 'kakao' | 'naver' | 'google', body: SocialLoginBodyDTO): Promise<{
         refreshToken: string;
         accessToken: string;
         user: {

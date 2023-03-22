@@ -8,4 +8,5 @@ export declare class RestaurantService {
     updateRestaurant(address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string): Promise<import("typeorm").UpdateResult>;
     catch(err: any): void;
     deleteRestaurant(kakao_place_id: any): Promise<void>;
+    getNearRestaurant(x: string, y: string): Promise<any[]>;
 }

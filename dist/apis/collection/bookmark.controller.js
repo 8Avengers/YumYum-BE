@@ -34,7 +34,7 @@ let BookmarkController = class BookmarkController {
         return await collections;
     }
     async createCollection(data, currentUser) {
-        return await this.bookmarkService.createCollection(currentUser.id, data.name, data.type);
+        return await this.bookmarkService.createCollection(currentUser.id, data.name, data.type, data.visibility);
     }
     async updateCollection(collectionId, name) {
         return await this.bookmarkService.updateCollection(collectionId, name);

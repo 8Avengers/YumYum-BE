@@ -170,10 +170,10 @@ __decorate([
 __decorate([
     (0, common_1.Put)('/collections/:collectionId'),
     (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     (0, swagger_1.ApiOperation)({ summary: 'MyList 수정' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 수정 성공' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 수정 실패' }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     __param(0, (0, decorators_1.Param)('collectionId')),
     __param(1, (0, common_1.UploadedFile)()),
     __param(2, (0, decorators_1.Body)(common_1.ValidationPipe)),

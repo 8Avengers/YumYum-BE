@@ -9,7 +9,7 @@ export declare class UserSignupService {
         email: any;
     }): Promise<User>;
     getUserById(id: any): Promise<User>;
-    createUser({ email, hashedPassword, nickname, name, gender, birth, phoneNumber, }: {
+    createLocalUser({ email, hashedPassword, nickname, name, gender, birth, phoneNumber, }: {
         email: any;
         hashedPassword: any;
         nickname: any;
@@ -26,8 +26,23 @@ export declare class UserSignupService {
         birth: any;
         phone_number: any;
         profile_image: string;
+        provider: "local";
     } & User>;
-    createOauthUser({ email, nickname, name }: {
+    createOauthUser({ email, nickname, name, provider, provider_id }: {
+        email: any;
+        nickname: any;
+        name: any;
+        provider: any;
+        provider_id: any;
+    }): Promise<{
+        email: any;
+        nickname: any;
+        name: any;
+        provider: any;
+        provider_id: any;
+        profile_image: string;
+    } & User>;
+    createUserWithPassport({ email, nickname, name }: {
         email: any;
         nickname: any;
         name: any;

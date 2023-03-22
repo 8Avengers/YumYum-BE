@@ -10,5 +10,4 @@ export declare class MapService {
     getFollowerPosting(userId: number): Promise<any[]>;
     getFollowerPostingList(userId: number): Promise<any[]>;
     getMyPosting(userId: number, collectionId: number): Promise<Post[]>;
-    getNearRestaurant(x: string, y: string): Promise<any[]>;
 }

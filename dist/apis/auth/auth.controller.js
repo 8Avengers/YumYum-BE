@@ -32,10 +32,15 @@ let AuthController = class AuthController {
         this.userProfileService = userProfileService;
         this.authService = authService;
     }
-    async oauthSignIn(params, body) {
+    async oauthSignUpGoogle(params, body) {
         const { provider } = params;
-        console.log("들어오나 확인", provider, body);
-        return await this.authService.oauthLogin(provider, body);
+        console.log('들어오나 확인', provider, body);
+        return await this.authService.oauthLoginGoogle(provider, body);
+    }
+    async oauthSignUpKakao(params, body) {
+        const { provider } = params;
+        console.log('들어오나 확인', provider, body);
+        return await this.authService.oauthLoginKakao(provider, body);
     }
     async loginEmail(loginUserDto) {
         const { email, password } = loginUserDto;
@@ -77,7 +82,7 @@ let AuthController = class AuthController {
     }
 };
 __decorate([
-    (0, common_1.Post)('oauth/login/:provider'),
+    (0, common_1.Post)('oauth/login/google'),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, common_1.Body)()),
@@ -85,7 +90,17 @@ __decorate([
     __metadata("design:paramtypes", [social_login_dto_1.SocialLoginProviderDTO,
         social_login_dto_1.SocialLoginBodyDTO]),
     __metadata("design:returntype", Promise)
-], AuthController.prototype, "oauthSignIn", null);
+], AuthController.prototype, "oauthSignUpGoogle", null);
+__decorate([
+    (0, common_1.Post)('oauth/login/kakao'),
+    (0, common_1.HttpCode)(200),
+    __param(0, (0, common_1.Param)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [social_login_dto_1.SocialLoginProviderDTO,
+        social_login_dto_1.SocialLoginBodyDTO]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "oauthSignUpKakao", null);
 __decorate([
     (0, auth_decorators_1.loginEmail)(),
     (0, common_1.Post)('/login'),
@@ -104,7 +119,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "restoreAccessToken", null);
 __decorate([
-    (0, common_1.Get)('/login/google'),
+    (0, common_1.Get)('/login/passport/google'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -112,7 +127,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginGoogle", null);
 __decorate([
-    (0, common_1.Get)('/login/kakao'),
+    (0, common_1.Get)('/login/passport/kakao'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -120,7 +135,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginKakao", null);
 __decorate([
-    (0, common_1.Get)('/login/naver'),
+    (0, common_1.Get)('/login/passport/naver'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('naver')),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),

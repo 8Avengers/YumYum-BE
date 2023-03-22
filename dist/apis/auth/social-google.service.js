@@ -9,52 +9,54 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SocialNaverService = void 0;
-const axios_1 = require("@nestjs/axios");
+exports.SocialGoogleService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
-let SocialNaverService = class SocialNaverService {
+const axios_1 = require("@nestjs/axios");
+let SocialGoogleService = class SocialGoogleService {
     constructor(configService, httpService) {
         this.configService = configService;
         this.httpService = httpService;
-        this.clientId = this.configService.get('OAUTH2_NAVER_CLIENT_ID');
-        this.clientSecert = this.configService.get('OAUTH2_NAVER_CLIENT_SECRET');
-        this.redirectUri = this.configService.get('OAUTH2_NAVER_REDIRECT_URI');
+        this.clientId = this.configService.get('GOOGLE_CLIENTID');
+        this.clientSecret = this.configService.get('GOOGLE_CLIENTSECRET');
+        this.redirectUri = this.configService.get('GOOGLE_CALLBACKURL');
     }
-    async getOauth2Token({ code, state }) {
-        const response = await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://nid.naver.com/oauth2.0/token', {
+    async getOauth2Token({ code }) {
+        const response = await (0, rxjs_1.lastValueFrom)(this.httpService.post('https://oauth2.googleapis.com/token', null, {
             params: {
-                grant_type: 'authorization_code',
-                client_id: this.clientId,
-                client_secret: this.clientSecert,
                 code,
-                state,
+                client_id: this.clientId,
+                client_secret: this.clientSecret,
+                redirect_uri: this.redirectUri,
+                grant_type: 'authorization_code',
             },
         })).catch((err) => {
             throw new common_1.BadRequestException({
-                message: '로그인 요청이 잘못되었습니다.',
+                message: 'Invalid login request.',
             });
         });
+        console.log('getOauth2Token from social-google.service.ts?', response.data);
         return response.data;
     }
     async getUserInfo(accessToken) {
-        const response = await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://openapi.naver.com/v1/nid/me', {
+        const response = await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
         })).catch((err) => {
             throw new common_1.BadRequestException({
-                message: '올바르지 않은 접근입니다.',
+                message: 'Invalid access.',
             });
         });
-        return response.data.response;
+        console.log('getUserInfo from social-google.service.ts?', response.data);
+        return response.data;
     }
 };
-SocialNaverService = __decorate([
+SocialGoogleService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
         axios_1.HttpService])
-], SocialNaverService);
-exports.SocialNaverService = SocialNaverService;
-//# sourceMappingURL=social.naver.service.js.map
+], SocialGoogleService);
+exports.SocialGoogleService = SocialGoogleService;
+//# sourceMappingURL=social-google.service.js.map

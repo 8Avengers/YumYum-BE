@@ -7,6 +7,8 @@ import { CommentUserTag } from '../../comment/entities/comment-usertag.entity';
 import { Collection } from '../../collection/entities/collection.entity';
 export declare class User {
     id: number;
+    provider_id: string | null;
+    provider: 'local' | 'naver' | 'kakao' | 'google';
     name: string;
     email: string;
     password: string;

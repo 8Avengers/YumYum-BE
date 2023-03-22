@@ -45,6 +45,7 @@ export declare class MyListService {
             collectionItems: CollectionItem[];
             postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
         }[];
+        AvgRating: string;
     }>;
     getMyListsDetailPost(userId: number, restaurantId: number, collectionId: number, page: string): Promise<{
         id: number;

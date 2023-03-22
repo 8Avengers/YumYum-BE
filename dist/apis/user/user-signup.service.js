@@ -45,7 +45,7 @@ let UserSignupService = class UserSignupService {
             throw error;
         }
     }
-    async createUser({ email, hashedPassword, nickname, name, gender, birth, phoneNumber, }) {
+    async createLocalUser({ email, hashedPassword, nickname, name, gender, birth, phoneNumber, }) {
         try {
             const user = await this.userRepository.findOne({
                 where: { email },
@@ -67,6 +67,7 @@ let UserSignupService = class UserSignupService {
             const profileImageUrl = gender === 'M'
                 ? 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/male.jpg'
                 : 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/female.jpg';
+            const local = 'local';
             const newUser = await this.userRepository.save({
                 email,
                 password: hashedPassword,
@@ -75,6 +76,41 @@ let UserSignupService = class UserSignupService {
                 gender,
                 birth,
                 phone_number: phoneNumber,
+                profile_image: profileImageUrl,
+                provider: local,
+            });
+            const collection = new collection_entity_1.Collection();
+            collection.type = 'bookmark';
+            collection.visibility = 'private';
+            collection.user = newUser;
+            await this.collectionRepository.save(collection);
+            return newUser;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    async createOauthUser({ email, nickname, name, provider, provider_id }) {
+        try {
+            const user = await this.userRepository.findOne({
+                where: { email },
+                withDeleted: true,
+            });
+            if (user) {
+                if (user.deleted_at) {
+                    throw new common_2.ConflictException('이미 탈퇴한 회원입니다.');
+                }
+                else {
+                    throw new common_2.ConflictException('이미 등록된 이메일입니다.');
+                }
+            }
+            const profileImageUrl = 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/male.jpg';
+            const newUser = await this.userRepository.save({
+                email,
+                nickname,
+                name,
+                provider,
+                provider_id,
                 profile_image: profileImageUrl,
             });
             const collection = new collection_entity_1.Collection();
@@ -88,7 +124,7 @@ let UserSignupService = class UserSignupService {
             throw error;
         }
     }
-    async createOauthUser({ email, nickname, name }) {
+    async createUserWithPassport({ email, nickname, name }) {
         try {
             const user = await this.userRepository.findOne({
                 where: { email },

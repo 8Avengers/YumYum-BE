@@ -20,9 +20,10 @@ const jwt_refresh_strategy_1 = require("./strategies/jwt-refresh.strategy");
 const jwt_social_google_strategy_1 = require("./strategies/jwt-social-google.strategy");
 const jwt_social_kakao_strategy_1 = require("./strategies/jwt-social-kakao.strategy");
 const jwt_social_naver_strategy_1 = require("./strategies/jwt-social-naver.strategy");
-const social_kakao_service_1 = require("./social.kakao.service");
-const social_naver_service_1 = require("./social.naver.service");
+const social_kakao_service_1 = require("./social-kakao.service");
+const social_naver_service_1 = require("./social-naver.service");
 const axios_1 = require("@nestjs/axios");
+const social_google_service_1 = require("./social-google.service");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
@@ -43,6 +44,7 @@ AuthModule = __decorate([
             user_signup_service_1.UserSignupService,
             social_naver_service_1.SocialNaverService,
             social_kakao_service_1.SocialKakaoService,
+            social_google_service_1.SocialGoogleService,
         ],
         controllers: [auth_controller_1.AuthController],
     })

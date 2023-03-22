@@ -31,9 +31,6 @@ let MapController = class MapController {
     async getMyPostingSearchInMap(collectionId, currentUser) {
         return await this.mapService.getMyPosting(currentUser.id, collectionId);
     }
-    async getCloseRestaurant(data) {
-        return await this.mapService.getNearRestaurant(data.x, data.y);
-    }
 };
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '맵 탐색 페이지' }),
@@ -63,14 +60,6 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], MapController.prototype, "getMyPostingSearchInMap", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({ summary: '메인 페이지' }),
-    (0, common_1.Get)('/main/near-restaurant'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], MapController.prototype, "getCloseRestaurant", null);
 MapController = __decorate([
     (0, swagger_1.ApiTags)('Map'),
     (0, common_1.Controller)('map'),

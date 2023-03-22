@@ -7,11 +7,11 @@ export declare class BookmarkService {
     constructor(collectionRepository: Repository<Collection>, collectionItemRepository: Repository<CollectionItem>);
     getBookmarks(userId: number): Promise<Collection[]>;
     getCollections(collectionId: number): Promise<Collection[]>;
-    createCollection(userId: number, name: string, type: string): Promise<import("typeorm").InsertResult>;
+    createCollection(userId: number, name: string, type: string, visibility: string): Promise<import("typeorm").InsertResult>;
     updateCollection(collectionId: number, name: string): Promise<import("typeorm").UpdateResult>;
     deleteCollection(collectionId: number): Promise<void>;
-    collectionPlusPosting(collectionId: number, postId: number): Promise<void>;
-    collectionMinusPosting(collectionId: number, postId: number): Promise<void>;
-    collectionPlusRestaurant(collectionId: number, restaurantId: number): Promise<void>;
-    collectionMinusRestaurant(collectionId: number, restaurantId: number): Promise<void>;
+    collectionPlusPosting(collectionId: number, postId: number): Promise<CollectionItem>;
+    collectionMinusPosting(collectionId: number, postId: number): Promise<import("typeorm").DeleteResult>;
+    collectionPlusRestaurant(collectionId: number, restaurantId: number): Promise<CollectionItem>;
+    collectionMinusRestaurant(collectionId: number, restaurantId: number): Promise<import("typeorm").DeleteResult>;
 }
