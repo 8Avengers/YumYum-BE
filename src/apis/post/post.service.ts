@@ -21,8 +21,8 @@ import { CollectionItem } from '../collection/entities/collection-item.entity';
 import { PostLike } from './entities/post-like.entity';
 // import { fromSubQuery} from
 // type Image = string | Express.Multer.File;
-// import { PostUserTag } from './entities/post-usertag.entity';
-// import { PostUserTagService } from './post-user-tag.service';
+import { PostUserTag } from './entities/post-usertag.entity';
+import { PostUserTagService } from './post-user-tag.service';
 
 @Injectable()
 export class PostService {
@@ -38,7 +38,8 @@ export class PostService {
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
     private readonly restaurantService: RestaurantService,
-    private readonly uploadService: UploadService, // private readonly postUserTagService: PostUserTagService,
+    private readonly uploadService: UploadService,
+    private readonly postUserTagService: PostUserTagService,
   ) {}
 
   /*
@@ -69,6 +70,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { user: { id: true } },
         },
         relations: {
           user: true,
@@ -79,6 +81,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: true,
         },
         order: { created_at: 'desc' },
         skip: pageNum * 8,
@@ -104,6 +107,7 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const userTags = post.postUserTags.map((userTag) => userTag.user.id);
         return {
           id: post.id,
           content: post.content,
@@ -118,6 +122,7 @@ export class PostService {
           totalComments,
           myList: post.collectionItems,
           visibility: post.visibility,
+          userTags,
         };
       });
     } catch (err) {
@@ -241,6 +246,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
+    userTags: string[],
     files: Express.Multer.File[],
     // usernames: string[],
   ) {
@@ -278,13 +284,6 @@ export class PostService {
 
       const postId = post.id;
 
-      // for (const imageUrl of img) {
-      //   const image = await this.imageRepository.create({
-      //     post: { id: postId },
-      //     file_url: imageUrl,
-      //   });
-      //   await this.imageRepository.save(image);
-      // }
       files.map(async (file) => {
         try {
           const uploadedFile = await this.uploadService.uploadPostImageToS3(
@@ -305,11 +304,9 @@ export class PostService {
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
-      return { postId: postId };
+      await this.postUserTagService.tagUsersInPost(postId, userTags);
 
-      // if (usernames && usernames.length > 0) {
-      //   await this.postUserTagService.tagUsersInPost(savedPost.id, usernames);
-      // }
+      return { postId: postId };
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -340,6 +337,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
+    userTags: string[],
     newFiles: Express.Multer.File[],
     originalFiles: string[],
   ) {
@@ -430,10 +428,6 @@ export class PostService {
         newPostImages = results.map((result) => {
           return result.postImage;
         });
-
-        // postImages = originalFiles.concat(
-        //   newPostImages.map((newPostImage) => newPostImage.postImage),
-        // );
       }
 
       await this.imageRepository.updatePostImages(
@@ -444,6 +438,10 @@ export class PostService {
 
       if (myListId) {
         await this.myListService.myListUpdatePosting(id, myListId);
+      }
+
+      if (userTags) {
+        await this.postUserTagService.updateUserTagInPost(id, userTags);
       }
 
       return { postId: id };
