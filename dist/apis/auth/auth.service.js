@@ -29,7 +29,7 @@ let AuthService = class AuthService {
     async oauthLoginGoogle(provider, body) {
         const socialService = this.socialGoogleService;
         console.log('provider에는 뭐가들어올까아?', provider);
-        console.log('body에는 뭐가들어올까아?', provider);
+        console.log('body에는 뭐가들어올까아?', body);
         const token = await socialService.getOauth2Token(body);
         const info = await socialService.getUserInfo(token.access_token);
         console.log('token에는 뭐가 들어가 있을까?', token);

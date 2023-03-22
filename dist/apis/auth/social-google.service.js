@@ -23,6 +23,7 @@ let SocialGoogleService = class SocialGoogleService {
         this.redirectUri = this.configService.get('GOOGLE_CALLBACKURL');
     }
     async getOauth2Token({ code }) {
+        console.log("code가 socialgoogleservice에 들어오는가", code);
         const response = await (0, rxjs_1.lastValueFrom)(this.httpService.post('https://oauth2.googleapis.com/token', null, {
             params: {
                 code,
@@ -36,6 +37,7 @@ let SocialGoogleService = class SocialGoogleService {
                 message: 'Invalid login request.',
             });
         });
+        console.log("code가 socialgoogleservice에 들어오는가", code);
         console.log('getOauth2Token from social-google.service.ts?', response.data);
         return response.data;
     }
