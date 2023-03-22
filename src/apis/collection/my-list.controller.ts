@@ -211,7 +211,7 @@ export class MyListController {
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
   ) {
-    return this.myListService.deleteMyList(currentUser, collectionId);
+    return this.myListService.deleteMyList(collectionId);
   }
 
   /*

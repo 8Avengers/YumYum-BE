@@ -437,12 +437,17 @@ export class MyListService {
     ### 표정훈
     ### MyList 삭제
     */
-  async deleteMyList(userId: number, id: number) {
+  async deleteMyList(collectionId: number) {
     try {
-      const result = await this.collectionRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
-      if (result.affected === 0) {
+      const deleteResult = await this.collectionItemRepository.delete({
+        collection: { id: collectionId },
+      });
+
+      if (deleteResult.affected === 0) {
         throw new NotFoundException('마이리스트가 없습니다.');
       }
+
+      return deleteResult;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
