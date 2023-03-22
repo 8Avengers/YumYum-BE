@@ -40,11 +40,15 @@ export class AuthService {
     console.log('provider에는 뭐가들어올까아?', provider);
     console.log('body에는 뭐가들어올까아?', body);
 
-    const token = await socialService.getAccessTokenFromGoogle(body.code); //body안에는 code와 state가 들어있어.
-    const info = await socialService.getGoogleUserProfile(token.access_token);
+    const token = await socialService.getOauth2Token(body); //body안에는 code와 state가 들어있어.
+    const info = await socialService.getUserInfo(token.access_token);
 
     console.log('token에는 뭐가 들어가 있을까?', token);
     console.log('info에는 뭐가 들어가 있을까?', info);
+
+    console.log('getUserInfo통과후info.email', info.email);
+    console.log('getUserInfo통과후info.nickname', info.nickname);
+    console.log('getUserInfo통과후info.name', info.name);
 
     let user; // 먼저 유저 정의
 
@@ -55,9 +59,9 @@ export class AuthService {
       어카운트 닉네임을 
       내가정의한 변수로 담는다.
       */
-      const providerIdFromGoogle = '';
-      const userEmailFromGoogle = '';
-      const userNicknameFromGoogle = '';
+      const providerIdFromGoogle = info.id;
+      const userEmailFromGoogle = info.kakao_account.email;
+      const userNicknameFromGoogle = info.kakao_account.profile.nickname;
 
       console.log('useridFromKakao info.id 통과', providerIdFromGoogle);
       console.log('userEmailFromKakao통과', userEmailFromGoogle);
