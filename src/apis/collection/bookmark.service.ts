@@ -21,21 +21,15 @@ export class BookmarkService {
   ) {}
 
   /*
-    ### 23.03.08
+    ### 23.03.22
     ### 표정훈
-    ### 컬렉션 전체 보기🔥
+    ### 북마크 전체 보기🔥 (image 부분은 생각해봐야할듯)
     */
   async getBookmarks(userId: number) {
     try {
       const bookmarks = await this.collectionRepository.find({
-        relations: {
-          collectionItems: {
-            post: true,
-            restaurant: true,
-          },
-        },
         where: { user_id: userId, deletedAt: null, type: 'bookmark' },
-        select: { name: true, image: true },
+        select: { id: true, name: true, image: true },
       });
       return bookmarks;
     } catch (err) {
@@ -46,9 +40,9 @@ export class BookmarkService {
     }
   }
   /*
-      ### 23.03.08
+      ### 23.03.22
       ### 표정훈
-      ### 컬렉션 상세 보기🔥
+      ### 북마크 상세 보기
       */
   async getCollections(collectionId: number) {
     try {
@@ -75,7 +69,7 @@ export class BookmarkService {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 컬렉션 생성🔥
+      ### 북마크 생성
       */
   createCollection(userId: number, name: string, type: string) {
     return this.collectionRepository.insert({
@@ -88,7 +82,7 @@ export class BookmarkService {
   /*
       ### 23.03.08
       ### 표정훈
-      ### 컬렉션 수정🔥
+      ### 북마크 수정
       */
   async updateCollection(collectionId: number, name: string) {
     try {
@@ -113,7 +107,7 @@ export class BookmarkService {
   /*
       ### 23.03.08
       ### 표정훈
-      ### 컬렉션 삭제🔥
+      ### 북마크 삭제
       */
   async deleteCollection(collectionId: number) {
     try {
@@ -134,9 +128,9 @@ export class BookmarkService {
   }
 
   /*
-    ### 23.03.13
+    ### 23.03.22
     ### 표정훈
-    ### 컬렉션에 포스팅 더하기🔥
+    ### 북마크에 포스팅 더하기
     */
   async collectionPlusPosting(collectionId: number, postId: number) {
     try {
@@ -148,7 +142,7 @@ export class BookmarkService {
       });
 
       if (existingItem) {
-        return; // Do nothing and exit the function if the CollectionItem already exists
+        return; // 이미 있다면 종료
       }
 
       const collectionItem = this.collectionItemRepository.create({
@@ -172,7 +166,7 @@ export class BookmarkService {
   /*
     ### 23.03.13
     ### 표정훈
-    ### 컬렉션에 포스팅 빼기🔥
+    ### 북마크에 포스팅 빼기
     */
   async collectionMinusPosting(collectionId: number, postId: number) {
     try {
@@ -194,7 +188,7 @@ export class BookmarkService {
   /*
     ### 23.03.13
     ### 표정훈
-    ### 컬렉션에 맛집 더하기🔥
+    ### 북마크에 맛집 더하기
     */
   async collectionPlusRestaurant(collectionId: number, restaurantId: number) {
     try {
@@ -230,7 +224,7 @@ export class BookmarkService {
   /*
     ### 23.03.13
     ### 표정훈
-    ### 컬렉션에 맛집 빼기🔥
+    ### 북마크에 맛집 빼기
     */
   async collectionMinusRestaurant(collectionId: number, restaurantId: number) {
     try {
@@ -250,10 +244,3 @@ export class BookmarkService {
     }
   }
 }
-
-/*
-collectionPlusPosting 컬렉션에 포스팅 더하기
-collectionPlusRestaurant 컬렉션에 맛집 더하기
-collectionMinusPosting 컬렉션에 포스팅 빼기
-collectionMinusRestaurant 컬렉션에 맛집 빼기
-*/
