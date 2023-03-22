@@ -42,7 +42,7 @@ export class BookmarkService {
   /*
       ### 23.03.22
       ### 표정훈
-      ### 북마크 상세 보기
+      ### 북마크 상세 보기 🔥
       */
   async getCollections(collectionId: number) {
     try {
@@ -54,6 +54,22 @@ export class BookmarkService {
           },
         },
         where: { id: collectionId, deletedAt: null, type: 'bookmark' },
+        select: {
+          id: true,
+          type: true,
+          collectionItems: {
+            id: true,
+            post: {
+              id: true,
+              content: true,
+              rating: true,
+            },
+            restaurant: {
+              id: true,
+              place_name: true,
+            },
+          },
+        },
       });
 
       return bookmark;
@@ -71,11 +87,17 @@ export class BookmarkService {
       ### 표정훈
       ### 북마크 생성
       */
-  createCollection(userId: number, name: string, type: string) {
+  createCollection(
+    userId: number,
+    name: string,
+    type: string,
+    visibility: string,
+  ) {
     return this.collectionRepository.insert({
       user_id: userId,
       name: name,
       type: 'bookmark',
+      visibility: 'private',
     });
   }
 
@@ -92,6 +114,10 @@ export class BookmarkService {
           name: name,
         },
       );
+      if (bookmarkUpdate.affected === 0) {
+        throw new NotFoundException('북마크가 없습니다.');
+      }
+
       return bookmarkUpdate;
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -151,6 +177,7 @@ export class BookmarkService {
       });
 
       await this.collectionItemRepository.save(collectionItem);
+      return collectionItem;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -170,10 +197,11 @@ export class BookmarkService {
     */
   async collectionMinusPosting(collectionId: number, postId: number) {
     try {
-      await this.collectionItemRepository.delete({
+      const deletePost = await this.collectionItemRepository.delete({
         collection: { id: collectionId },
         post: { id: postId },
       });
+      return deletePost;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -199,16 +227,17 @@ export class BookmarkService {
         },
       });
 
-      console.log('북마크 레스토링', existingItem);
-
       if (existingItem) {
         return; // 이미 존재하는 CollectionItem이면 추가하지 않고, 함수 종료
       }
 
-      await this.collectionItemRepository.insert({
+      const collectionItem = await this.collectionItemRepository.create({
         collection: { id: collectionId },
         restaurant: { id: restaurantId },
       });
+
+      await this.collectionItemRepository.save(collectionItem);
+      return collectionItem;
     } catch (err) {
       if (err instanceof HttpException) {
         throw err;
@@ -228,10 +257,12 @@ export class BookmarkService {
     */
   async collectionMinusRestaurant(collectionId: number, restaurantId: number) {
     try {
-      await this.collectionItemRepository.delete({
+      const deleteRestaurant = await this.collectionItemRepository.delete({
         collection: { id: collectionId },
         restaurant: { id: restaurantId },
       });
+
+      return deleteRestaurant;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

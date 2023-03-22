@@ -60,7 +60,7 @@ export class MyListController {
   /*
     ### 23.03.20
     ### 표정훈/이드보라
-    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
+    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥 세준님
     */
   @Get('/collections/detail/posts/:collectionId/:restaurantId')
   @UseGuards(AuthAccessGuard)
@@ -181,12 +181,11 @@ export class MyListController {
 
   @Put('/collections/:collectionId')
   @UseGuards(AuthAccessGuard)
+  @UseInterceptors(FileInterceptor('file')) //이미지관련
   @ApiOperation({ summary: 'MyList 수정' })
   @ApiResponse({ status: 200, description: 'MyList 수정 성공' })
   @ApiResponse({ status: 400, description: 'MyList 수정 실패' })
-  @UseInterceptors(FileInterceptor('file')) //이미지관련
   async updateMyList(
-    // @Param('userId') userId: number,
     @Param('collectionId') collectionId: number,
     @UploadedFile() file: Express.Multer.File,
     @Body(ValidationPipe) data: UpdateMyListDto,
