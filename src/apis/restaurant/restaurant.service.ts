@@ -136,7 +136,7 @@ export class RestaurantService {
         'restaurant.place_name',
         'restaurant.x',
         'restaurant.y',
-        'post.rating',
+        'AVG(post.rating)',
         'image.file_url',
       ])
       .addSelect(
@@ -144,8 +144,9 @@ export class RestaurantService {
         'distance',
       )
       .having(`distance <= 2`)
+      .groupBy('restaurant.place_name')
       .orderBy('rand()')
-      .limit(3)
+      // .limit(3)
       .getRawMany();
     return nearRestaurant;
   }
