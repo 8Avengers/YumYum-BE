@@ -153,6 +153,8 @@ export class PostService {
             category_name: true,
             place_name: true,
             road_address_name: true,
+            x: true,
+            y: true,
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
