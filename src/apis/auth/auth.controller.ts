@@ -47,6 +47,7 @@ export class AuthController {
     @Body() body: SocialLoginBodyDTO,
   ) {
     const { provider } = params;
+    console.log('들어오나 확인', provider, body);
     return await this.authService.oauthLogin(provider, body);
   }
 
