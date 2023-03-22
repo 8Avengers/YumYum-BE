@@ -39,7 +39,7 @@ export class UserSignupService {
     }
   }
 
-  async createUser({
+  async createLocalUser({
     email,
     hashedPassword,
     nickname,
@@ -74,6 +74,8 @@ export class UserSignupService {
           ? 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/male.jpg'
           : 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/female.jpg';
 
+      const local = 'local';
+
       const newUser = await this.userRepository.save({
         email,
         password: hashedPassword,
@@ -83,6 +85,7 @@ export class UserSignupService {
         birth,
         phone_number: phoneNumber,
         profile_image: profileImageUrl, // Save the profile image URL
+        provider: local, //일반 이메일 회원가입시 provider를 local로 설정
       });
 
       const collection = new Collection();
@@ -97,7 +100,7 @@ export class UserSignupService {
     }
   }
 
-  async createOauthUser({ email, nickname, name }) {
+  async createOauthUser({ email, nickname, name, provider, provider_id }) {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
@@ -127,6 +130,8 @@ export class UserSignupService {
         nickname,
         name,
         profile_image: profileImageUrl,
+        provider,
+        provider_id,
       });
 
       //회원가입시 자동으로 bookmark의 모든게시물 collection이 private으로 생성

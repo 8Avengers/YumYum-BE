@@ -5,6 +5,7 @@ import { UserSignupService } from '../user/user-signup.service';
 
 //passport미사용
 import { SocialLoginBodyDTO } from './dto/social-login.dto';
+import { SocialGoogleService } from './social-google.service';
 
 import { SocialKakaoService } from './social-kakao.service';
 import { SocialNaverService } from './social-naver.service';
@@ -19,6 +20,7 @@ export class AuthService {
     //passport미사용
     private socialKaKaoService: SocialKakaoService,
     private socialNaverService: SocialNaverService,
+    private readonly socialGoogleService: SocialGoogleService,
   ) {}
 
   //소셜로그인API-Passport미사용
@@ -57,6 +59,7 @@ export class AuthService {
       const userIdFromKakao = info.id;
       const userEmailFromKakao = info.kakao_account.email;
       const userNicknameFromKakao = info.kakao_account.profile.nickname;
+      const providerId = info.id;
 
       console.log('useridFromKakao info.id 통과', userIdFromKakao);
       console.log('userEmailFromKakao통과', userEmailFromKakao);
@@ -72,6 +75,8 @@ export class AuthService {
           email: userEmailFromKakao,
           nickname: userNicknameFromKakao,
           name: info.name,
+          provider: provider,
+          provider_id: providerId,
         });
       } else {
         user = existingUser; // 가입이미되어있다면, 로그인 진행

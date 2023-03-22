@@ -17,6 +17,7 @@ import { JwtNaverStrategy } from './strategies/jwt-social-naver.strategy';
 import { SocialKakaoService } from './social-kakao.service';
 import { SocialNaverService } from './social-naver.service';
 import { HttpModule } from '@nestjs/axios';
+import { SocialGoogleService } from './social-google.service';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { HttpModule } from '@nestjs/axios';
     //아래는passport미사용
     SocialNaverService,
     SocialKakaoService,
+    SocialGoogleService,
   ],
 
   controllers: [AuthController],
