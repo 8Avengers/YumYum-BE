@@ -86,6 +86,7 @@ export class MyListService {
                 x: true,
                 y: true,
                 place_name: true,
+                category_group_name: true,
               },
             },
           },
