@@ -33,10 +33,4 @@ export class MapController {
   ) {
     return await this.mapService.getMyPosting(currentUser.id, collectionId);
   }
-
-  @ApiOperation({ summary: '메인 페이지' })
-  @Get('/main/near-restaurant')
-  async getCloseRestaurant(@Body() data: Partial<LocationRestaurantDto>) {
-    return await this.mapService.getNearRestaurant(data.x, data.y);
-  }
 }
