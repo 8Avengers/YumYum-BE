@@ -31,13 +31,15 @@ let AuthService = class AuthService {
         const info = await socialService.getUserInfo(token.access_token);
         console.log('token에는 뭐가 들어가 있을까?', token);
         console.log('info에는 뭐가 들어가 있을까?', info);
-        console.log('getUserInfo통과후', info.email);
-        console.log('getUserInfo통과후', info.nickname);
-        console.log('getUserInfo통과후', info.name);
+        console.log('getUserInfo통과후info.email', info.email);
+        console.log('getUserInfo통과후info.nickname', info.nickname);
+        console.log('getUserInfo통과후info.name', info.name);
         let user;
         try {
             const userEmailFromKakao = info.kakao_account.email;
             const userNicknameFromKakao = info.kakao_account.profile.nickname;
+            console.log('userEmailFromKakao통과', userEmailFromKakao);
+            console.log('userNicknameFromKakao통과', userEmailFromKakao);
             const existingUser = await this.userSignupService.findOne({
                 email: userEmailFromKakao,
             });
