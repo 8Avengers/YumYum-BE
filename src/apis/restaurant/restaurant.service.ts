@@ -126,4 +126,28 @@ export class RestaurantService {
       }
     }
   }
+  async getNearRestaurant(x: string, y: string) {
+    const nearRestaurant = await this.restaurantRepository
+      .createQueryBuilder('restaurant')
+      .leftJoin('restaurant.posts', 'post')
+      .leftJoin('post.images', 'image')
+      .select([
+        'restaurant.id',
+        'restaurant.place_name',
+        'restaurant.x',
+        'restaurant.y',
+        'AVG(post.rating)',
+        'image.file_url',
+      ])
+      .addSelect(
+        `6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`,
+        'distance',
+      )
+      .having(`distance <= 2`)
+      .groupBy('restaurant.place_name')
+      .orderBy('rand()')
+      // .limit(3)
+      .getRawMany();
+    return nearRestaurant;
+  }
 }
