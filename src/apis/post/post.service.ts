@@ -70,7 +70,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
-          postUserTags: { user: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -81,7 +81,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
-          postUserTags: true,
+          postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         skip: pageNum * 8,
@@ -107,7 +107,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const userTags = post.postUserTags.map((userTag) => userTag.user.id);
+        const userTags = post.postUserTags.map(
+          (userTag) => userTag.user.nickname,
+        );
         return {
           id: post.id,
           content: post.content,
@@ -164,6 +166,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -173,6 +176,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
       });
 
@@ -197,6 +201,10 @@ export class PostService {
         id: item.collection.id,
       }));
 
+      const userTags = post[0].postUserTags.map(
+        (userTag) => userTag.user.nickname,
+      );
+
       return {
         id: post[0].id,
         content: post[0].content,
@@ -211,6 +219,7 @@ export class PostService {
         totalComments,
         myList,
         visibility: post[0].visibility,
+        userTags,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -509,6 +518,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -519,6 +529,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         offset: pageNum * 8,
@@ -544,6 +555,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const userTags = post.postUserTags.map(
+          (userTag) => userTag.user.nickname,
+        );
         return {
           id: post.id,
           content: post.content,
@@ -558,6 +572,7 @@ export class PostService {
           totalComments,
           myList: post.collectionItems,
           visibility: post.visibility,
+          userTags,
         };
       });
     } catch (err) {
@@ -594,6 +609,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -604,6 +620,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         offset: pageNum * 8,
@@ -629,6 +646,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const userTags = post.postUserTags.map(
+          (userTag) => userTag.user.nickname,
+        );
         return {
           id: post.id,
           content: post.content,
@@ -643,6 +663,7 @@ export class PostService {
           totalComments,
           myList: post.collectionItems,
           visibility: post.visibility,
+          userTags,
         };
       });
     } catch (err) {
@@ -749,8 +770,10 @@ export class PostService {
         .leftJoin('post.images', 'image')
         .leftJoinAndSelect('post.hashtags', 'hashtags')
         .leftJoin('post.user', 'user')
-        .leftJoinAndSelect('post.collectionItems', 'collectionItem')
-        .leftJoinAndSelect('collectionItem.collection', 'collection')
+        // .leftJoinAndSelect('post.collectionItems', 'collectionItem')
+        // // .leftJoinAndSelect('collectionItem.collection', 'collection')
+        // .leftJoinAndSelect('post.postUserTags', 'userTags')
+        // .innerJoin('userTags.user', 'taggedUser')
         .select([
           'post.id',
           'post.content',
@@ -773,18 +796,19 @@ export class PostService {
         )
         .addSelect('hashtags.name')
         .addSelect('image.file_url')
-        .addSelect('collection.id', 'collection_id')
+        // .addSelect('collectionItem.collection')
+        // .addSelect('userTags.user AS taggedUser')
         .having(`distance <= 3`)
         .orderBy('post.created_at', 'DESC')
         .skip(pageNum * 8)
         .take(8)
-        .getRawAndEntities();
+        .getMany();
 
       if (!postsAroundMe) {
         throw new NotFoundException('포스트가 없습니다.');
       }
 
-      const postIds = postsAroundMe.entities.map((post) => post.id);
+      const postIds = postsAroundMe.map((post) => post.id);
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
@@ -793,14 +817,19 @@ export class PostService {
         userId,
       );
 
-      return postsAroundMe.entities.map((post, index) => {
+      return postsAroundMe.map((post, index) => {
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
         const isLiked =
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const myList = postsAroundMe.raw[index].collection_id;
+        // const myList =
+        //   post.collectionItems.map(
+        //     (collectionItem) => collectionItem.collection.id,
+        //   ) || [];
+        // const userTags =
+        //   post.postUserTags.map((userTag) => userTag.user.nickname) || [];
         return {
           id: post.id,
           content: post.content,
@@ -813,8 +842,9 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
-          myList,
+          // myList,
           visibility: post.visibility,
+          // userTags,
         };
       });
     } catch (err) {

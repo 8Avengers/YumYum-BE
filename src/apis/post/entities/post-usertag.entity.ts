@@ -11,7 +11,6 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Post } from './post.entity';
-import { PrimaryGeneratedColumn } from 'typeorm/decorator/columns/PrimaryGeneratedColumn';
 
 @Entity()
 export class PostUserTag {
