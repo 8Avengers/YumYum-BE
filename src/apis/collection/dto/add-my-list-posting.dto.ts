@@ -1,6 +1,6 @@
-import { IsNumber, IsArray } from 'class-validator';
+import { IsArray } from 'class-validator';
 
 export class addCollectionPostingDto {
   @IsArray()
-  collectionId: number[];
+  collectionId: Array<number>;
 }

@@ -312,6 +312,7 @@ export class MyListService {
             id: true,
             post: {
               id: true,
+              rating: true,
               images: { id: true, file_url: true },
               restaurant: {
                 place_name: true,
@@ -462,6 +463,8 @@ export class MyListService {
 
   async myListPlusPosting(postId: number, collectionId: number[]) {
     try {
+      const collectionItems = [];
+
       for (let i = 0; i < collectionId.length; i++) {
         const item = collectionId[i];
 
@@ -473,16 +476,19 @@ export class MyListService {
         });
 
         if (existingItem) {
-          continue; // 이미 존재하는 CollectionItem이면 해당 콜렉션에 추가하지 않고, 다음 콜렉션으로 넘어감
+          continue;
         }
 
         const collectionItem = this.collectionItemRepository.create({
           post: { id: postId },
           collection: { id: item },
         });
+
         await this.collectionItemRepository.save(collectionItem);
-        return collectionItem;
+        collectionItems.push(collectionItem);
       }
+
+      return collectionItems;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
