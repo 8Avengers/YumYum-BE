@@ -181,12 +181,11 @@ export class MyListController {
 
   @Put('/collections/:collectionId')
   @UseGuards(AuthAccessGuard)
+  @UseInterceptors(FileInterceptor('file')) //이미지관련
   @ApiOperation({ summary: 'MyList 수정' })
   @ApiResponse({ status: 200, description: 'MyList 수정 성공' })
   @ApiResponse({ status: 400, description: 'MyList 수정 실패' })
-  @UseInterceptors(FileInterceptor('file')) //이미지관련
   async updateMyList(
-    // @Param('userId') userId: number,
     @Param('collectionId') collectionId: number,
     @UploadedFile() file: Express.Multer.File,
     @Body(ValidationPipe) data: UpdateMyListDto,

@@ -41,7 +41,7 @@ export class BookmarkController {
   /*
       ### 23.03.22
       ### 표정훈
-      ### 북마크 상세 보기
+      ### 북마크 상세 보기🔥
       */
   @Get('/collections/detail/:collectionId')
   @UseGuards(AuthAccessGuard)
@@ -56,7 +56,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 북마크 생성
+      ### 북마크 생성🔥
       */
   @Post('/collections')
   @UseGuards(AuthAccessGuard)
@@ -71,13 +71,14 @@ export class BookmarkController {
       currentUser.id,
       data.name,
       data.type,
+      data.visibility,
     );
   }
 
   /*
       ### 23.03.13
       ### 표정훈
-      ### 북마크 수정
+      ### 북마크 수정🔥
       */
 
   @Put('/collections/:collectionId')
@@ -95,7 +96,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 북마크 삭제
+      ### 북마크 삭제🔥
       */
   @Delete('/collections/:collectionId')
   @UseGuards(AuthAccessGuard)
@@ -109,7 +110,7 @@ export class BookmarkController {
   /*
     ### 23.03.22
     ### 표정훈
-    ### 북마크에 포스팅 더하기
+    ### 북마크에 포스팅 더하기🔥
     */
   @Post('/collections/plus/post/:postId')
   @UseGuards(AuthAccessGuard)
@@ -127,9 +128,9 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.13
+      ### 23.03.22
       ### 표정훈
-      ### 북마크에 포스팅 빼기
+      ### 북마크에 포스팅 빼기🔥
       */
   @Delete('/collections/minus/post/:postId')
   @UseGuards(AuthAccessGuard)
@@ -147,9 +148,9 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.13
+      ### 23.03.22
       ### 표정훈
-      ### 북마크에 맛집 더하기
+      ### 북마크에 맛집 더하기🔥
       */
 
   @Post('/collections/plus/restaurant/:restaurantId')
@@ -168,9 +169,9 @@ export class BookmarkController {
   }
 
   /*
-        ### 23.03.13
+        ### 23.03.22
         ### 표정훈
-        ### 북마크에 맛집 빼기
+        ### 북마크에 맛집 빼기🔥
         */
   @Delete('/collections/minus/restaurant/:restaurantId')
   @UseGuards(AuthAccessGuard)
