@@ -10,6 +10,7 @@ import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
 import { PostLike } from './entities/post-like.entity';
+import { PostUserTagService } from './post-user-tag.service';
 export declare class PostService {
     private postRepository;
     private commentRepository;
@@ -21,7 +22,8 @@ export declare class PostService {
     private readonly myListService;
     private readonly restaurantService;
     private readonly uploadService;
-    constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, collectionItemRepository: Repository<CollectionItem>, postLikeRepository: Repository<PostLike>, imageRepository: ImageRepository, likeService: PostLikeService, postHashtagService: PostHashtagService, myListService: MyListService, restaurantService: RestaurantService, uploadService: UploadService);
+    private readonly postUserTagService;
+    constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, collectionItemRepository: Repository<CollectionItem>, postLikeRepository: Repository<PostLike>, imageRepository: ImageRepository, likeService: PostLikeService, postHashtagService: PostHashtagService, myListService: MyListService, restaurantService: RestaurantService, uploadService: UploadService, postUserTagService: PostUserTagService);
     getPosts(userId: number, page: string): Promise<{
         id: number;
         content: string;
@@ -36,6 +38,7 @@ export declare class PostService {
         totalComments: number;
         myList: CollectionItem[];
         visibility: "public" | "private";
+        userTags: string[];
     }[]>;
     getPostById(postId: number, userId: number): Promise<{
         id: number;
@@ -55,11 +58,12 @@ export declare class PostService {
             id: number;
         }[];
         visibility: "public" | "private";
+        userTags: string[];
     }>;
-    createPost(userId: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListIds: number[], content: string, rating: number, visibility: any, hashtagNames: string[], files: Express.Multer.File[]): Promise<{
+    createPost(userId: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListIds: number[], content: string, rating: number, visibility: any, hashtagNames: string[], userTags: string[], files: Express.Multer.File[]): Promise<{
         postId: number;
     }>;
-    updatePost(id: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListId: number[], content: string, rating: number, visibility: any, hashtagNames: string[], newFiles: Express.Multer.File[], originalFiles: string[]): Promise<{
+    updatePost(id: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListId: number[], content: string, rating: number, visibility: any, hashtagNames: string[], userTags: string[], newFiles: Express.Multer.File[], originalFiles: string[]): Promise<{
         postId: number;
     }>;
     deletePost(id: number): Promise<void>;
@@ -77,6 +81,7 @@ export declare class PostService {
         totalComments: number;
         myList: CollectionItem[];
         visibility: "public" | "private";
+        userTags: string[];
     }[]>;
     getPostsByOtherUserId(userId: number, myUserId: number, page: string): Promise<{
         id: number;
@@ -92,8 +97,9 @@ export declare class PostService {
         totalComments: number;
         myList: CollectionItem[];
         visibility: "public" | "private";
+        userTags: string[];
     }[]>;
-    getTrendingPosts(): Promise<any>;
+    getTrendingPosts(category: string): Promise<any>;
     getPostsAroundMe(x: string, y: string, userId: any, page: string): Promise<{
         id: number;
         content: string;
@@ -106,7 +112,6 @@ export declare class PostService {
         totalLikes: number;
         isLiked: any;
         totalComments: number;
-        myList: any;
         visibility: "public" | "private";
     }[]>;
 }

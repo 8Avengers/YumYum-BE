@@ -21,32 +21,65 @@ const post_entity_1 = require("./entities/post.entity");
 const post_usertag_entity_1 = require("./entities/post-usertag.entity");
 const typeorm_3 = require("typeorm");
 let PostUserTagService = class PostUserTagService {
-    constructor(userRepository, postRepository) {
+    constructor(userRepository, postRepository, postUserTagRepository) {
         this.userRepository = userRepository;
         this.postRepository = postRepository;
+        this.postUserTagRepository = postUserTagRepository;
     }
     async tagUsersInPost(postId, usernames) {
-        const post = await this.postRepository.findOne({ where: { id: postId } });
-        const users = await this.userRepository.find({
-            where: { nickname: (0, typeorm_3.In)(usernames) },
-        });
-        const userTags = [];
-        for (const username of usernames) {
-            const user = users.find((u) => u.nickname === username);
-            const postUserTag = new post_usertag_entity_1.PostUserTag();
-            postUserTag.post = post;
-            postUserTag.user = user;
-            userTags.push(postUserTag);
+        try {
+            const post = await this.postRepository.findOne({
+                where: { id: postId },
+            });
+            const users = await this.userRepository.find({
+                where: { nickname: (0, typeorm_3.In)(usernames) },
+            });
+            for (const username of usernames) {
+                const user = users.find((u) => u.nickname === username);
+                await this.postUserTagRepository.save({
+                    post: { id: postId },
+                    user: { id: user.id },
+                });
+            }
+            await this.postRepository.save(post);
+            return post;
         }
-        post.postUserTags = userTags;
-        return this.postRepository.save(post);
+        catch (err) {
+            console.error(err);
+            throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+        }
+    }
+    async updateUserTagInPost(postId, usernames) {
+        try {
+            const post = await this.postRepository.findOne({
+                where: { id: postId },
+            });
+            const users = await this.userRepository.find({
+                where: { nickname: (0, typeorm_3.In)(usernames) },
+            });
+            for (const username of usernames) {
+                const user = users.find((u) => u.nickname === username);
+                await this.postUserTagRepository.save({
+                    post: { id: postId },
+                    user: { id: user.id },
+                });
+            }
+            await this.postRepository.save(post);
+            return post;
+        }
+        catch (err) {
+            console.error(err);
+            throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+        }
     }
 };
 PostUserTagService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(user_entity_1.User)),
     __param(1, (0, typeorm_1.InjectRepository)(post_entity_1.Post)),
+    __param(2, (0, typeorm_1.InjectRepository)(post_usertag_entity_1.PostUserTag)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository])
 ], PostUserTagService);
 exports.PostUserTagService = PostUserTagService;

@@ -16,5 +16,6 @@ export declare class MyFeedController {
         totalComments: number;
         myList: import("../collection/entities/collection-item.entity").CollectionItem[];
         visibility: "public" | "private";
+        userTags: string[];
     }[]>;
 }

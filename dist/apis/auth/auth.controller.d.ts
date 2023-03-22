@@ -7,7 +7,7 @@ export declare class AuthController {
     private readonly userProfileService;
     private readonly authService;
     constructor(userProfileService: UserProfileService, authService: AuthService);
-    oauthSignIn(provider: string, body: SocialLoginBodyDTO): Promise<{
+    oauthSignIn(provider: string, body: SocialLoginBodyDTO): Promise<void | {
         refreshToken: string;
         accessToken: string;
         user: {

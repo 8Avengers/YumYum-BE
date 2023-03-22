@@ -30,6 +30,8 @@ const post_module_1 = require("../post/post.module");
 const follow_entity_1 = require("../user/entities/follow.entity");
 const user_entity_1 = require("../user/entities/user.entity");
 const upload_service_1 = require("../upload/upload.service");
+const post_user_tag_service_1 = require("../post/post-user-tag.service");
+const post_usertag_entity_1 = require("../post/entities/post-usertag.entity");
 let CollectionModule = class CollectionModule {
 };
 CollectionModule = __decorate([
@@ -46,6 +48,7 @@ CollectionModule = __decorate([
                 follow_entity_1.Follow,
                 user_entity_1.User,
                 upload_module_1.UploadModule,
+                post_usertag_entity_1.PostUserTag,
             ]),
             restaurant_module_1.RestaurantModule,
             upload_module_1.UploadModule,
@@ -60,6 +63,7 @@ CollectionModule = __decorate([
             post_like_service_1.PostLikeService,
             image_repository_1.ImageRepository,
             upload_service_1.UploadService,
+            post_user_tag_service_1.PostUserTagService,
         ],
         exports: [my_list_service_1.MyListService, typeorm_1.TypeOrmModule],
     })

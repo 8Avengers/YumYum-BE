@@ -36,12 +36,14 @@ let PostController = class PostController {
         const parsedMyListId = JSON.parse(data.myListId);
         const parsedRating = JSON.parse(data.rating);
         const parsedHashtagNames = JSON.parse(data.hashtagNames);
-        return this.postService.createPost(currentUser.id, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, files);
+        const parsedUserTags = JSON.parse(data.userTags);
+        return this.postService.createPost(currentUser.id, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, parsedUserTags, files);
     }
     async updatePost(files, postId, data, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }) {
         let parsedMyListId;
         let parsedRating;
         let parsedHashtagNames;
+        let parsedUserTags;
         if (data.myListId) {
             parsedMyListId = JSON.parse(data.myListId);
         }
@@ -51,13 +53,16 @@ let PostController = class PostController {
         if (data.hashtagNames) {
             parsedHashtagNames = JSON.parse(data.hashtagNames);
         }
-        return this.postService.updatePost(postId, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, files, data.files);
+        if (data.userTags) {
+            parsedUserTags = JSON.parse(data.userTags);
+        }
+        return this.postService.updatePost(postId, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, parsedUserTags, files, data.files);
     }
     async deletePost(postId) {
         return this.postService.deletePost(postId);
     }
-    async getTrendingPostsByCategory() {
-        return this.postService.getTrendingPosts();
+    async getTrendingPostsByCategory(category) {
+        return this.postService.getTrendingPosts(category);
     }
     async getPostsAroundMe(data, currentUser, page) {
         return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id, page);
@@ -123,8 +128,9 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '회원들의 추천 맛집 불러오기' }),
     (0, common_1.Get)('/main/trending'),
+    __param(0, (0, common_1.Query)('category')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "getTrendingPostsByCategory", null);
 __decorate([

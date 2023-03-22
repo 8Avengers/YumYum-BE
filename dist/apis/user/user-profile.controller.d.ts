@@ -41,6 +41,7 @@ export declare class UserProfileController {
         totalComments: number;
         myList: import("../collection/entities/collection-item.entity").CollectionItem[];
         visibility: "public" | "private";
+        userTags: string[];
     }[]>;
     followUser(follower: User, followingId: number): Promise<string>;
     getFollowersOfUser(userId: number): Promise<{

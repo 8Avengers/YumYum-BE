@@ -29,5 +29,9 @@ __decorate([
     (0, class_validator_1.IsString)({ each: true }),
     __metadata("design:type", String)
 ], CreatePostDto.prototype, "hashtagNames", void 0);
+__decorate([
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", String)
+], CreatePostDto.prototype, "userTags", void 0);
 exports.CreatePostDto = CreatePostDto;
 //# sourceMappingURL=create-post.dto.js.map

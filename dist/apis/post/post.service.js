@@ -26,8 +26,9 @@ const image_repository_1 = require("./image.repository");
 const upload_service_1 = require("../upload/upload.service");
 const collection_item_entity_1 = require("../collection/entities/collection-item.entity");
 const post_like_entity_1 = require("./entities/post-like.entity");
+const post_user_tag_service_1 = require("./post-user-tag.service");
 let PostService = class PostService {
-    constructor(postRepository, commentRepository, collectionItemRepository, postLikeRepository, imageRepository, likeService, postHashtagService, myListService, restaurantService, uploadService) {
+    constructor(postRepository, commentRepository, collectionItemRepository, postLikeRepository, imageRepository, likeService, postHashtagService, myListService, restaurantService, uploadService, postUserTagService) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.collectionItemRepository = collectionItemRepository;
@@ -38,6 +39,7 @@ let PostService = class PostService {
         this.myListService = myListService;
         this.restaurantService = restaurantService;
         this.uploadService = uploadService;
+        this.postUserTagService = postUserTagService;
     }
     async getPosts(userId, page) {
         try {
@@ -61,6 +63,7 @@ let PostService = class PostService {
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },
                     collectionItems: { id: true, collection: { id: true } },
+                    postUserTags: { id: true, user: { nickname: true } },
                 },
                 relations: {
                     user: true,
@@ -71,6 +74,7 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
+                    postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
                 skip: pageNum * 8,
@@ -89,6 +93,7 @@ let PostService = class PostService {
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
+                const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
                 return {
                     id: post.id,
                     content: post.content,
@@ -103,6 +108,7 @@ let PostService = class PostService {
                     totalComments,
                     myList: post.collectionItems,
                     visibility: post.visibility,
+                    userTags,
                 };
             });
         }
@@ -138,6 +144,7 @@ let PostService = class PostService {
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },
                     collectionItems: { id: true, collection: { id: true } },
+                    postUserTags: { id: true, user: { nickname: true } },
                 },
                 relations: {
                     user: true,
@@ -147,6 +154,7 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
+                    postUserTags: { user: true },
                 },
             });
             if (!post) {
@@ -161,6 +169,7 @@ let PostService = class PostService {
             const myList = post[0].collectionItems.map((item) => ({
                 id: item.collection.id,
             }));
+            const userTags = post[0].postUserTags.map((userTag) => userTag.user.nickname);
             return {
                 id: post[0].id,
                 content: post[0].content,
@@ -175,6 +184,7 @@ let PostService = class PostService {
                 totalComments,
                 myList,
                 visibility: post[0].visibility,
+                userTags,
             };
         }
         catch (err) {
@@ -187,7 +197,7 @@ let PostService = class PostService {
             }
         }
     }
-    async createPost(userId, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListIds, content, rating, visibility, hashtagNames, files) {
+    async createPost(userId, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListIds, content, rating, visibility, hashtagNames, userTags, files) {
         try {
             const createdRestaurant = await this.restaurantService.createRestaurant(address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y);
             const restaurantId = createdRestaurant;
@@ -216,6 +226,7 @@ let PostService = class PostService {
                 }
             });
             await this.myListService.myListPlusPosting(postId, myListIds);
+            await this.postUserTagService.tagUsersInPost(postId, userTags);
             return { postId: postId };
         }
         catch (err) {
@@ -223,7 +234,7 @@ let PostService = class PostService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    async updatePost(id, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListId, content, rating, visibility, hashtagNames, newFiles, originalFiles) {
+    async updatePost(id, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListId, content, rating, visibility, hashtagNames, userTags, newFiles, originalFiles) {
         try {
             const post = await this.postRepository.findOne({
                 where: { id },
@@ -282,6 +293,9 @@ let PostService = class PostService {
             if (myListId) {
                 await this.myListService.myListUpdatePosting(id, myListId);
             }
+            if (userTags) {
+                await this.postUserTagService.updateUserTagInPost(id, userTags);
+            }
             return { postId: id };
         }
         catch (err) {
@@ -334,6 +348,7 @@ let PostService = class PostService {
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },
                     collectionItems: { id: true, collection: { id: true } },
+                    postUserTags: { id: true, user: { nickname: true } },
                 },
                 relations: {
                     user: true,
@@ -344,6 +359,7 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
+                    postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
                 offset: pageNum * 8,
@@ -362,6 +378,7 @@ let PostService = class PostService {
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
+                const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
                 return {
                     id: post.id,
                     content: post.content,
@@ -376,6 +393,7 @@ let PostService = class PostService {
                     totalComments,
                     myList: post.collectionItems,
                     visibility: post.visibility,
+                    userTags,
                 };
             });
         }
@@ -411,6 +429,7 @@ let PostService = class PostService {
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },
                     collectionItems: { id: true, collection: { id: true } },
+                    postUserTags: { id: true, user: { nickname: true } },
                 },
                 relations: {
                     user: true,
@@ -421,6 +440,7 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
+                    postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
                 offset: pageNum * 8,
@@ -439,6 +459,7 @@ let PostService = class PostService {
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
+                const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
                 return {
                     id: post.id,
                     content: post.content,
@@ -453,6 +474,7 @@ let PostService = class PostService {
                     totalComments,
                     myList: post.collectionItems,
                     visibility: post.visibility,
+                    userTags,
                 };
             });
         }
@@ -466,13 +488,16 @@ let PostService = class PostService {
             }
         }
     }
-    async getTrendingPosts() {
+    async getTrendingPosts(category) {
         try {
-            const trendingPostsByCategory = [];
             const date = new Date();
             date.setMonth(date.getMonth() - 1);
             const trendingPosts = await this.postRepository
                 .createQueryBuilder('post')
+                .leftJoin('post.postLikes', 'postLikes')
+                .leftJoin('post.restaurant', 'restaurant')
+                .leftJoin('post.user', 'user')
+                .leftJoin('post.images', 'image')
                 .select('post.id')
                 .addSelect([
                 'post.content',
@@ -480,53 +505,21 @@ let PostService = class PostService {
                 'post.updated_at',
                 'post.created_at',
             ])
-                .leftJoin('post.postLikes', 'postLikes')
-                .leftJoin('post.restaurant', 'restaurant')
-                .leftJoin('post.user', 'user')
+                .addSelect('COUNT(postLikes.id) as postLikesCount')
                 .groupBy("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname")
-                .orderBy('COUNT(postLikes.id)', 'DESC')
+                .orderBy('postLikesCount', 'DESC')
                 .where('post.visibility = :visibility', { visibility: 'public' })
                 .where('postLikes.updated_at >= :date', { date })
+                .where("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END) = :category", { category: category })
                 .addSelect("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END)", 'category')
                 .addSelect('restaurant.place_name')
                 .addSelect('user.profile_image')
                 .addSelect('user.nickname')
-                .getRawAndEntities();
-            trendingPosts.entities.forEach((post, index) => {
-                const category = trendingPosts.raw[index].category;
-                const postObj = {
-                    id: post.id,
-                    content: post.content,
-                    rating: post.rating,
-                    restaurant: {
-                        category: category,
-                        place_name: post.restaurant.place_name,
-                    },
-                    user: {
-                        profile_image: post.user.profile_image,
-                        nickname: post.user.nickname,
-                    },
-                };
-                const existingCategoryIndex = trendingPostsByCategory.findIndex((categoryObj) => categoryObj.category === category);
-                if (existingCategoryIndex === -1) {
-                    trendingPostsByCategory.push({
-                        category: category,
-                        posts: [postObj],
-                    });
-                }
-                else {
-                    trendingPostsByCategory[existingCategoryIndex].posts.push(postObj);
-                }
-            });
-            for (const categoryObj of trendingPostsByCategory) {
-                categoryObj.posts.sort((a, b) => {
-                    const aLikes = a.postLikes ? a.postLikes.length : 0;
-                    const bLikes = b.postLikes ? b.postLikes.length : 0;
-                    return bLikes - aLikes;
-                });
-                categoryObj.posts = categoryObj.posts.slice(0, 10);
-            }
-            return trendingPostsByCategory;
+                .addSelect('image.file_url')
+                .addSelect('postLikes.id')
+                .take(5)
+                .getMany();
+            return trendingPosts;
         }
         catch (err) {
             console.error(err);
@@ -542,8 +535,6 @@ let PostService = class PostService {
                 .leftJoin('post.images', 'image')
                 .leftJoinAndSelect('post.hashtags', 'hashtags')
                 .leftJoin('post.user', 'user')
-                .leftJoinAndSelect('post.collectionItems', 'collectionItem')
-                .leftJoinAndSelect('collectionItem.collection', 'collection')
                 .select([
                 'post.id',
                 'post.content',
@@ -563,25 +554,23 @@ let PostService = class PostService {
                 .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
                 .addSelect('hashtags.name')
                 .addSelect('image.file_url')
-                .addSelect('collection.id', 'collection_id')
                 .having(`distance <= 3`)
                 .orderBy('post.created_at', 'DESC')
                 .skip(pageNum * 8)
                 .take(8)
-                .getRawAndEntities();
+                .getMany();
             if (!postsAroundMe) {
                 throw new common_1.NotFoundException('포스트가 없습니다.');
             }
-            const postIds = postsAroundMe.entities.map((post) => post.id);
+            const postIds = postsAroundMe.map((post) => post.id);
             const postLikes = await this.likeService.getLikesForAllPosts(postIds);
             const likedStatuses = await this.likeService.getLikedStatusforAllPosts(postIds, userId);
-            return postsAroundMe.entities.map((post, index) => {
+            return postsAroundMe.map((post, index) => {
                 var _a, _b;
                 const likes = ((_a = postLikes.find((like) => like.postId === post.id)) === null || _a === void 0 ? void 0 : _a.totalLikes) || 0;
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
-                const myList = postsAroundMe.raw[index].collection_id;
                 return {
                     id: post.id,
                     content: post.content,
@@ -594,7 +583,6 @@ let PostService = class PostService {
                     totalLikes: likes,
                     isLiked,
                     totalComments,
-                    myList,
                     visibility: post.visibility,
                 };
             });
@@ -625,7 +613,8 @@ PostService = __decorate([
         post_hashtag_service_1.PostHashtagService,
         my_list_service_1.MyListService,
         restaurant_service_1.RestaurantService,
-        upload_service_1.UploadService])
+        upload_service_1.UploadService,
+        post_user_tag_service_1.PostUserTagService])
 ], PostService);
 exports.PostService = PostService;
 //# sourceMappingURL=post.service.js.map

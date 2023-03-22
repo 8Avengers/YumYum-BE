@@ -24,6 +24,7 @@ const restaurant_module_1 = require("../restaurant/restaurant.module");
 const image_entity_1 = require("./entities/image.entity");
 const image_repository_1 = require("./image.repository");
 const upload_module_1 = require("../upload/upload.module");
+const post_user_tag_service_1 = require("./post-user-tag.service");
 let PostModule = class PostModule {
 };
 PostModule = __decorate([
@@ -40,6 +41,7 @@ PostModule = __decorate([
             post_like_service_1.PostLikeService,
             post_hashtag_service_1.PostHashtagService,
             image_repository_1.ImageRepository,
+            post_user_tag_service_1.PostUserTagService,
         ],
         exports: [post_service_1.PostService, typeorm_1.TypeOrmModule],
     })

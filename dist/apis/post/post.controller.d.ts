@@ -25,6 +25,7 @@ export declare class PostController {
             id: number;
         }[];
         visibility: "public" | "private";
+        userTags: string[];
     }>;
     getPosts(currentUser: any, page: string): Promise<{
         id: number;
@@ -40,6 +41,7 @@ export declare class PostController {
         totalComments: number;
         myList: import("../collection/entities/collection-item.entity").CollectionItem[];
         visibility: "public" | "private";
+        userTags: string[];
     }[]>;
     createPost(files: Array<Express.Multer.File>, data: CreatePostDto, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }: CreateRestaurantDto, currentUser: any): Promise<{
         postId: number;
@@ -48,7 +50,7 @@ export declare class PostController {
         postId: number;
     }>;
     deletePost(postId: number): Promise<void>;
-    getTrendingPostsByCategory(): Promise<any>;
+    getTrendingPostsByCategory(category: string): Promise<any>;
     getPostsAroundMe(data: Partial<LocationDto>, currentUser: any, page: string): Promise<{
         id: number;
         content: string;
@@ -61,7 +63,6 @@ export declare class PostController {
         totalLikes: number;
         isLiked: any;
         totalComments: number;
-        myList: any;
         visibility: "public" | "private";
     }[]>;
 }

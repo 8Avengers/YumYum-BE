@@ -4,4 +4,5 @@ export declare class CreatePostDto {
     readonly rating: string;
     readonly visibility: 'public' | 'private';
     readonly hashtagNames?: string;
+    readonly userTags?: string;
 }

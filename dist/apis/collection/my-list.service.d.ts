@@ -27,25 +27,9 @@ export declare class MyListService {
     getMyListDetail(collectionId: number, page: string): Promise<{
         id: number;
         name: string;
+        description: string;
         visibility: "public" | "private";
-        post: {
-            restaurant: Restaurant;
-            images: import("../post/entities/image.entity").Image[];
-            id: number;
-            content: string;
-            rating: number;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date;
-            visibility: "public" | "private";
-            postLikes: import("../post/entities/post-like.entity").PostLike[];
-            comments: Comment[];
-            user: User;
-            hashtags: import("../post/entities/hashtag.entity").Hashtag[];
-            collectionItems: CollectionItem[];
-            postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
-        }[];
-        AvgRating: string;
+        post: any[];
     }>;
     getMyListsDetailPost(userId: number, restaurantId: number, collectionId: number, page: string): Promise<{
         id: number;

@@ -12,25 +12,9 @@ export declare class MyListController {
     getMyListDetail(collectionId: number, page: string): Promise<{
         id: number;
         name: string;
+        description: string;
         visibility: "public" | "private";
-        post: {
-            restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
-            images: import("../post/entities/image.entity").Image[];
-            id: number;
-            content: string;
-            rating: number;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date;
-            visibility: "public" | "private";
-            postLikes: import("../post/entities/post-like.entity").PostLike[];
-            comments: import("../comment/entities/comment.entity").Comment[];
-            user: import("../user/entities/user.entity").User;
-            hashtags: import("../post/entities/hashtag.entity").Hashtag[];
-            collectionItems: import("./entities/collection-item.entity").CollectionItem[];
-            postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
-        }[];
-        AvgRating: string;
+        post: any[];
     }>;
     getMyListsDetailPost(restaurantId: number, collectionId: number, currentUser: any, page: string): Promise<{
         id: number;

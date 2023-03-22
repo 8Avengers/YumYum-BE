@@ -63,6 +63,7 @@ let MyListService = class MyListService {
                 select: {
                     id: true,
                     name: true,
+                    description: true,
                     visibility: true,
                     collectionItems: {
                         id: true,
@@ -76,6 +77,7 @@ let MyListService = class MyListService {
                                 x: true,
                                 y: true,
                                 place_name: true,
+                                category_group_name: true,
                             },
                         },
                     },
@@ -84,22 +86,40 @@ let MyListService = class MyListService {
                 take: myListInOnePage,
             });
             const [myListDetail] = myList.map((myList) => {
-                let sum = 0;
-                let count = 0;
+                const groupedPosts = {};
                 for (const item of myList.collectionItems) {
+                    const restaurantId = item.post.restaurant.id;
+                    if (!groupedPosts[restaurantId]) {
+                        groupedPosts[restaurantId] = { posts: [], sum: 0, count: 0 };
+                    }
+                    groupedPosts[restaurantId].posts.push(Object.assign(Object.assign({}, item.post), { restaurant: item.post.restaurant, images: item.post.images }));
                     const rating = item.post.rating;
                     if (typeof rating === 'number') {
-                        sum += rating;
-                        count++;
+                        groupedPosts[restaurantId].sum += rating;
+                        groupedPosts[restaurantId].count++;
                     }
                 }
-                const avgRating = count > 0 ? (sum / count).toFixed(1) : null;
+                const formattedPosts = [];
+                for (const groupId in groupedPosts) {
+                    const group = groupedPosts[groupId];
+                    const avgRating = group.count > 0 ? (group.sum / group.count).toFixed(1) : null;
+                    if (group.posts.length > 0) {
+                        formattedPosts.push({
+                            id: group.posts[0].id,
+                            content: group.posts[0].content,
+                            rating: group.posts[0].rating,
+                            AvgRating: avgRating,
+                            images: group.posts[0].images,
+                            restaurant: group.posts[0].restaurant,
+                        });
+                    }
+                }
                 return {
                     id: myList.id,
                     name: myList.name,
+                    description: myList.description,
                     visibility: myList.visibility,
-                    post: myList.collectionItems.map((item) => (Object.assign(Object.assign({}, item.post), { restaurant: item.post.restaurant, images: item.post.images }))),
-                    AvgRating: avgRating,
+                    post: formattedPosts,
                 };
             });
             return myListDetail;
@@ -120,7 +140,6 @@ let MyListService = class MyListService {
                 where: {
                     deleted_at: null,
                     visibility: 'public',
-                    user: { id: userId },
                     restaurant: { id: restaurantId },
                     collectionItems: { collection: { id: collectionId } },
                 },
