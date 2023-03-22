@@ -31,11 +31,14 @@ export class AuthService {
     const socialService = this.socialGoogleService;
 
     console.log('provider에는 뭐가들어올까아?', provider);
-    console.log('body에는 뭐가들어올까아?', provider);
+    console.log('body에는 뭐가들어올까아?', body);
 
-    const token = await socialService.getOauth2Token(body); //body안에는 code와 state가 들어있어.
-    const info = await socialService.getUserInfo(token.access_token);
+    // getAccessTokenFromGoogle 호출 전 로그 출력
+    console.log('Calling getAccessTokenFromGoogle...');
 
+    const token = await socialService.getAccessTokenFromGoogle(body.code);
+    console.log('Token from getAccessTokenFromGoogle:', token); // 로그 추가
+    const info = await socialService.getGoogleUserProfile(token.access_token);
     console.log('token에는 뭐가 들어가 있을까?', token);
     console.log('info에는 뭐가 들어가 있을까?', info);
 
@@ -43,70 +46,70 @@ export class AuthService {
     console.log('getUserInfo통과후info.nickname', info.nickname);
     console.log('getUserInfo통과후info.name', info.name);
 
-    let user; // 먼저 유저 정의
+    // let user; // 먼저 유저 정의
 
-    try {
-      /* 
-      구글 API로 부터 응답받은
-      어카운트 이메일, 
-      어카운트 닉네임을 
-      내가정의한 변수로 담는다.
-      */
-      const providerIdFromGoogle = info.id;
-      const userEmailFromGoogle = info.kakao_account.email;
-      const userNicknameFromGoogle = info.kakao_account.profile.nickname;
+    // try {
+    //   /*
+    //   구글 API로 부터 응답받은
+    //   어카운트 이메일,
+    //   어카운트 닉네임을
+    //   내가정의한 변수로 담는다.
+    //   */
+    //   const providerIdFromGoogle = info.id;
+    //   const userEmailFromGoogle = info.kakao_account.email;
+    //   const userNicknameFromGoogle = info.kakao_account.profile.nickname;
 
-      console.log('useridFromKakao info.id 통과', providerIdFromGoogle);
-      console.log('userEmailFromKakao통과', userEmailFromGoogle);
-      console.log('userNicknameFromKakao통과', userNicknameFromGoogle);
+    //   console.log('useridFromKakao info.id 통과', providerIdFromGoogle);
+    //   console.log('userEmailFromKakao통과', userEmailFromGoogle);
+    //   console.log('userNicknameFromKakao통과', userNicknameFromGoogle);
 
-      // 1. 가입확인
-      const existingUser = await this.userSignupService.findOne({
-        email: userEmailFromGoogle,
-      });
-      // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
-      if (!existingUser) {
-        user = await this.userSignupService.createOauthUser({
-          email: userEmailFromGoogle,
-          nickname: userNicknameFromGoogle,
-          name: info.name,
-          provider: provider,
-          provider_id: providerIdFromGoogle,
-        });
-      } else {
-        user = existingUser; // 가입이미되어있다면, 로그인 진행
-      }
-      console.log('가입이미되어있다면, 로그인 진행의 user', user);
+    //   // 1. 가입확인
+    //   const existingUser = await this.userSignupService.findOne({
+    //     email: userEmailFromGoogle,
+    //   });
+    //   // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
+    //   if (!existingUser) {
+    //     user = await this.userSignupService.createOauthUser({
+    //       email: userEmailFromGoogle,
+    //       nickname: userNicknameFromGoogle,
+    //       name: info.name,
+    //       provider: provider,
+    //       provider_id: providerIdFromGoogle,
+    //     });
+    //   } else {
+    //     user = existingUser; // 가입이미되어있다면, 로그인 진행
+    //   }
+    //   console.log('가입이미되어있다면, 로그인 진행의 user', user);
 
-      user = await this.userSignupService.findOne({
-        email: user.email,
-      });
+    //   user = await this.userSignupService.findOne({
+    //     email: user.email,
+    //   });
 
-      console.log('DB에서 email : user.email이후의 user', user);
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        console.error(`Error:  ${error.message}`);
-      } else {
-        throw error;
-      }
-    }
+    //   console.log('DB에서 email : user.email이후의 user', user);
+    // } catch (error) {
+    //   if (error instanceof ConflictException) {
+    //     console.error(`Error:  ${error.message}`);
+    //   } else {
+    //     throw error;
+    //   }
+    // }
 
-    console.log('try catch문 통과한 이후의 user', user);
+    // console.log('try catch문 통과한 이후의 user', user);
 
-    // 3. 로그인 : 소셜 로그인했지만, 우리서비스에서 로그인한 것처럼 AT,RT발급
-    const accessToken = await this.createAccessToken({ user });
-    const refreshToken = await this.createRefreshToken({ user });
+    // // 3. 로그인 : 소셜 로그인했지만, 우리서비스에서 로그인한 것처럼 AT,RT발급
+    // const accessToken = await this.createAccessToken({ user });
+    // const refreshToken = await this.createRefreshToken({ user });
 
-    return {
-      refreshToken,
-      accessToken,
-      user: {
-        userId: user.id,
-        nickname: user.nickname,
-        email: user.email,
-        profileImage: user.profile_image,
-      },
-    };
+    // return {
+    //   refreshToken,
+    //   accessToken,
+    //   user: {
+    //     userId: user.id,
+    //     nickname: user.nickname,
+    //     email: user.email,
+    //     profileImage: user.profile_image,
+    //   },
+    // };
   }
 
   //카카오|네이버 로그인-Passport미사용

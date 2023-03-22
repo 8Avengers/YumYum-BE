@@ -3,20 +3,25 @@ import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { SocialLoginBodyDTO } from './dto/social-login.dto';
 
 @Injectable()
 export class SocialGoogleService {
-  private clientId = this.configService.get('GOOGLE_CLIENTID');
-  private clientSecret = this.configService.get('GOOGLE_CLIENTSECRET');
-  private redirectUri = this.configService.get('GOOGLE_CALLBACKURL');
+  private clientId: string;
+  private clientSecret: string;
+  private redirectUri: string;
 
   constructor(
-    private configService: ConfigService,
     private httpService: HttpService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    this.clientId = configService.get('GOOGLE_CLIENTID');
+    this.clientSecret = configService.get('GOOGLE_CLIENTSECRET');
+    this.redirectUri = configService.get('GOOGLE_CALLBACKURL');
+  }
 
-  async getOauth2Token({ code }: SocialLoginBodyDTO) {
+  async getAccessTokenFromGoogle(code: string) {
+    console.log('Inside getAccessTokenFromGoogle method'); // 로그 추가
+    console.log('getAccessTokenFromGoogle내부의code가 들어오나?!!', code);
     const response = await lastValueFrom(
       this.httpService.post('https://oauth2.googleapis.com/token', null, {
         params: {
@@ -28,31 +33,43 @@ export class SocialGoogleService {
         },
       }),
     ).catch((err: AxiosError) => {
+      console.error('Error in getAccessTokenFromGoogle:', err); // 로그 추가
+
       throw new BadRequestException({
         message: 'Invalid login request.',
+        error: err.response?.data,
       });
     });
 
-    console.log('getOauth2Token from social-google.service.ts?', response.data);
+    // console.log('getAccessTokenFromGoogle:', response.data.access_token);
 
-    return response.data;
+    return response.data.access_token;
   }
 
-  async getUserInfo(accessToken: string) {
-    const response = await lastValueFrom(
-      this.httpService.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }),
-    ).catch((err: AxiosError) => {
-      throw new BadRequestException({
-        message: 'Invalid access.',
-      });
-    });
+  async getGoogleUserProfile(accessToken: string) {
+    const googleProfileUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
 
-    console.log('getUserInfo from social-google.service.ts?', response.data);
+    try {
+      const response = await lastValueFrom(
+        this.httpService.get(googleProfileUrl, { headers }),
+      );
 
-    return response.data;
+      return {
+        email: response.data.email,
+        nickname: response.data.name,
+        name: response.data.family_name,
+      };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response) {
+        throw new BadRequestException(axiosError.response.data);
+      }
+      throw error;
+    }
   }
+
+  // Add other methods to handle Google OAuth2 flow if needed.
 }
