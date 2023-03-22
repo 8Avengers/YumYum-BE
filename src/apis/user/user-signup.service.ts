@@ -39,6 +39,7 @@ export class UserSignupService {
     }
   }
 
+  //local로 회원가입
   async createLocalUser({
     email,
     hashedPassword,
@@ -101,13 +102,7 @@ export class UserSignupService {
   }
 
   //소셜로그인 passport 미사용
-  async createOauthUser({
-    email,
-    nickname,
-    // name,
-    provider,
-    provider_id,
-  }) {
+  async createOauthUser({ email, nickname, name, provider, provider_id }) {
     try {
       const user = await this.userRepository.findOne({
         where: { email },
@@ -135,7 +130,7 @@ export class UserSignupService {
       const newUser = await this.userRepository.save({
         email,
         nickname,
-        // name: string,
+        name,
         provider,
         provider_id,
         profile_image: profileImageUrl,
@@ -183,7 +178,7 @@ export class UserSignupService {
       const newUser = await this.userRepository.save({
         email,
         nickname,
-        // name: string,
+        name,
 
         profile_image: profileImageUrl,
       });
