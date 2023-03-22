@@ -1,3 +1,4 @@
+/// <reference types="multer" />
 import { minusCollectionPostingDto } from './dto/minus-bookmark-posting.dto';
 import { CreateMyListDto } from './dto/create-my-list.dto';
 import { UpdateMyListDto } from './dto/update-my-list.dto';
@@ -29,7 +30,7 @@ export declare class MyListController {
             collectionItems: import("./entities/collection-item.entity").CollectionItem[];
             postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
         }[];
-    }[]>;
+    }>;
     getMyListsDetailPost(restaurantId: number, collectionId: number, currentUser: any, page: string): Promise<{
         id: number;
         content: string;
@@ -63,13 +64,13 @@ export declare class MyListController {
     }[]>;
     createMyList(data: CreateMyListDto, currentUser: any): Promise<import("typeorm").InsertResult>;
     getMyListInfo(collectionId: number): Promise<import("./entities/collection.entity").Collection>;
-    updateMyList(collectionId: number, data: UpdateMyListDto, currentUser: any): Promise<{
+    updateMyList(collectionId: number, file: Express.Multer.File, data: UpdateMyListDto, currentUser: any): Promise<{
         name: string;
         image: string;
         description: string;
         visibility: "public" | "private";
     }>;
-    deleteMyList(collectionId: number, currentUser: any): Promise<void>;
+    deleteMyList(collectionId: number, currentUser: any): Promise<import("typeorm").DeleteResult>;
     myListPlusPosting(postId: number, data: addCollectionPostingDto): Promise<any[]>;
     myListMinusPosting(postId: number, data: minusCollectionPostingDto, currentUser: any): Promise<void>;
     myListUpdatePosting(postId: number, data: addCollectionPostingDto): Promise<void>;

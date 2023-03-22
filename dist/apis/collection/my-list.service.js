@@ -83,12 +83,13 @@ let MyListService = class MyListService {
                 skip: pageNum * myListInOnePage,
                 take: myListInOnePage,
             });
-            return myList.map((myList) => ({
+            const [myListDetail] = myList.map((myList) => ({
                 id: myList.id,
                 name: myList.name,
                 visibility: myList.visibility,
                 post: myList.collectionItems.map((item) => (Object.assign(Object.assign({}, item.post), { restaurant: item.post.restaurant, images: item.post.images }))),
             }));
+            return myListDetail;
         }
         catch (err) {
             console.error(err);
@@ -282,19 +283,34 @@ let MyListService = class MyListService {
             }
         }
     }
-    async updateMyList(userId, collectionId, name, image, description, visibility) {
+    async updateMyList(userId, collectionId, name, image, description, visibility, file) {
         try {
-            const myList = await this.collectionRepository.update({ id: collectionId, type: 'myList', user: { id: userId } }, {
-                name,
-                image,
-                description,
-                visibility,
+            const myListInfo = await this.collectionRepository.findOne({
+                where: {
+                    id: collectionId,
+                    type: 'myList',
+                    user: { id: userId },
+                },
             });
+            if (myListInfo) {
+                myListInfo.name = name;
+                myListInfo.description = description;
+                myListInfo.visibility = visibility;
+                if (file) {
+                    const uploadedFile = await this.uploadService.uploadMyListImageToS3('yumyumdb-myList', file);
+                    myListInfo.image = uploadedFile.myListImage;
+                }
+            }
+            else {
+                myListInfo.image = myListInfo.image;
+            }
+            const updateMyListInfo = await this.collectionRepository.save(myListInfo);
+            console.log('updateMyListInfo 정보:::::::::', updateMyListInfo);
             return {
-                name,
-                image,
-                description,
-                visibility,
+                name: updateMyListInfo.name,
+                image: updateMyListInfo.image,
+                description: updateMyListInfo.description,
+                visibility: updateMyListInfo.visibility,
             };
         }
         catch (err) {
@@ -307,12 +323,15 @@ let MyListService = class MyListService {
             }
         }
     }
-    async deleteMyList(userId, id) {
+    async deleteMyList(collectionId) {
         try {
-            const result = await this.collectionRepository.softDelete(id);
-            if (result.affected === 0) {
+            const deleteResult = await this.collectionItemRepository.delete({
+                collection: { id: collectionId },
+            });
+            if (deleteResult.affected === 0) {
                 throw new common_1.NotFoundException('마이리스트가 없습니다.');
             }
+            return deleteResult;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {

@@ -26,14 +26,8 @@ let BookmarkService = class BookmarkService {
     async getBookmarks(userId) {
         try {
             const bookmarks = await this.collectionRepository.find({
-                relations: {
-                    collectionItems: {
-                        post: true,
-                        restaurant: true,
-                    },
-                },
                 where: { user_id: userId, deletedAt: null, type: 'bookmark' },
-                select: { name: true, image: true },
+                select: { id: true, name: true, image: true },
             });
             return bookmarks;
         }

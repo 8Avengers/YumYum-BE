@@ -24,6 +24,7 @@ const add_my_list_posting_dto_1 = require("./dto/add-my-list-posting.dto");
 const auth_guards_1 = require("../auth/guards/auth.guards");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const post_service_1 = require("../post/post.service");
+const platform_express_1 = require("@nestjs/platform-express");
 let MyListController = class MyListController {
     constructor(myListService, postService) {
         this.myListService = myListService;
@@ -55,8 +56,8 @@ let MyListController = class MyListController {
     async getMyListInfo(collectionId) {
         return this.myListService.getMyListInfo(collectionId);
     }
-    async updateMyList(collectionId, data, currentUser) {
-        const updateMyList = await this.myListService.updateMyList(currentUser.id, collectionId, data.name, data.image, data.description, data.visibility);
+    async updateMyList(collectionId, file, data, currentUser) {
+        const updateMyList = await this.myListService.updateMyList(currentUser.id, collectionId, data.name, data.image, data.description, data.visibility, file);
         const result = {
             name: updateMyList.name,
             image: updateMyList.image,
@@ -66,7 +67,7 @@ let MyListController = class MyListController {
         return result;
     }
     async deleteMyList(collectionId, currentUser) {
-        return this.myListService.deleteMyList(currentUser, collectionId);
+        return this.myListService.deleteMyList(collectionId);
     }
     async myListPlusPosting(postId, data) {
         return this.myListService.myListPlusPosting(postId, data.collectionId);
@@ -172,11 +173,13 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'MyList 수정' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 수정 성공' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 수정 실패' }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     __param(0, (0, decorators_1.Param)('collectionId')),
-    __param(1, (0, decorators_1.Body)()),
-    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, decorators_1.Body)(common_1.ValidationPipe)),
+    __param(3, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, update_my_list_dto_1.UpdateMyListDto, Object]),
+    __metadata("design:paramtypes", [Number, Object, update_my_list_dto_1.UpdateMyListDto, Object]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "updateMyList", null);
 __decorate([

@@ -19,6 +19,12 @@ export declare class UploadService {
         contentType: string;
         profileImage: string;
     }>;
+    uploadMyListImageToS3(folder: string, file: Express.Multer.File): Promise<{
+        key: string;
+        s3Object: PromiseResult<AWS.S3.PutObjectOutput, AWS.AWSError>;
+        contentType: string;
+        myListImage: string;
+    }>;
     deleteS3Object(key: string, callback?: (err: AWS.AWSError, data: AWS.S3.DeleteObjectOutput) => void): Promise<{
         success: true;
     }>;

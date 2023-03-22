@@ -27,7 +27,7 @@ let BookmarkController = class BookmarkController {
     }
     async getBookmarks(currentUser) {
         const bookmarks = await this.bookmarkService.getBookmarks(currentUser.id);
-        return await bookmarks;
+        return bookmarks;
     }
     async getCollections(collectionId) {
         const collections = await this.bookmarkService.getCollections(collectionId);
@@ -67,7 +67,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BookmarkController.prototype, "getBookmarks", null);
 __decorate([
-    (0, common_1.Get)('/collections/:collectionId'),
+    (0, common_1.Get)('/collections/detail/:collectionId'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     (0, swagger_1.ApiOperation)({ summary: '북마크 상세조회' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: '북마크 상세조회 성공' }),
@@ -161,6 +161,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], BookmarkController.prototype, "collectionMinusRestaurant", null);
 BookmarkController = __decorate([
+    (0, swagger_1.ApiTags)('bookmarks'),
     (0, common_1.Controller)('bookmarks'),
     __metadata("design:paramtypes", [bookmark_service_1.BookmarkService])
 ], BookmarkController);

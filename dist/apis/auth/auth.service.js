@@ -26,7 +26,7 @@ let AuthService = class AuthService {
     }
     async oauthLogin(provider, body) {
         const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
-        console.log("socialService 통과후 body", body, "socialService 통과후 provider", provider);
+        console.log('socialService 통과후 body', body, 'socialService 통과후 provider', provider);
         const token = await socialService.getOauth2Token(body);
         const info = await socialService.getUserInfo(token.access_token);
         console.log('token에는 뭐가 들어가 있을까?', token);
@@ -36,12 +36,14 @@ let AuthService = class AuthService {
         console.log('getUserInfo통과후info.name', info.name);
         let user;
         try {
+            const userIdFromKakao = info.id;
             const userEmailFromKakao = info.kakao_account.email;
             const userNicknameFromKakao = info.kakao_account.profile.nickname;
+            console.log('useridFromKakao info.id 통과', userIdFromKakao);
             console.log('userEmailFromKakao통과', userEmailFromKakao);
             console.log('userNicknameFromKakao통과', userEmailFromKakao);
             const existingUser = await this.userSignupService.findOne({
-                email: userEmailFromKakao,
+                email: userIdFromKakao,
             });
             if (!existingUser) {
                 user = await this.userSignupService.createOauthUser({

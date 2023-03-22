@@ -45,7 +45,7 @@ export declare class MyListService {
             collectionItems: CollectionItem[];
             postUserTags: import("../post/entities/post-usertag.entity").PostUserTag[];
         }[];
-    }[]>;
+    }>;
     getMyListsDetailPost(userId: number, restaurantId: number, collectionId: number, page: string): Promise<{
         id: number;
         content: string;
@@ -79,13 +79,13 @@ export declare class MyListService {
     }[]>;
     createMyList(userId: number, name: string, type: 'myList'): Promise<import("typeorm").InsertResult>;
     getMyListInfo(collectionId: number): Promise<Collection>;
-    updateMyList(userId: number, collectionId: number, name: string, image: string, description: string, visibility: 'public' | 'private'): Promise<{
+    updateMyList(userId: number, collectionId: number, name: string, image: string, description: string, visibility: 'public' | 'private', file: any): Promise<{
         name: string;
         image: string;
         description: string;
         visibility: "public" | "private";
     }>;
-    deleteMyList(userId: number, id: number): Promise<void>;
+    deleteMyList(collectionId: number): Promise<import("typeorm").DeleteResult>;
     myListPlusPosting(postId: number, collectionId: number[]): Promise<any[]>;
     myListMinusPosting(postId: number, collectionId: number): Promise<void>;
     myListUpdatePosting(postId: number, collectionId: number[]): Promise<void>;

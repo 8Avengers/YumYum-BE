@@ -88,6 +88,38 @@ let UploadService = class UploadService {
             throw new common_1.BadRequestException(`파일 업로드를 올바르게 다시 해주세요. : ${error}`);
         }
     }
+    async uploadMyListImageToS3(folder, file) {
+        try {
+            const sharp = require('sharp');
+            const inputImageBuffer = file.buffer;
+            const resizedImageBuffer = await sharp(inputImageBuffer)
+                .resize(300, 300, {
+                fit: 'inside',
+                withoutEnlargement: true,
+            })
+                .toBuffer()
+                .catch((error) => {
+                console.error(error);
+                throw new common_1.BadRequestException(`이미지 리사이징을 다시 해주세요.: ${error}`);
+            });
+            const key = `${folder}/${Date.now()}_${path.basename(file.originalname)}`.replace(/ /g, '');
+            const s3Object = await this.awsS3
+                .putObject({
+                Bucket: this.S3_BUCKET_NAME,
+                Key: key,
+                Body: resizedImageBuffer,
+                ACL: 'public-read',
+                ContentType: file.mimetype,
+            })
+                .promise();
+            console.log('s3Object가 뭘까?::', s3Object);
+            const myListImage = `https://${this.S3_BUCKET_NAME}.s3.${this.awsS3.config.region}.amazonaws.com/${key}`;
+            return { key, s3Object, contentType: file.mimetype, myListImage };
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(`파일 업로드를 올바르게 다시 해주세요. : ${error}`);
+        }
+    }
     async deleteS3Object(key, callback) {
         try {
             await this.awsS3
