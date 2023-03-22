@@ -60,7 +60,7 @@ export class MyListController {
   /*
     ### 23.03.20
     ### 표정훈/이드보라
-    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
+    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥 세준님
     */
   @Get('/collections/detail/posts/:collectionId/:restaurantId')
   @UseGuards(AuthAccessGuard)

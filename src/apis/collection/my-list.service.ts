@@ -94,17 +94,32 @@ export class MyListService {
         take: myListInOnePage,
       });
 
-      //첫 대괄호 없애기위해 객체 형태로 변경
-      const [myListDetail] = myList.map((myList) => ({
-        id: myList.id,
-        name: myList.name,
-        visibility: myList.visibility,
-        post: myList.collectionItems.map((item) => ({
-          ...item.post,
-          restaurant: item.post.restaurant,
-          images: item.post.images,
-        })),
-      }));
+      const [myListDetail] = myList.map((myList) => {
+        // 각 포스트의 레스토랑 평점을 합산한다
+        let sum = 0;
+        let count = 0;
+        for (const item of myList.collectionItems) {
+          const rating = item.post.rating;
+          if (typeof rating === 'number') {
+            sum += rating;
+            count++;
+          }
+        }
+        // 레스토랑 평점의 평균 값을 계산한다
+        const avgRating = count > 0 ? (sum / count).toFixed(1) : null;
+
+        return {
+          id: myList.id,
+          name: myList.name,
+          visibility: myList.visibility,
+          post: myList.collectionItems.map((item) => ({
+            ...item.post,
+            restaurant: item.post.restaurant,
+            images: item.post.images,
+          })),
+          AvgRating: avgRating, // 레스토랑 평점의 평균 값 추가
+        };
+      });
 
       return myListDetail;
     } catch (err) {
@@ -118,7 +133,7 @@ export class MyListService {
   /*
     ### 23.03.20
     ### 표정훈/이드보라
-    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥
+    ### MyList 상세 더보기(동일한 포스트 불러오기) 🔥 세준님
     - 뉴스피드 형식으로 이드보라님 코드 가져옴
     */
 
@@ -157,6 +172,7 @@ export class MyListService {
             category_name: true,
             place_name: true,
             road_address_name: true,
+            category_group_name: true, //이게맞나?
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
