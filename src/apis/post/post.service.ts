@@ -21,8 +21,8 @@ import { CollectionItem } from '../collection/entities/collection-item.entity';
 import { PostLike } from './entities/post-like.entity';
 // import { fromSubQuery} from
 // type Image = string | Express.Multer.File;
-// import { PostUserTag } from './entities/post-usertag.entity';
-// import { PostUserTagService } from './post-user-tag.service';
+import { PostUserTag } from './entities/post-usertag.entity';
+import { PostUserTagService } from './post-user-tag.service';
 
 @Injectable()
 export class PostService {
@@ -38,7 +38,8 @@ export class PostService {
     private readonly postHashtagService: PostHashtagService,
     private readonly myListService: MyListService,
     private readonly restaurantService: RestaurantService,
-    private readonly uploadService: UploadService, // private readonly postUserTagService: PostUserTagService,
+    private readonly uploadService: UploadService,
+    private readonly postUserTagService: PostUserTagService,
   ) {}
 
   /*
@@ -69,6 +70,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -79,6 +81,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         skip: pageNum * 8,
@@ -104,6 +107,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const userTags = post.postUserTags.map(
+          (userTag) => userTag.user.nickname,
+        );
         return {
           id: post.id,
           content: post.content,
@@ -118,6 +124,7 @@ export class PostService {
           totalComments,
           myList: post.collectionItems,
           visibility: post.visibility,
+          userTags,
         };
       });
     } catch (err) {
@@ -159,6 +166,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -168,6 +176,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
       });
 
@@ -192,6 +201,10 @@ export class PostService {
         id: item.collection.id,
       }));
 
+      const userTags = post[0].postUserTags.map(
+        (userTag) => userTag.user.nickname,
+      );
+
       return {
         id: post[0].id,
         content: post[0].content,
@@ -206,6 +219,7 @@ export class PostService {
         totalComments,
         myList,
         visibility: post[0].visibility,
+        userTags,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -241,6 +255,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
+    userTags: string[],
     files: Express.Multer.File[],
     // usernames: string[],
   ) {
@@ -278,13 +293,6 @@ export class PostService {
 
       const postId = post.id;
 
-      // for (const imageUrl of img) {
-      //   const image = await this.imageRepository.create({
-      //     post: { id: postId },
-      //     file_url: imageUrl,
-      //   });
-      //   await this.imageRepository.save(image);
-      // }
       files.map(async (file) => {
         try {
           const uploadedFile = await this.uploadService.uploadPostImageToS3(
@@ -305,11 +313,9 @@ export class PostService {
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
-      return { postId: postId };
+      await this.postUserTagService.tagUsersInPost(postId, userTags);
 
-      // if (usernames && usernames.length > 0) {
-      //   await this.postUserTagService.tagUsersInPost(savedPost.id, usernames);
-      // }
+      return { postId: postId };
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -340,6 +346,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
+    userTags: string[],
     newFiles: Express.Multer.File[],
     originalFiles: string[],
   ) {
@@ -430,10 +437,6 @@ export class PostService {
         newPostImages = results.map((result) => {
           return result.postImage;
         });
-
-        // postImages = originalFiles.concat(
-        //   newPostImages.map((newPostImage) => newPostImage.postImage),
-        // );
       }
 
       await this.imageRepository.updatePostImages(
@@ -444,6 +447,10 @@ export class PostService {
 
       if (myListId) {
         await this.myListService.myListUpdatePosting(id, myListId);
+      }
+
+      if (userTags) {
+        await this.postUserTagService.updateUserTagInPost(id, userTags);
       }
 
       return { postId: id };
@@ -511,6 +518,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -521,6 +529,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         offset: pageNum * 8,
@@ -546,6 +555,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const userTags = post.postUserTags.map(
+          (userTag) => userTag.user.nickname,
+        );
         return {
           id: post.id,
           content: post.content,
@@ -560,6 +572,7 @@ export class PostService {
           totalComments,
           myList: post.collectionItems,
           visibility: post.visibility,
+          userTags,
         };
       });
     } catch (err) {
@@ -596,6 +609,7 @@ export class PostService {
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
           collectionItems: { id: true, collection: { id: true } },
+          postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -606,6 +620,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
+          postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         offset: pageNum * 8,
@@ -631,6 +646,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
+        const userTags = post.postUserTags.map(
+          (userTag) => userTag.user.nickname,
+        );
         return {
           id: post.id,
           content: post.content,
@@ -645,6 +663,7 @@ export class PostService {
           totalComments,
           myList: post.collectionItems,
           visibility: post.visibility,
+          userTags,
         };
       });
     } catch (err) {
@@ -659,15 +678,25 @@ export class PostService {
     }
   }
 
-  async getTrendingPosts(): Promise<any> {
+  /*
+                                                                                      ### 23.03.23
+                                                                                      ### 이드보라
+                                                                                      ### 메인페이지 - 회원들의 추천 맛집 리뷰
+                                                                                      */
+
+  async getTrendingPosts(category: string): Promise<any> {
     try {
-      const trendingPostsByCategory = [];
+      // const trendingPostsByCategory = [];
 
       const date = new Date();
       date.setMonth(date.getMonth() - 1);
 
       const trendingPosts = await this.postRepository
         .createQueryBuilder('post')
+        .leftJoin('post.postLikes', 'postLikes')
+        .leftJoin('post.restaurant', 'restaurant')
+        .leftJoin('post.user', 'user')
+        .leftJoin('post.images', 'image')
         .select('post.id')
         .addSelect([
           'post.content',
@@ -675,16 +704,18 @@ export class PostService {
           'post.updated_at',
           'post.created_at',
         ])
-        .leftJoin('post.postLikes', 'postLikes')
-        .leftJoin('post.restaurant', 'restaurant')
-        .leftJoin('post.user', 'user')
+        .addSelect('COUNT(postLikes.id) as postLikesCount')
         .groupBy(
           "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname",
         )
-        .orderBy('COUNT(postLikes.id)', 'DESC')
+        .orderBy('postLikesCount', 'DESC')
         // .addOrderBy('RAND()')
         .where('post.visibility = :visibility', { visibility: 'public' })
         .where('postLikes.updated_at >= :date', { date })
+        .where(
+          "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END) = :category",
+          { category: category },
+        )
         .addSelect(
           "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END)",
           'category',
@@ -692,48 +723,12 @@ export class PostService {
         .addSelect('restaurant.place_name')
         .addSelect('user.profile_image')
         .addSelect('user.nickname')
-        .getRawAndEntities();
+        .addSelect('image.file_url')
+        .addSelect('postLikes.id')
+        .take(5)
+        .getMany();
 
-      trendingPosts.entities.forEach((post, index) => {
-        const category = trendingPosts.raw[index].category;
-        const postObj = {
-          id: post.id,
-          content: post.content,
-          rating: post.rating,
-          restaurant: {
-            category: category,
-            place_name: post.restaurant.place_name,
-          },
-          user: {
-            profile_image: post.user.profile_image,
-            nickname: post.user.nickname,
-          },
-        };
-
-        const existingCategoryIndex = trendingPostsByCategory.findIndex(
-          (categoryObj) => categoryObj.category === category,
-        );
-
-        if (existingCategoryIndex === -1) {
-          trendingPostsByCategory.push({
-            category: category,
-            posts: [postObj],
-          });
-        } else {
-          trendingPostsByCategory[existingCategoryIndex].posts.push(postObj);
-        }
-      });
-
-      for (const categoryObj of trendingPostsByCategory) {
-        categoryObj.posts.sort((a, b) => {
-          const aLikes = a.postLikes ? a.postLikes.length : 0;
-          const bLikes = b.postLikes ? b.postLikes.length : 0;
-          return bLikes - aLikes;
-        });
-        categoryObj.posts = categoryObj.posts.slice(0, 10);
-      }
-
-      return trendingPostsByCategory;
+      return trendingPosts;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -741,6 +736,12 @@ export class PostService {
       );
     }
   }
+
+  /*
+                                                                                      ### 23.03.22
+                                                                                      ### 이드보라
+                                                                                      ### 내 주변 피드
+                                                                                      */
 
   async getPostsAroundMe(x: string, y: string, userId, page: string) {
     try {
@@ -751,8 +752,10 @@ export class PostService {
         .leftJoin('post.images', 'image')
         .leftJoinAndSelect('post.hashtags', 'hashtags')
         .leftJoin('post.user', 'user')
-        .leftJoinAndSelect('post.collectionItems', 'collectionItem')
-        .leftJoinAndSelect('collectionItem.collection', 'collection')
+        // .leftJoinAndSelect('post.collectionItems', 'collectionItem')
+        // // .leftJoinAndSelect('collectionItem.collection', 'collection')
+        // .leftJoinAndSelect('post.postUserTags', 'userTags')
+        // .innerJoin('userTags.user', 'taggedUser')
         .select([
           'post.id',
           'post.content',
@@ -775,18 +778,19 @@ export class PostService {
         )
         .addSelect('hashtags.name')
         .addSelect('image.file_url')
-        .addSelect('collection.id', 'collection_id')
+        // .addSelect('collectionItem.collection')
+        // .addSelect('userTags.user AS taggedUser')
         .having(`distance <= 3`)
         .orderBy('post.created_at', 'DESC')
         .skip(pageNum * 8)
         .take(8)
-        .getRawAndEntities();
+        .getMany();
 
       if (!postsAroundMe) {
         throw new NotFoundException('포스트가 없습니다.');
       }
 
-      const postIds = postsAroundMe.entities.map((post) => post.id);
+      const postIds = postsAroundMe.map((post) => post.id);
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
@@ -795,14 +799,19 @@ export class PostService {
         userId,
       );
 
-      return postsAroundMe.entities.map((post, index) => {
+      return postsAroundMe.map((post, index) => {
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
         const isLiked =
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const myList = postsAroundMe.raw[index].collection_id;
+        // const myList =
+        //   post.collectionItems.map(
+        //     (collectionItem) => collectionItem.collection.id,
+        //   ) || [];
+        // const userTags =
+        //   post.postUserTags.map((userTag) => userTag.user.nickname) || [];
         return {
           id: post.id,
           content: post.content,
@@ -815,8 +824,9 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
-          myList,
+          // myList,
           visibility: post.visibility,
+          // userTags,
         };
       });
     } catch (err) {

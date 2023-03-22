@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { Post } from './entities/post.entity';
 import { PostUserTag } from './entities/post-usertag.entity';
@@ -13,29 +13,67 @@ export class PostUserTagService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
+    @InjectRepository(PostUserTag)
+    private readonly postUserTagRepository: Repository<PostUserTag>,
   ) {}
 
   async tagUsersInPost(postId: number, usernames: string[]): Promise<Post> {
-    const post = await this.postRepository.findOne({ where: { id: postId } });
+    try {
+      const post = await this.postRepository.findOne({
+        where: { id: postId },
+      });
 
-    const users = await this.userRepository.find({
-      where: { nickname: In(usernames) },
-    });
+      const users = await this.userRepository.find({
+        where: { nickname: In(usernames) },
+      });
 
-    const userTags = [];
+      for (const username of usernames) {
+        const user = users.find((u) => u.nickname === username);
 
-    for (const username of usernames) {
-      const user = users.find((u) => u.nickname === username);
+        await this.postUserTagRepository.save({
+          post: { id: postId },
+          user: { id: user.id },
+        });
+      }
 
-      const postUserTag = new PostUserTag();
-      postUserTag.post = post;
-      postUserTag.user = user;
+      await this.postRepository.save(post);
 
-      userTags.push(postUserTag);
+      return post;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
     }
+  }
 
-    post.postUserTags = userTags;
+  async updateUserTagInPost(postId: number, usernames: string[]) {
+    try {
+      const post = await this.postRepository.findOne({
+        where: { id: postId },
+      });
 
-    return this.postRepository.save(post);
+      const users = await this.userRepository.find({
+        where: { nickname: In(usernames) },
+      });
+
+      for (const username of usernames) {
+        const user = users.find((u) => u.nickname === username);
+
+        await this.postUserTagRepository.save({
+          post: { id: postId },
+          user: { id: user.id },
+        });
+      }
+
+      await this.postRepository.save(post);
+
+      return post;
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
 }

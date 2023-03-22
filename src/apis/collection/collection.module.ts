@@ -21,6 +21,8 @@ import { PostModule } from '../post/post.module';
 import { Follow } from '../user/entities/follow.entity';
 import { User } from '../user/entities/user.entity';
 import { UploadService } from '../upload/upload.service';
+import { PostUserTagService } from '../post/post-user-tag.service';
+import { PostUserTag } from '../post/entities/post-usertag.entity';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { UploadService } from '../upload/upload.service';
       Follow,
       User,
       UploadModule,
+      PostUserTag,
     ]),
     RestaurantModule,
     UploadModule,
@@ -49,6 +52,7 @@ import { UploadService } from '../upload/upload.service';
     PostLikeService,
     ImageRepository,
     UploadService,
+    PostUserTagService,
   ],
   exports: [MyListService, TypeOrmModule],
 })

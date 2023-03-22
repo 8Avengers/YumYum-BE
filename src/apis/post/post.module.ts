@@ -15,6 +15,7 @@ import { RestaurantModule } from '../restaurant/restaurant.module';
 import { Image } from './entities/image.entity';
 import { ImageRepository } from './image.repository';
 import { UploadModule } from '../upload/upload.module';
+import { PostUserTagService } from './post-user-tag.service';
 
 // import { PostUserTagService } from './post-user-tag.service';
 
@@ -31,6 +32,7 @@ import { UploadModule } from '../upload/upload.module';
     PostLikeService,
     PostHashtagService,
     ImageRepository,
+    PostUserTagService,
   ],
   exports: [PostService, TypeOrmModule],
 })
