@@ -7,10 +7,10 @@
 //   'name',
 // ]) {}
 
-export class OauthUserDto {
-  readonly name: string;
+export class OauthPassportDto {
+  readonly name?: string;
 
-  readonly email: string;
+  readonly email?: string;
 
-  readonly nickname: string;
+  readonly nickname?: string;
 }

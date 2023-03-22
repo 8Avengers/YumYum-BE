@@ -25,7 +25,7 @@ export class CommentService {
                                   ### 이드보라
                                   ### 특정 포스팅에 해당하는 모든 댓글 불러오기
                                  */
-  async getAllComments(postId: number, userId: number) {
+  async getAllComments(postId: number, userId: number, page) {
     try {
       const existPost = await this.postRepository.findOne({
         where: { id: postId },
@@ -35,6 +35,7 @@ export class CommentService {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
       }
 
+      const pageNum = Number(page) - 1;
       const comments = await this.commentRepository.find({
         where: { deleted_at: null, post: { id: postId } },
         select: {
@@ -42,8 +43,11 @@ export class CommentService {
           content: true,
           updated_at: true,
           user: { id: true, nickname: true, profile_image: true },
+          created_at: true,
         },
         relations: ['user'],
+        skip: pageNum * 13,
+        take: 13,
       });
 
       const commentIds = comments.map((comment) => comment.id);

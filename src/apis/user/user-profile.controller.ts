@@ -13,22 +13,23 @@ import {
   UseInterceptors,
   UploadedFile,
   NotFoundException,
+  Query,
 } from '@nestjs/common';
 import { UserProfileService } from './user-profile.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { User } from './entities/user.entity';
 import { DeleteUser, UpdateUserProfile } from './user.decorators';
-import { UploadService } from '../upload/upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { PostService } from '../post/post.service';
+import { DeleteUserDto } from './dto/delete-user.dto';
 
 @ApiTags('유저프로필/팔로우/팔로잉')
 @Controller('/profile')
 export class UserProfileController {
   constructor(
-    private readonly userService: UserProfileService, //
+    private readonly userProfileService: UserProfileService, //
     private readonly postService: PostService,
   ) {}
 
@@ -37,7 +38,7 @@ export class UserProfileController {
   @Get('/me')
   @UseGuards(AuthAccessGuard)
   async getMyProfile(@CurrentUser() user: User) {
-    const myProfile = await this.userService.getUserById(user.id);
+    const myProfile = await this.userProfileService.getUserById(user.id);
     console.log(myProfile);
 
     const response = {
@@ -63,7 +64,7 @@ export class UserProfileController {
     console.log('포스맨통과하면여기찍힌다.file::::::', file);
     //포스트맨으로 하면, 사진 자체가 받아지지 않는다. 뭐가 문제일까?
 
-    const updatedUserProfile = await this.userService.updateUserProfile({
+    const updatedUserProfile = await this.userProfileService.updateUserProfile({
       user,
       updateUserProfileDto,
       file,
@@ -79,13 +80,23 @@ export class UserProfileController {
     return response;
   }
 
-  //유저 탈퇴하기(소프트딜리트)
+  //유저 탈퇴하기 TypeORM이 제공하는 SoftDelete
   @DeleteUser()
   @UseGuards(AuthAccessGuard)
   @Delete('/me')
-  async deleteUser(@CurrentUser() user: any): Promise<Boolean> {
+  async deleteUser(
+    @CurrentUser() user: any,
+    // @Body(ValidationPipe) deleteUserDto: DeleteUserDto,
+  ): Promise<boolean> {
+    console.log(user);
+    // console.log(deleteUserDto);
     try {
-      return await this.userService.deleteUser(user);
+      const result = await this.userProfileService.deleteUser(
+        user,
+        // deleteUserDto.password,
+      );
+
+      return result;
     } catch (error) {
       console.error(error);
       throw new BadRequestException(error.message);
@@ -99,14 +110,14 @@ export class UserProfileController {
     @Param('userId') userId: number,
     @CurrentUser() currentUser?: User,
   ) {
-    const userProfile = await this.userService.getUserById(userId);
+    const userProfile = await this.userProfileService.getUserById(userId);
 
     let followStatus = null;
     if (currentUser) {
       if (currentUser.id === userId) {
         followStatus = 'me';
       } else {
-        followStatus = await this.userService.checkUserFollowRelation(
+        followStatus = await this.userProfileService.checkUserFollowRelation(
           currentUser.id,
           userId,
         );
@@ -137,10 +148,12 @@ export class UserProfileController {
   async getUserIdPosts(
     @Param('userId') userId: number,
     @CurrentUser() currentUser: User,
+    @Query('page') page: string,
   ) {
     const allPostsByUserId = await this.postService.getPostsByOtherUserId(
       userId,
       currentUser.id,
+      page,
     );
 
     return allPostsByUserId;
@@ -153,23 +166,31 @@ export class UserProfileController {
     @CurrentUser() follower: User,
     @Param('userId') followingId: number,
   ): Promise<string> {
-    const followingUser = await this.userService.getUserById(followingId);
+    const followingUser = await this.userProfileService.getUserById(
+      followingId,
+    );
 
     if (!followingUser) {
       throw new NotFoundException('User not found');
     }
 
     const existingFollow =
-      await this.userService.getFollowByFollowerAndFollowingIds(
+      await this.userProfileService.getFollowByFollowerAndFollowingIds(
         follower.id,
         followingId,
       );
 
     if (existingFollow) {
-      await this.userService.deleteUserFollowRelation(follower, followingId);
+      await this.userProfileService.deleteUserFollowRelation(
+        follower,
+        followingId,
+      );
       return `${follower.nickname}님이 ${followingUser.nickname}님을 언팔로우하였어요`;
     } else {
-      await this.userService.createUserFollowRelation(follower, followingId);
+      await this.userProfileService.createUserFollowRelation(
+        follower,
+        followingId,
+      );
       return `${follower.nickname}님이 ${followingUser.nickname}님을 팔로우하였어요`;
     }
   }
@@ -179,7 +200,7 @@ export class UserProfileController {
   async getFollowersOfUser(
     @Param('userId') userId: number,
   ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
-    const userIdFollowers = await this.userService.getFollowers(userId);
+    const userIdFollowers = await this.userProfileService.getFollowers(userId);
     return userIdFollowers;
   }
 
@@ -188,7 +209,9 @@ export class UserProfileController {
   async getFollowingsOfUser(
     @Param('userId') userId: number,
   ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
-    const userIdFollowings = await this.userService.getFollowings(userId);
+    const userIdFollowings = await this.userProfileService.getFollowings(
+      userId,
+    );
     return userIdFollowings;
   }
 }
