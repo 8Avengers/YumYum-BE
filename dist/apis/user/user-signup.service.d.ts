@@ -35,5 +35,6 @@ export declare class UserSignupService {
         email: any;
         nickname: any;
         name: any;
+        profile_image: string;
     } & User>;
 }

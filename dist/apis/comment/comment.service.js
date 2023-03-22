@@ -25,7 +25,7 @@ let CommentService = class CommentService {
         this.postRepository = postRepository;
         this.commentLikeService = commentLikeService;
     }
-    async getAllComments(postId, userId) {
+    async getAllComments(postId, userId, page) {
         try {
             const existPost = await this.postRepository.findOne({
                 where: { id: postId },
@@ -34,6 +34,7 @@ let CommentService = class CommentService {
             if (!existPost) {
                 throw new common_1.NotFoundException('존재하지 않는 포스트입니다.');
             }
+            const pageNum = Number(page) - 1;
             const comments = await this.commentRepository.find({
                 where: { deleted_at: null, post: { id: postId } },
                 select: {
@@ -41,8 +42,11 @@ let CommentService = class CommentService {
                     content: true,
                     updated_at: true,
                     user: { id: true, nickname: true, profile_image: true },
+                    created_at: true,
                 },
                 relations: ['user'],
+                skip: pageNum * 13,
+                take: 13,
             });
             const commentIds = comments.map((comment) => comment.id);
             const commentLikes = await this.commentLikeService.getLikesForAllComments(commentIds);

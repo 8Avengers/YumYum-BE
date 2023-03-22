@@ -28,8 +28,8 @@ let PostController = class PostController {
     async getPostById(postId, currentUser) {
         return await this.postService.getPostById(postId, currentUser.id);
     }
-    async getPosts(currentUser) {
-        const posts = await this.postService.getPosts(currentUser.id);
+    async getPosts(currentUser, page) {
+        const posts = await this.postService.getPosts(currentUser.id, page);
         return posts;
     }
     createPost(files, data, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }, currentUser) {
@@ -59,8 +59,8 @@ let PostController = class PostController {
     async getTrendingPostsByCategory() {
         return this.postService.getTrendingPosts();
     }
-    async getPostsAroundMe(data, currentUser) {
-        return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id);
+    async getPostsAroundMe(data, currentUser, page) {
+        return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id, page);
     }
 };
 __decorate([
@@ -78,8 +78,9 @@ __decorate([
     (0, common_1.Get)(),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "getPosts", null);
 __decorate([
@@ -132,8 +133,9 @@ __decorate([
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, String]),
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "getPostsAroundMe", null);
 PostController = __decorate([

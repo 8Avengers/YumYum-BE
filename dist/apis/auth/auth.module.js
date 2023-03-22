@@ -15,11 +15,14 @@ const user_signup_service_1 = require("../user/user-signup.service");
 const user_module_1 = require("../user/user.module");
 const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
-const jwt_access_strategy_1 = require("./jwt-access.strategy");
-const jwt_refresh_strategy_1 = require("./jwt-refresh.strategy");
-const jwt_social_google_strategy_1 = require("./jwt-social-google.strategy");
-const jwt_social_kakao_strategy_1 = require("./jwt-social-kakao.strategy");
-const jwt_social_naver_strategy_1 = require("./jwt-social-naver.strategy");
+const jwt_access_strategy_1 = require("./strategies/jwt-access.strategy");
+const jwt_refresh_strategy_1 = require("./strategies/jwt-refresh.strategy");
+const jwt_social_google_strategy_1 = require("./strategies/jwt-social-google.strategy");
+const jwt_social_kakao_strategy_1 = require("./strategies/jwt-social-kakao.strategy");
+const jwt_social_naver_strategy_1 = require("./strategies/jwt-social-naver.strategy");
+const social_kakao_service_1 = require("./social.kakao.service");
+const social_naver_service_1 = require("./social.naver.service");
+const axios_1 = require("@nestjs/axios");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
@@ -28,6 +31,7 @@ AuthModule = __decorate([
             jwt_1.JwtModule.register({}),
             typeorm_1.TypeOrmModule.forFeature([user_entity_1.User]),
             user_module_1.UserModule,
+            axios_1.HttpModule,
         ],
         providers: [
             jwt_social_google_strategy_1.JwtGoogleStrategy,
@@ -37,6 +41,8 @@ AuthModule = __decorate([
             jwt_access_strategy_1.JwtAccessStrategy,
             auth_service_1.AuthService,
             user_signup_service_1.UserSignupService,
+            social_naver_service_1.SocialNaverService,
+            social_kakao_service_1.SocialKakaoService,
         ],
         controllers: [auth_controller_1.AuthController],
     })

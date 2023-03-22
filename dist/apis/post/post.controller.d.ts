@@ -26,7 +26,7 @@ export declare class PostController {
         }[];
         visibility: "public" | "private";
     }>;
-    getPosts(currentUser: any): Promise<{
+    getPosts(currentUser: any, page: string): Promise<{
         id: number;
         content: string;
         rating: number;
@@ -49,7 +49,7 @@ export declare class PostController {
     }>;
     deletePost(postId: number): Promise<void>;
     getTrendingPostsByCategory(): Promise<any>;
-    getPostsAroundMe(data: Partial<LocationDto>, currentUser: any): Promise<{
+    getPostsAroundMe(data: Partial<LocationDto>, currentUser: any, page: string): Promise<{
         id: number;
         content: string;
         rating: number;

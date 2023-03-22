@@ -4,7 +4,7 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 export declare class CommentController {
     private readonly commentService;
     constructor(commentService: CommentService);
-    getAllComments(postId: number, currentUser: any): Promise<{
+    getAllComments(postId: number, currentUser: any, page: string): Promise<{
         id: number;
         content: string;
         updated_at: Date;

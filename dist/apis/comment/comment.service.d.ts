@@ -7,7 +7,7 @@ export declare class CommentService {
     private postRepository;
     private readonly commentLikeService;
     constructor(commentRepository: Repository<Comment>, postRepository: Repository<Post>, commentLikeService: CommentLikeService);
-    getAllComments(postId: number, userId: number): Promise<{
+    getAllComments(postId: number, userId: number, page: any): Promise<{
         id: number;
         content: string;
         updated_at: Date;

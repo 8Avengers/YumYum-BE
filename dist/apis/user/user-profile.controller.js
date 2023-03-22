@@ -24,12 +24,12 @@ const platform_express_1 = require("@nestjs/platform-express");
 const update_user_profile_dto_1 = require("./dto/update-user-profile.dto");
 const post_service_1 = require("../post/post.service");
 let UserProfileController = class UserProfileController {
-    constructor(userService, postService) {
-        this.userService = userService;
+    constructor(userProfileService, postService) {
+        this.userProfileService = userProfileService;
         this.postService = postService;
     }
     async getMyProfile(user) {
-        const myProfile = await this.userService.getUserById(user.id);
+        const myProfile = await this.userProfileService.getUserById(user.id);
         console.log(myProfile);
         const response = {
             id: myProfile.id,
@@ -41,7 +41,7 @@ let UserProfileController = class UserProfileController {
     }
     async updateMyProfile(user, file, updateUserProfileDto) {
         console.log('포스맨통과하면여기찍힌다.file::::::', file);
-        const updatedUserProfile = await this.userService.updateUserProfile({
+        const updatedUserProfile = await this.userProfileService.updateUserProfile({
             user,
             updateUserProfileDto,
             file,
@@ -55,8 +55,10 @@ let UserProfileController = class UserProfileController {
         return response;
     }
     async deleteUser(user) {
+        console.log(user);
         try {
-            return await this.userService.deleteUser(user);
+            const result = await this.userProfileService.deleteUser(user);
+            return result;
         }
         catch (error) {
             console.error(error);
@@ -64,14 +66,14 @@ let UserProfileController = class UserProfileController {
         }
     }
     async getUserProfile(userId, currentUser) {
-        const userProfile = await this.userService.getUserById(userId);
+        const userProfile = await this.userProfileService.getUserById(userId);
         let followStatus = null;
         if (currentUser) {
             if (currentUser.id === userId) {
                 followStatus = 'me';
             }
             else {
-                followStatus = await this.userService.checkUserFollowRelation(currentUser.id, userId);
+                followStatus = await this.userProfileService.checkUserFollowRelation(currentUser.id, userId);
             }
         }
         console.log('followStatus', followStatus);
@@ -88,31 +90,31 @@ let UserProfileController = class UserProfileController {
         };
         return response;
     }
-    async getUserIdPosts(userId, currentUser) {
-        const allPostsByUserId = await this.postService.getPostsByOtherUserId(userId, currentUser.id);
+    async getUserIdPosts(userId, currentUser, page) {
+        const allPostsByUserId = await this.postService.getPostsByOtherUserId(userId, currentUser.id, page);
         return allPostsByUserId;
     }
     async followUser(follower, followingId) {
-        const followingUser = await this.userService.getUserById(followingId);
+        const followingUser = await this.userProfileService.getUserById(followingId);
         if (!followingUser) {
             throw new common_1.NotFoundException('User not found');
         }
-        const existingFollow = await this.userService.getFollowByFollowerAndFollowingIds(follower.id, followingId);
+        const existingFollow = await this.userProfileService.getFollowByFollowerAndFollowingIds(follower.id, followingId);
         if (existingFollow) {
-            await this.userService.deleteUserFollowRelation(follower, followingId);
+            await this.userProfileService.deleteUserFollowRelation(follower, followingId);
             return `${follower.nickname}님이 ${followingUser.nickname}님을 언팔로우하였어요`;
         }
         else {
-            await this.userService.createUserFollowRelation(follower, followingId);
+            await this.userProfileService.createUserFollowRelation(follower, followingId);
             return `${follower.nickname}님이 ${followingUser.nickname}님을 팔로우하였어요`;
         }
     }
     async getFollowersOfUser(userId) {
-        const userIdFollowers = await this.userService.getFollowers(userId);
+        const userIdFollowers = await this.userProfileService.getFollowers(userId);
         return userIdFollowers;
     }
     async getFollowingsOfUser(userId) {
-        const userIdFollowings = await this.userService.getFollowings(userId);
+        const userIdFollowings = await this.userProfileService.getFollowings(userId);
         return userIdFollowings;
     }
 };
@@ -159,8 +161,9 @@ __decorate([
     (0, common_1.Get)('/:userId/posts'),
     __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, user_entity_1.User]),
+    __metadata("design:paramtypes", [Number, user_entity_1.User, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getUserIdPosts", null);
 __decorate([

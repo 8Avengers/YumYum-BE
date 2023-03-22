@@ -70,7 +70,7 @@ export declare class MyListController {
         visibility: "public" | "private";
     }>;
     deleteMyList(collectionId: number, currentUser: any): Promise<void>;
-    myListPlusPosting(postId: number, data: addCollectionPostingDto): Promise<import("./entities/collection-item.entity").CollectionItem>;
+    myListPlusPosting(postId: number, data: addCollectionPostingDto): Promise<any[]>;
     myListMinusPosting(postId: number, data: minusCollectionPostingDto, currentUser: any): Promise<void>;
     myListUpdatePosting(postId: number, data: addCollectionPostingDto): Promise<void>;
     HotMyList(): Promise<any>;

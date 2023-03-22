@@ -4,9 +4,9 @@ import { User } from './entities/user.entity';
 import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
 import { PostService } from '../post/post.service';
 export declare class UserProfileController {
-    private readonly userService;
+    private readonly userProfileService;
     private readonly postService;
-    constructor(userService: UserProfileService, postService: PostService);
+    constructor(userProfileService: UserProfileService, postService: PostService);
     getMyProfile(user: User): Promise<{
         id: number;
         nickname: string;
@@ -19,7 +19,7 @@ export declare class UserProfileController {
         introduce: string;
         profile_image: string;
     }>;
-    deleteUser(user: any): Promise<Boolean>;
+    deleteUser(user: any): Promise<boolean>;
     getUserProfile(userId: number, currentUser?: User): Promise<{
         id: number;
         nickname: string;
@@ -27,7 +27,7 @@ export declare class UserProfileController {
         profile_image: string;
         follow_relationship: any;
     }>;
-    getUserIdPosts(userId: number, currentUser: User): Promise<{
+    getUserIdPosts(userId: number, currentUser: User, page: string): Promise<{
         id: number;
         content: string;
         rating: number;

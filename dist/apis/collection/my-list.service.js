@@ -227,6 +227,7 @@ let MyListService = class MyListService {
                         id: true,
                         post: {
                             id: true,
+                            rating: true,
                             images: { id: true, file_url: true },
                             restaurant: {
                                 place_name: true,
@@ -325,6 +326,7 @@ let MyListService = class MyListService {
     }
     async myListPlusPosting(postId, collectionId) {
         try {
+            const collectionItems = [];
             for (let i = 0; i < collectionId.length; i++) {
                 const item = collectionId[i];
                 const existingItem = await this.collectionItemRepository.findOne({
@@ -341,8 +343,9 @@ let MyListService = class MyListService {
                     collection: { id: item },
                 });
                 await this.collectionItemRepository.save(collectionItem);
-                return collectionItem;
+                collectionItems.push(collectionItem);
             }
+            return collectionItems;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {

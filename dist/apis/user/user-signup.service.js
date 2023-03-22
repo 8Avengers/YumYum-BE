@@ -49,9 +49,16 @@ let UserSignupService = class UserSignupService {
         try {
             const user = await this.userRepository.findOne({
                 where: { email },
+                withDeleted: true,
             });
-            if (user)
-                throw new common_2.ConflictException('이미 등록된 이메일입니다.');
+            if (user) {
+                if (user.deleted_at) {
+                    throw new common_2.ConflictException('이미 탈퇴한 회원입니다.');
+                }
+                else {
+                    throw new common_2.ConflictException('이미 등록된 이메일입니다.');
+                }
+            }
             const nicknameExists = await this.userRepository.findOne({
                 where: { nickname },
             });
@@ -85,18 +92,22 @@ let UserSignupService = class UserSignupService {
         try {
             const user = await this.userRepository.findOne({
                 where: { email },
+                withDeleted: true,
             });
-            if (user)
-                throw new common_2.ConflictException('이미 등록된 이메일입니다.');
-            const nicknameExists = await this.userRepository.findOne({
-                where: { nickname },
-            });
-            if (nicknameExists)
-                throw new common_2.ConflictException('이미 사용중인 nickname입니다.');
+            if (user) {
+                if (user.deleted_at) {
+                    throw new common_2.ConflictException('이미 탈퇴한 회원입니다.');
+                }
+                else {
+                    throw new common_2.ConflictException('이미 등록된 이메일입니다.');
+                }
+            }
+            const profileImageUrl = 'https://yumyumdb.s3.ap-northeast-2.amazonaws.com/default-profile-image/male.jpg';
             const newUser = await this.userRepository.save({
                 email,
                 nickname,
                 name,
+                profile_image: profileImageUrl,
             });
             const collection = new collection_entity_1.Collection();
             collection.type = 'bookmark';

@@ -14,11 +14,58 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
 const user_signup_service_1 = require("../user/user-signup.service");
+const social_kakao_service_1 = require("./social.kakao.service");
+const social_naver_service_1 = require("./social.naver.service");
 let AuthService = class AuthService {
-    constructor(jwtService, configService, userSignupService) {
+    constructor(jwtService, configService, userSignupService, socialKaKaoService, socialNaverService) {
         this.jwtService = jwtService;
         this.configService = configService;
         this.userSignupService = userSignupService;
+        this.socialKaKaoService = socialKaKaoService;
+        this.socialNaverService = socialNaverService;
+    }
+    async oauthLogin(provider, body) {
+        const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
+        const token = await socialService.getOauth2Token(body);
+        const info = await socialService.getUserInfo(token.access_token);
+        console.log('token에는 뭐가 들어가 있을까?', token);
+        console.log('info에는 뭐가 들어가 있을까?', info);
+        let user;
+        try {
+            const existingUser = await this.userSignupService.findOne({
+                email: info.email,
+            });
+            if (!existingUser) {
+                user = await this.userSignupService.createOauthUser({
+                    email: info.email,
+                    nickname: info.nickname,
+                    name: info.name,
+                });
+            }
+            else {
+                user = existingUser;
+            }
+        }
+        catch (error) {
+            if (error instanceof common_1.ConflictException) {
+                console.error(`Error:  ${error.message}`);
+            }
+            else {
+                throw error;
+            }
+        }
+        const accessToken = await this.createAccessToken({ user });
+        const refreshToken = await this.createRefreshToken({ user });
+        return {
+            refreshToken,
+            accessToken,
+            user: {
+                userId: user.id,
+                nickname: user.nickname,
+                email: user.email,
+                profileImage: user.profile_image,
+            },
+        };
     }
     createAccessToken({ user }) {
         console.log('acessToken의 유저', user);
@@ -43,47 +90,10 @@ let AuthService = class AuthService {
         });
         return refreshToken;
     }
-    async signupOauth({ user }) {
-        console.log('oauth 끝나면 나오는 유저찍어보자', user);
-        let existingUser = await this.userSignupService.findOne({
-            email: user.email,
-        });
-        if (existingUser)
-            throw new common_1.ConflictException('이미 등록된 이메일입니다. 소셜로그인해주세요.');
-        try {
-            if (!existingUser) {
-                user = await this.userSignupService.createOauthUser({
-                    email: user.email,
-                    nickname: user.nickname,
-                    name: user.name,
-                });
-            }
-        }
-        catch (error) {
-            if (error instanceof common_1.ConflictException) {
-                console.error(`Error:  ${error.message}`);
-            }
-            else {
-                throw error;
-            }
-        }
-        const accessToken = await this.createAccessToken({ user });
-        const refreshToken = await this.createRefreshToken({ user });
-        return {
-            refreshToken,
-            accessToken,
-            user: {
-                userId: user.id,
-                nickname: user.nickname,
-                email: user.email,
-                profileImage: user.profile_image,
-            },
-        };
-    }
-    async loginOauth({ user }) {
+    async loginOauthByPassport({ user }) {
         console.log('oauth 끝나면 나오는 유저찍어보자', user);
         try {
-            let existingUser = await this.userSignupService.findOne({
+            const existingUser = await this.userSignupService.findOne({
                 email: user.email,
             });
             if (!existingUser) {
@@ -120,7 +130,9 @@ AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [jwt_1.JwtService,
         config_1.ConfigService,
-        user_signup_service_1.UserSignupService])
+        user_signup_service_1.UserSignupService,
+        social_kakao_service_1.SocialKakaoService,
+        social_naver_service_1.SocialNaverService])
 ], AuthService);
 exports.AuthService = AuthService;
 //# sourceMappingURL=auth.service.js.map

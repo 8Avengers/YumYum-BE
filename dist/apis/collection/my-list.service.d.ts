@@ -86,7 +86,7 @@ export declare class MyListService {
         visibility: "public" | "private";
     }>;
     deleteMyList(userId: number, id: number): Promise<void>;
-    myListPlusPosting(postId: number, collectionId: number[]): Promise<CollectionItem>;
+    myListPlusPosting(postId: number, collectionId: number[]): Promise<any[]>;
     myListMinusPosting(postId: number, collectionId: number): Promise<void>;
     myListUpdatePosting(postId: number, collectionId: number[]): Promise<void>;
     HotMyList(): Promise<any>;

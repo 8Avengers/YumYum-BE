@@ -2,7 +2,7 @@ import { PostService } from './post.service';
 export declare class MyFeedController {
     private readonly postService;
     constructor(postService: PostService);
-    getMyFeed(currentUser: any): Promise<{
+    getMyFeed(currentUser: any, page: string): Promise<{
         id: number;
         content: string;
         rating: number;

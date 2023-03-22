@@ -39,8 +39,9 @@ let PostService = class PostService {
         this.restaurantService = restaurantService;
         this.uploadService = uploadService;
     }
-    async getPosts(userId) {
+    async getPosts(userId, page) {
         try {
+            const pageNum = Number(page) - 1;
             const posts = await this.postRepository.find({
                 where: { deleted_at: null, visibility: 'public' },
                 select: {
@@ -48,6 +49,7 @@ let PostService = class PostService {
                     content: true,
                     rating: true,
                     updated_at: true,
+                    created_at: true,
                     visibility: true,
                     restaurant: {
                         kakao_place_id: true,
@@ -71,6 +73,8 @@ let PostService = class PostService {
                     },
                 },
                 order: { created_at: 'desc' },
+                skip: pageNum * 8,
+                take: 8,
             });
             if (!posts || posts.length === 0) {
                 throw new common_1.NotFoundException('포스트가 없습니다.');
@@ -128,6 +132,8 @@ let PostService = class PostService {
                         category_name: true,
                         place_name: true,
                         road_address_name: true,
+                        x: true,
+                        y: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },
@@ -306,8 +312,9 @@ let PostService = class PostService {
             }
         }
     }
-    async getPostsByMyId(userId) {
+    async getPostsByMyId(userId, page) {
         try {
+            const pageNum = Number(page) - 1;
             const posts = await this.postRepository.find({
                 where: { deleted_at: null, visibility: 'public', user: { id: userId } },
                 select: {
@@ -316,6 +323,7 @@ let PostService = class PostService {
                     rating: true,
                     updated_at: true,
                     visibility: true,
+                    created_at: true,
                     restaurant: {
                         kakao_place_id: true,
                         address_name: true,
@@ -338,6 +346,8 @@ let PostService = class PostService {
                     },
                 },
                 order: { created_at: 'desc' },
+                offset: pageNum * 8,
+                take: 8,
             });
             if (!posts || posts.length === 0) {
                 return [];
@@ -379,8 +389,9 @@ let PostService = class PostService {
             }
         }
     }
-    async getPostsByOtherUserId(userId, myUserId) {
+    async getPostsByOtherUserId(userId, myUserId, page) {
         try {
+            const pageNum = Number(page) - 1;
             const posts = await this.postRepository.find({
                 where: { deleted_at: null, visibility: 'public', user: { id: userId } },
                 select: {
@@ -389,6 +400,7 @@ let PostService = class PostService {
                     rating: true,
                     updated_at: true,
                     visibility: true,
+                    created_at: true,
                     restaurant: {
                         kakao_place_id: true,
                         address_name: true,
@@ -411,6 +423,8 @@ let PostService = class PostService {
                     },
                 },
                 order: { created_at: 'desc' },
+                offset: pageNum * 8,
+                take: 8,
             });
             if (!posts || posts.length === 0) {
                 return [];
@@ -460,8 +474,12 @@ let PostService = class PostService {
             const trendingPosts = await this.postRepository
                 .createQueryBuilder('post')
                 .select('post.id')
-                .addSelect('post.content')
-                .addSelect('post.rating')
+                .addSelect([
+                'post.content',
+                'post.rating',
+                'post.updated_at',
+                'post.created_at',
+            ])
                 .leftJoin('post.postLikes', 'postLikes')
                 .leftJoin('post.restaurant', 'restaurant')
                 .leftJoin('post.user', 'user')
@@ -515,8 +533,9 @@ let PostService = class PostService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    async getPostsAroundMe(x, y, userId) {
+    async getPostsAroundMe(x, y, userId, page) {
         try {
+            const pageNum = Number(page) - 1;
             const postsAroundMe = await this.postRepository
                 .createQueryBuilder('post')
                 .leftJoin('post.restaurant', 'restaurant')
@@ -531,6 +550,7 @@ let PostService = class PostService {
                 'post.rating',
                 'post.updated_at',
                 'post.visibility',
+                'post.created_at',
             ])
                 .addSelect([
                 'restaurant.kakao_place_id',
@@ -544,10 +564,11 @@ let PostService = class PostService {
                 .addSelect('hashtags.name')
                 .addSelect('image.file_url')
                 .addSelect('collection.id', 'collection_id')
-                .having(`distance <= 5`)
+                .having(`distance <= 3`)
                 .orderBy('post.created_at', 'DESC')
+                .skip(pageNum * 8)
+                .take(8)
                 .getRawAndEntities();
-            console.log('********', postsAroundMe);
             if (!postsAroundMe) {
                 throw new common_1.NotFoundException('포스트가 없습니다.');
             }

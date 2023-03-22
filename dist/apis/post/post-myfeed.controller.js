@@ -22,9 +22,9 @@ let MyFeedController = class MyFeedController {
     constructor(postService) {
         this.postService = postService;
     }
-    async getMyFeed(currentUser) {
+    async getMyFeed(currentUser, page) {
         const userId = currentUser.id;
-        const myPosts = await this.postService.getPostsByMyId(userId);
+        const myPosts = await this.postService.getPostsByMyId(userId, page);
         return myPosts;
     }
 };
@@ -33,8 +33,9 @@ __decorate([
     (0, common_1.Get)('/myfeed'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], MyFeedController.prototype, "getMyFeed", null);
 MyFeedController = __decorate([

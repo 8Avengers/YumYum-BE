@@ -1,20 +1,17 @@
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { UserSignupService } from '../user/user-signup.service';
+import { SocialLoginBodyDTO } from './dto/social-login.dto';
+import { SocialKakaoService } from './social.kakao.service';
+import { SocialNaverService } from './social.naver.service';
 export declare class AuthService {
     private readonly jwtService;
     private readonly configService;
     private readonly userSignupService;
-    constructor(jwtService: JwtService, configService: ConfigService, userSignupService: UserSignupService);
-    createAccessToken({ user }: {
-        user: any;
-    }): string;
-    createRefreshToken({ user }: {
-        user: any;
-    }): string;
-    signupOauth({ user }: {
-        user: any;
-    }): Promise<{
+    private socialKaKaoService;
+    private socialNaverService;
+    constructor(jwtService: JwtService, configService: ConfigService, userSignupService: UserSignupService, socialKaKaoService: SocialKakaoService, socialNaverService: SocialNaverService);
+    oauthLogin(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO): Promise<{
         refreshToken: string;
         accessToken: string;
         user: {
@@ -24,7 +21,13 @@ export declare class AuthService {
             profileImage: any;
         };
     }>;
-    loginOauth({ user }: {
+    createAccessToken({ user }: {
+        user: any;
+    }): string;
+    createRefreshToken({ user }: {
+        user: any;
+    }): string;
+    loginOauthByPassport({ user }: {
         user: any;
     }): Promise<{
         refreshToken: string;

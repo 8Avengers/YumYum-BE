@@ -24,8 +24,8 @@ let CommentController = class CommentController {
     constructor(commentService) {
         this.commentService = commentService;
     }
-    async getAllComments(postId, currentUser) {
-        return await this.commentService.getAllComments(postId, currentUser.id);
+    async getAllComments(postId, currentUser, page) {
+        return await this.commentService.getAllComments(postId, currentUser.id, page);
     }
     createComment(postId, data, currentUser) {
         return this.commentService.createComment(postId, currentUser.id, data.content);
@@ -43,8 +43,9 @@ __decorate([
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, common_1.Param)('postId')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, Object]),
+    __metadata("design:paramtypes", [Number, Object, String]),
     __metadata("design:returntype", Promise)
 ], CommentController.prototype, "getAllComments", null);
 __decorate([

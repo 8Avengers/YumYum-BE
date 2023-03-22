@@ -23,13 +23,18 @@ const user_profile_service_1 = require("../user/user-profile.service");
 const login_user_dto_1 = require("../user/dto/login-user.dto");
 const passport_1 = require("@nestjs/passport");
 const auth_guards_1 = require("./guards/auth.guards");
-const oauth_user_dto_1 = require("../user/dto/oauth-user.dto");
 const auth_decorators_1 = require("./auth.decorators");
 const swagger_1 = require("@nestjs/swagger");
+const oauth_passport_dto_1 = require("./dto/oauth-passport.dto");
+const social_login_dto_1 = require("./dto/social-login.dto");
 let AuthController = class AuthController {
     constructor(userProfileService, authService) {
         this.userProfileService = userProfileService;
         this.authService = authService;
+    }
+    async oauthSignIn(params, body) {
+        const { provider } = params;
+        return await this.authService.oauthLogin(provider, body);
     }
     async loginEmail(loginUserDto) {
         const { email, password } = loginUserDto;
@@ -54,31 +59,32 @@ let AuthController = class AuthController {
             },
         };
     }
-    async signupGoogle(user) {
-        return this.authService.signupOauth({ user });
-    }
-    async loginGoogle(user) {
-        return this.authService.loginOauth({ user });
-    }
-    async signupNaver(user) {
-        return this.authService.signupOauth({ user });
-    }
-    async loginNaver(user) {
-        return this.authService.loginOauth({ user });
-    }
-    async signupKakao(user) {
-        return this.authService.signupOauth({ user });
-    }
-    async loginKakao(user) {
-        return this.authService.loginOauth({ user });
-    }
     async restoreAccessToken(currentUser) {
         const accessToken = this.authService.createAccessToken({
             user: currentUser,
         });
         return { accessToken };
     }
+    async loginGoogle(user) {
+        return this.authService.loginOauthByPassport({ user });
+    }
+    async loginKakao(user) {
+        return this.authService.loginOauthByPassport({ user });
+    }
+    async loginNaver(user) {
+        return this.authService.loginOauthByPassport({ user });
+    }
 };
+__decorate([
+    (0, common_1.Post)('oauth/login/:provider'),
+    (0, common_1.HttpCode)(200),
+    __param(0, (0, common_1.Param)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [social_login_dto_1.SocialLoginProviderDTO,
+        social_login_dto_1.SocialLoginBodyDTO]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "oauthSignIn", null);
 __decorate([
     (0, auth_decorators_1.loginEmail)(),
     (0, common_1.Post)('/login'),
@@ -88,60 +94,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "loginEmail", null);
 __decorate([
-    (0, auth_decorators_1.signupGoogle)(),
-    (0, common_1.Get)('/signup/google'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "signupGoogle", null);
-__decorate([
-    (0, auth_decorators_1.loginGoogle)(),
-    (0, common_1.Get)('/login/google'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "loginGoogle", null);
-__decorate([
-    (0, auth_decorators_1.signupNaver)(),
-    (0, common_1.Get)('/signup/naver'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('naver')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "signupNaver", null);
-__decorate([
-    (0, auth_decorators_1.loginNaver)(),
-    (0, common_1.Get)('/login/naver'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('naver')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "loginNaver", null);
-__decorate([
-    (0, auth_decorators_1.signupKakao)(),
-    (0, common_1.Get)('/signup/kakao'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "signupKakao", null);
-__decorate([
-    (0, auth_decorators_1.loginKakao)(),
-    (0, common_1.Get)('/login/naver'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [oauth_user_dto_1.OauthUserDto]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "loginKakao", null);
-__decorate([
     (0, common_1.UseGuards)(auth_guards_1.AuthRefreshGuard),
     (0, auth_decorators_1.restoreAccessToken)(),
     (0, common_1.Post)('/restore-access-token'),
@@ -150,6 +102,30 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "restoreAccessToken", null);
+__decorate([
+    (0, common_1.Get)('/login/google'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('google')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [oauth_passport_dto_1.OauthPassportDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "loginGoogle", null);
+__decorate([
+    (0, common_1.Get)('/login/kakao'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('kakao')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [oauth_passport_dto_1.OauthPassportDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "loginKakao", null);
+__decorate([
+    (0, common_1.Get)('/login/naver'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('naver')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [oauth_passport_dto_1.OauthPassportDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "loginNaver", null);
 AuthController = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('/'),

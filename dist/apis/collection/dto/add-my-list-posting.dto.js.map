@@ -1,1 +1,1 @@
-{"version":3,"file":"add-my-list-posting.dto.js","sourceRoot":"","sources":["../../../../src/apis/collection/dto/add-my-list-posting.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAAoD;AAEpD,MAAa,uBAAuB;CAGnC;AAFC;IAAC,IAAA,yBAAO,GAAE;;6DACa;AAFzB,0DAGC"}
+{"version":3,"file":"add-my-list-posting.dto.js","sourceRoot":"","sources":["../../../../src/apis/collection/dto/add-my-list-posting.dto.ts"],"names":[],"mappings":";;;;;;;;;;;;AAAA,qDAA0C;AAE1C,MAAa,uBAAuB;CAGnC;AAFC;IAAC,IAAA,yBAAO,GAAE;8BACI,KAAK;6DAAS;AAF9B,0DAGC"}

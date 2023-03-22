@@ -1,3 +1,3 @@
 export declare class addCollectionPostingDto {
-    collectionId: number[];
+    collectionId: Array<number>;
 }

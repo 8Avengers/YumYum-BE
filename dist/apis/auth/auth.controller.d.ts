@@ -1,11 +1,22 @@
 import { AuthService } from './auth.service';
 import { UserProfileService } from '../user/user-profile.service';
 import { LoginUserDto } from '../user/dto/login-user.dto';
-import { OauthUserDto } from '../user/dto/oauth-user.dto';
+import { OauthPassportDto } from './dto/oauth-passport.dto';
+import { SocialLoginProviderDTO, SocialLoginBodyDTO } from './dto/social-login.dto';
 export declare class AuthController {
     private readonly userProfileService;
     private readonly authService;
     constructor(userProfileService: UserProfileService, authService: AuthService);
+    oauthSignIn(params: SocialLoginProviderDTO, body: SocialLoginBodyDTO): Promise<{
+        refreshToken: string;
+        accessToken: string;
+        user: {
+            userId: any;
+            nickname: any;
+            email: any;
+            profileImage: any;
+        };
+    }>;
     loginEmail(loginUserDto: LoginUserDto): Promise<{
         refreshToken: string;
         accessToken: string;
@@ -16,31 +27,22 @@ export declare class AuthController {
             profileImage: string;
         };
     }>;
-    signupGoogle(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    loginGoogle(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    signupNaver(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    loginNaver(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    signupKakao(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
-    loginKakao(user: OauthUserDto): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
     restoreAccessToken(currentUser: any): Promise<{
         accessToken: string;
+    }>;
+    loginGoogle(user: OauthPassportDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: any;
+    }>;
+    loginKakao(user: OauthPassportDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: any;
+    }>;
+    loginNaver(user: OauthPassportDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: any;
     }>;
 }
