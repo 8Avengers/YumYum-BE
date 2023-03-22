@@ -88,51 +88,89 @@ let AuthService = class AuthService {
             },
         };
     }
-    async oauthLoginKakao(provider, body) {
+    async oauthLoginSocial(provider, body) {
         const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
         console.log('socialService 통과후 body', body, 'socialService 통과후 provider', provider);
         const token = await socialService.getOauth2Token(body);
         const info = await socialService.getUserInfo(token.access_token);
         console.log('token에는 뭐가 들어가 있을까?', token);
         console.log('info에는 뭐가 들어가 있을까?', info);
+        console.log('info에는 뭐가 들어가 있을까?', provider);
         console.log('getUserInfo통과후info.email', info.email);
         console.log('getUserInfo통과후info.nickname', info.nickname);
         console.log('getUserInfo통과후info.name', info.name);
         let user;
-        try {
-            const providerIdFromKakao = info.id;
-            const userEmailFromKakao = info.kakao_account.email;
-            const userNicknameFromKakao = info.kakao_account.profile.nickname;
-            console.log('useridFromKakao info.id 통과', providerIdFromKakao);
-            console.log('userEmailFromKakao통과', userEmailFromKakao);
-            console.log('userNicknameFromKakao통과', userEmailFromKakao);
-            const existingUser = await this.userSignupService.findOne({
-                email: userEmailFromKakao,
-            });
-            if (!existingUser) {
-                user = await this.userSignupService.createOauthUser({
+        if (provider === 'kakao') {
+            try {
+                const providerIdFromKakao = info.id;
+                const userEmailFromKakao = info.kakao_account.email;
+                const userNicknameFromKakao = info.kakao_account.profile.nickname;
+                console.log('useridFromKakao info.id 통과', providerIdFromKakao);
+                console.log('userEmailFromKakao통과', userEmailFromKakao);
+                console.log('userNicknameFromKakao통과', userEmailFromKakao);
+                const existingUser = await this.userSignupService.findOne({
                     email: userEmailFromKakao,
-                    nickname: userNicknameFromKakao,
-                    name: info.name,
-                    provider: provider,
-                    provider_id: providerIdFromKakao,
+                });
+                if (!existingUser) {
+                    user = await this.userSignupService.createOauthUser({
+                        email: userEmailFromKakao,
+                        nickname: userNicknameFromKakao,
+                        name: info.name,
+                        provider: provider,
+                        provider_id: providerIdFromKakao,
+                    });
+                }
+                else {
+                    user = existingUser;
+                }
+                user = await this.userSignupService.findOne({
+                    email: user.email,
                 });
             }
-            else {
-                user = existingUser;
+            catch (error) {
+                if (error instanceof common_1.ConflictException) {
+                    console.error(`Error:  ${error.message}`);
+                }
+                else {
+                    throw error;
+                }
             }
-            console.log('가입이미되어있다면, 로그인 진행의 user', user);
-            user = await this.userSignupService.findOne({
-                email: user.email,
-            });
-            console.log('DB에서 email : user.email이후의 user', user);
         }
-        catch (error) {
-            if (error instanceof common_1.ConflictException) {
-                console.error(`Error:  ${error.message}`);
+        else if (provider === 'naver') {
+            const providerIdFromNaver = info.id;
+            const userEmailFromNaver = info.email;
+            const userNicknameFromNaver = info.nickname;
+            console.log('useridFromNaver response.id passed', providerIdFromNaver);
+            console.log('userEmailFromNaver passed', userEmailFromNaver);
+            console.log('passed userNicknameFromNaver', userNicknameFromNaver);
+            console.log('info', info);
+            try {
+                const existingUser = await this.userSignupService.findOne({
+                    email: userEmailFromNaver,
+                });
+                if (!existingUser) {
+                    user = await this.userSignupService.createOauthUser({
+                        email: userEmailFromNaver,
+                        nickname: userNicknameFromNaver,
+                        name: info.name,
+                        provider: provider,
+                        provider_id: providerIdFromNaver,
+                    });
+                }
+                else {
+                    user = existingUser;
+                }
+                user = await this.userSignupService.findOne({
+                    email: user.email,
+                });
             }
-            else {
-                throw error;
+            catch (error) {
+                if (error instanceof common_1.ConflictException) {
+                    console.error(`Error: ${error.message}`);
+                }
+                else {
+                    throw error;
+                }
             }
         }
         console.log('try catch문 통과한 이후의 user', user);

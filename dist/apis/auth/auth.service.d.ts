@@ -23,7 +23,7 @@ export declare class AuthService {
             profileImage: any;
         };
     }>;
-    oauthLoginKakao(provider: 'kakao' | 'naver' | 'google', body: SocialLoginBodyDTO): Promise<{
+    oauthLoginSocial(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO): Promise<{
         refreshToken: string;
         accessToken: string;
         user: {
