@@ -26,25 +26,36 @@ let AuthService = class AuthService {
     }
     async oauthLogin(provider, body) {
         const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
+        console.log("socialService 통과후 body", body, "socialService 통과후 provider", provider);
         const token = await socialService.getOauth2Token(body);
         const info = await socialService.getUserInfo(token.access_token);
         console.log('token에는 뭐가 들어가 있을까?', token);
         console.log('info에는 뭐가 들어가 있을까?', info);
+        console.log('getUserInfo통과후', info.email);
+        console.log('getUserInfo통과후', info.nickname);
+        console.log('getUserInfo통과후', info.name);
         let user;
         try {
+            const userEmailFromKakao = info.kakao_account.email;
+            const userNicknameFromKakao = info.kakao_account.profile.nickname;
             const existingUser = await this.userSignupService.findOne({
-                email: info.email,
+                email: userEmailFromKakao,
             });
             if (!existingUser) {
                 user = await this.userSignupService.createOauthUser({
-                    email: info.email,
-                    nickname: info.nickname,
+                    email: userEmailFromKakao,
+                    nickname: userNicknameFromKakao,
                     name: info.name,
                 });
             }
             else {
                 user = existingUser;
             }
+            console.log('가입이미되어있다면, 로그인 진행의 user', user);
+            user = await this.userSignupService.findOne({
+                email: user.email,
+            });
+            console.log('DB에서 email : user.email이후의 user', user);
         }
         catch (error) {
             if (error instanceof common_1.ConflictException) {
@@ -54,6 +65,7 @@ let AuthService = class AuthService {
                 throw error;
             }
         }
+        console.log('try catch문 통과한 이후의 user', user);
         const accessToken = await this.createAccessToken({ user });
         const refreshToken = await this.createRefreshToken({ user });
         return {

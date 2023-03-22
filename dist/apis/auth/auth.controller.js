@@ -34,6 +34,7 @@ let AuthController = class AuthController {
     }
     async oauthSignIn(params, body) {
         const { provider } = params;
+        console.log("들어오나 확인", provider, body);
         return await this.authService.oauthLogin(provider, body);
     }
     async loginEmail(loginUserDto) {

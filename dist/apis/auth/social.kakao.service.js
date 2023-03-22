@@ -36,7 +36,7 @@ let SocialKakaoService = class SocialKakaoService {
                 message: '로그인 요청이 잘못되었습니다.',
             });
         });
-        console.log('kakao.service.ts에서 code를 받으면?', response.data);
+        console.log('social.kakao.service.ts에서 getOauth2Token를 실행을 무엇을 리턴해줄까?', response.data);
         return response.data;
     }
     async getUserInfo(accessToken) {
@@ -49,6 +49,7 @@ let SocialKakaoService = class SocialKakaoService {
                 message: '올바르지 않은 접근입니다.',
             });
         });
+        console.log('social.kakao.service.ts에서 getUserInfo 를 실행후 무엇을 리턴해줄까?', response.data);
         return response.data;
     }
 };
