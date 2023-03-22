@@ -94,7 +94,8 @@ export class MyListService {
         take: myListInOnePage,
       });
 
-      return myList.map((myList) => ({
+      //첫 대괄호 없애기위해 객체 형태로 변경
+      const [myListDetail] = myList.map((myList) => ({
         id: myList.id,
         name: myList.name,
         visibility: myList.visibility,
@@ -104,6 +105,8 @@ export class MyListService {
           images: item.post.images,
         })),
       }));
+
+      return myListDetail;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -402,23 +405,42 @@ export class MyListService {
     image: string,
     description: string,
     visibility: 'public' | 'private',
+    file,
   ) {
     try {
-      const myList = await this.collectionRepository.update(
-        { id: collectionId, type: 'myList', user: { id: userId } },
-        {
-          name,
-          image,
-          description,
-          visibility,
+      // 이미 생성된 컬렉션을 찾는다.
+      const myListInfo = await this.collectionRepository.findOne({
+        where: {
+          id: collectionId,
+          type: 'myList',
+          user: { id: userId },
         },
-      );
+      });
+
+      // 입력받은 정보를 myListInfo에 담는다.
+      if (myListInfo) {
+        myListInfo.name = name;
+        myListInfo.description = description;
+        myListInfo.visibility = visibility;
+        if (file) {
+          const uploadedFile = await this.uploadService.uploadMyListImageToS3(
+            'yumyumdb-myList', //AmazonS3의 저장되는 폴더명
+            file,
+          );
+          myListInfo.image = uploadedFile.myListImage;
+        }
+      } else {
+        myListInfo.image = myListInfo.image;
+      }
+      // 담은 정보를 저장한다.
+      const updateMyListInfo = await this.collectionRepository.save(myListInfo);
+      console.log('updateMyListInfo 정보:::::::::', updateMyListInfo);
 
       return {
-        name,
-        image,
-        description,
-        visibility,
+        name: updateMyListInfo.name,
+        image: updateMyListInfo.image,
+        description: updateMyListInfo.description,
+        visibility: updateMyListInfo.visibility,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -437,12 +459,17 @@ export class MyListService {
     ### 표정훈
     ### MyList 삭제
     */
-  async deleteMyList(userId: number, id: number) {
+  async deleteMyList(collectionId: number) {
     try {
-      const result = await this.collectionRepository.softDelete(id); // soft delete를 시켜주는 것이 핵심입니다!
-      if (result.affected === 0) {
+      const deleteResult = await this.collectionItemRepository.delete({
+        collection: { id: collectionId },
+      });
+
+      if (deleteResult.affected === 0) {
         throw new NotFoundException('마이리스트가 없습니다.');
       }
+
+      return deleteResult;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
