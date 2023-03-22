@@ -14,8 +14,8 @@ import { JwtKakaoStrategy } from './strategies/jwt-social-kakao.strategy';
 import { JwtNaverStrategy } from './strategies/jwt-social-naver.strategy';
 
 //passport미사용 service
-import { SocialKakaoService } from './social.kakao.service';
-import { SocialNaverService } from './social.naver.service';
+import { SocialKakaoService } from './social-kakao.service';
+import { SocialNaverService } from './social-naver.service';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({

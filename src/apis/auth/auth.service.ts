@@ -6,8 +6,8 @@ import { UserSignupService } from '../user/user-signup.service';
 //passport미사용
 import { SocialLoginBodyDTO } from './dto/social-login.dto';
 
-import { SocialKakaoService } from './social.kakao.service';
-import { SocialNaverService } from './social.naver.service';
+import { SocialKakaoService } from './social-kakao.service';
+import { SocialNaverService } from './social-naver.service';
 
 @Injectable()
 export class AuthService {
@@ -64,7 +64,7 @@ export class AuthService {
 
       // 1. 가입확인
       const existingUser = await this.userSignupService.findOne({
-        email: userIdFromKakao,
+        email: userEmailFromKakao,
       });
       // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
       if (!existingUser) {
