@@ -73,6 +73,7 @@ export class MyListService {
         select: {
           id: true,
           name: true,
+          description: true,
           visibility: true,
           collectionItems: {
             id: true,
@@ -96,29 +97,51 @@ export class MyListService {
       });
 
       const [myListDetail] = myList.map((myList) => {
-        // 각 포스트의 레스토랑 평점을 합산한다
-        let sum = 0;
-        let count = 0;
+        const groupedPosts = {};
         for (const item of myList.collectionItems) {
+          // Group posts by restaurant id
+          const restaurantId = item.post.restaurant.id;
+          if (!groupedPosts[restaurantId]) {
+            groupedPosts[restaurantId] = { posts: [], sum: 0, count: 0 };
+          }
+          groupedPosts[restaurantId].posts.push({
+            ...item.post,
+            restaurant: item.post.restaurant,
+            images: item.post.images,
+          });
+          // Calculate sum and count for each group
           const rating = item.post.rating;
           if (typeof rating === 'number') {
-            sum += rating;
-            count++;
+            groupedPosts[restaurantId].sum += rating;
+            groupedPosts[restaurantId].count++;
           }
         }
-        // 레스토랑 평점의 평균 값을 계산한다
-        const avgRating = count > 0 ? (sum / count).toFixed(1) : null;
+
+        // Calculate average rating for each group and reformat posts
+        const formattedPosts = [];
+        for (const groupId in groupedPosts) {
+          const group = groupedPosts[groupId];
+          const avgRating =
+            group.count > 0 ? (group.sum / group.count).toFixed(1) : null;
+
+          if (group.posts.length > 0) {
+            formattedPosts.push({
+              id: group.posts[0].id,
+              content: group.posts[0].content,
+              rating: group.posts[0].rating,
+              AvgRating: avgRating,
+              images: group.posts[0].images,
+              restaurant: group.posts[0].restaurant,
+            });
+          }
+        }
 
         return {
           id: myList.id,
           name: myList.name,
+          description: myList.description,
           visibility: myList.visibility,
-          post: myList.collectionItems.map((item) => ({
-            ...item.post,
-            restaurant: item.post.restaurant,
-            images: item.post.images,
-          })),
-          AvgRating: avgRating, // 레스토랑 평점의 평균 값 추가
+          post: formattedPosts,
         };
       });
 
@@ -157,7 +180,6 @@ export class MyListService {
         where: {
           deleted_at: null,
           visibility: 'public',
-          user: { id: userId },
           restaurant: { id: restaurantId },
           collectionItems: { collection: { id: collectionId } },
         },
