@@ -33,12 +33,15 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     async oauthSignIn(provider, body) {
-        console.log('들어오나 확인', provider, body);
+        console.log('Check if its coming in', provider, body);
         if (provider === 'google') {
             return await this.authService.oauthLoginGoogle(provider, body);
         }
         else if (provider === 'kakao') {
-            return await this.authService.oauthLoginKakao(provider, body);
+            return await this.authService.oauthLoginSocial(provider, body);
+        }
+        else if (provider === 'naver') {
+            return await this.authService.oauthLoginSocial(provider, body);
         }
         else {
             throw new common_1.BadRequestException(`Invalid provider: ${provider}`);

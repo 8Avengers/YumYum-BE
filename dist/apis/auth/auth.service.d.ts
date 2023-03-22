@@ -13,8 +13,17 @@ export declare class AuthService {
     private socialNaverService;
     private readonly socialGoogleService;
     constructor(jwtService: JwtService, configService: ConfigService, userSignupService: UserSignupService, socialKaKaoService: SocialKakaoService, socialNaverService: SocialNaverService, socialGoogleService: SocialGoogleService);
-    oauthLoginGoogle(provider: 'kakao' | 'naver' | 'google', body: SocialLoginBodyDTO): Promise<void>;
-    oauthLoginKakao(provider: 'kakao' | 'naver' | 'google', body: SocialLoginBodyDTO): Promise<{
+    oauthLoginGoogle(provider: 'kakao' | 'naver' | 'google', body: SocialLoginBodyDTO): Promise<{
+        refreshToken: string;
+        accessToken: string;
+        user: {
+            userId: any;
+            nickname: any;
+            email: any;
+            profileImage: any;
+        };
+    }>;
+    oauthLoginSocial(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO): Promise<{
         refreshToken: string;
         accessToken: string;
         user: {

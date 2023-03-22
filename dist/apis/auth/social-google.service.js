@@ -15,60 +15,56 @@ const config_1 = require("@nestjs/config");
 const rxjs_1 = require("rxjs");
 const axios_1 = require("@nestjs/axios");
 let SocialGoogleService = class SocialGoogleService {
-    constructor(httpService, configService) {
-        this.httpService = httpService;
+    constructor(configService, httpService) {
         this.configService = configService;
-        this.clientId = configService.get('GOOGLE_CLIENTID');
-        this.clientSecret = configService.get('GOOGLE_CLIENTSECRET');
-        this.redirectUri = configService.get('GOOGLE_CALLBACKURL');
+        this.httpService = httpService;
+        this.clientId = this.configService.get('GOOGLE_CLIENTID');
+        this.clientSecret = this.configService.get('GOOGLE_CLIENTSECRET');
+        this.redirectUri = this.configService.get('GOOGLE_CALLBACKURL');
     }
-    async getAccessTokenFromGoogle(code) {
-        console.log('Inside getAccessTokenFromGoogle method');
-        console.log('getAccessTokenFromGoogle내부의code가 들어오나?!!', code);
-        const response = await (0, rxjs_1.lastValueFrom)(this.httpService.post('https://oauth2.googleapis.com/token', null, {
-            params: {
-                code,
-                client_id: this.clientId,
-                client_secret: this.clientSecret,
-                redirect_uri: this.redirectUri,
-                grant_type: 'authorization_code',
-            },
-        })).catch((err) => {
-            var _a;
-            console.error('Error in getAccessTokenFromGoogle:', err);
+    async getOauth2Token({ code }) {
+        console.log('code가 socialgoogleservice에 들어오는가', code);
+        try {
+            const response = await (0, rxjs_1.lastValueFrom)(this.httpService.post('https://oauth2.googleapis.com/token', null, {
+                params: {
+                    code,
+                    client_id: this.clientId,
+                    client_secret: this.clientSecret,
+                    redirect_uri: this.redirectUri,
+                    grant_type: 'authorization_code',
+                },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }));
+            console.log('getOauth2Token from social-google.service.ts?', response.data);
+            return response.data;
+        }
+        catch (err) {
+            console.error(err);
             throw new common_1.BadRequestException({
                 message: 'Invalid login request.',
-                error: (_a = err.response) === null || _a === void 0 ? void 0 : _a.data,
+            });
+        }
+    }
+    async getUserInfo(accessToken) {
+        const response = await (0, rxjs_1.lastValueFrom)(this.httpService.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })).catch((err) => {
+            throw new common_1.BadRequestException({
+                message: 'Invalid access.',
             });
         });
-        return response.data.access_token;
-    }
-    async getGoogleUserProfile(accessToken) {
-        const googleProfileUrl = 'https://www.googleapis.com/oauth2/v2/userinfo';
-        const headers = {
-            Authorization: `Bearer ${accessToken}`,
-        };
-        try {
-            const response = await (0, rxjs_1.lastValueFrom)(this.httpService.get(googleProfileUrl, { headers }));
-            return {
-                email: response.data.email,
-                nickname: response.data.name,
-                name: response.data.family_name,
-            };
-        }
-        catch (error) {
-            const axiosError = error;
-            if (axiosError.response) {
-                throw new common_1.BadRequestException(axiosError.response.data);
-            }
-            throw error;
-        }
+        console.log('getUserInfo from social-google.service.ts?', response.data);
+        return response.data;
     }
 };
 SocialGoogleService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [axios_1.HttpService,
-        config_1.ConfigService])
+    __metadata("design:paramtypes", [config_1.ConfigService,
+        axios_1.HttpService])
 ], SocialGoogleService);
 exports.SocialGoogleService = SocialGoogleService;
 //# sourceMappingURL=social-google.service.js.map
