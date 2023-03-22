@@ -208,8 +208,8 @@ export class PostController {
    */
   @ApiOperation({ summary: '회원들의 추천 맛집 불러오기' })
   @Get('/main/trending')
-  async getTrendingPostsByCategory() {
-    return this.postService.getTrendingPosts();
+  async getTrendingPostsByCategory(@Query('category') category: string) {
+    return this.postService.getTrendingPosts(category);
   }
 
   /*

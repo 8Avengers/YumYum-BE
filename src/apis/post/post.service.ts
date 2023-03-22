@@ -678,15 +678,25 @@ export class PostService {
     }
   }
 
-  async getTrendingPosts(): Promise<any> {
+  /*
+                                                                                      ### 23.03.23
+                                                                                      ### 이드보라
+                                                                                      ### 메인페이지 - 회원들의 추천 맛집 리뷰
+                                                                                      */
+
+  async getTrendingPosts(category: string): Promise<any> {
     try {
-      const trendingPostsByCategory = [];
+      // const trendingPostsByCategory = [];
 
       const date = new Date();
       date.setMonth(date.getMonth() - 1);
 
       const trendingPosts = await this.postRepository
         .createQueryBuilder('post')
+        .leftJoin('post.postLikes', 'postLikes')
+        .leftJoin('post.restaurant', 'restaurant')
+        .leftJoin('post.user', 'user')
+        .leftJoin('post.images', 'image')
         .select('post.id')
         .addSelect([
           'post.content',
@@ -694,16 +704,18 @@ export class PostService {
           'post.updated_at',
           'post.created_at',
         ])
-        .leftJoin('post.postLikes', 'postLikes')
-        .leftJoin('post.restaurant', 'restaurant')
-        .leftJoin('post.user', 'user')
+        .addSelect('COUNT(postLikes.id) as postLikesCount')
         .groupBy(
           "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname",
         )
-        .orderBy('COUNT(postLikes.id)', 'DESC')
+        .orderBy('postLikesCount', 'DESC')
         // .addOrderBy('RAND()')
         .where('post.visibility = :visibility', { visibility: 'public' })
         .where('postLikes.updated_at >= :date', { date })
+        .where(
+          "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END) = :category",
+          { category: category },
+        )
         .addSelect(
           "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END)",
           'category',
@@ -711,48 +723,12 @@ export class PostService {
         .addSelect('restaurant.place_name')
         .addSelect('user.profile_image')
         .addSelect('user.nickname')
-        .getRawAndEntities();
+        .addSelect('image.file_url')
+        .addSelect('postLikes.id')
+        .take(5)
+        .getMany();
 
-      trendingPosts.entities.forEach((post, index) => {
-        const category = trendingPosts.raw[index].category;
-        const postObj = {
-          id: post.id,
-          content: post.content,
-          rating: post.rating,
-          restaurant: {
-            category: category,
-            place_name: post.restaurant.place_name,
-          },
-          user: {
-            profile_image: post.user.profile_image,
-            nickname: post.user.nickname,
-          },
-        };
-
-        const existingCategoryIndex = trendingPostsByCategory.findIndex(
-          (categoryObj) => categoryObj.category === category,
-        );
-
-        if (existingCategoryIndex === -1) {
-          trendingPostsByCategory.push({
-            category: category,
-            posts: [postObj],
-          });
-        } else {
-          trendingPostsByCategory[existingCategoryIndex].posts.push(postObj);
-        }
-      });
-
-      for (const categoryObj of trendingPostsByCategory) {
-        categoryObj.posts.sort((a, b) => {
-          const aLikes = a.postLikes ? a.postLikes.length : 0;
-          const bLikes = b.postLikes ? b.postLikes.length : 0;
-          return bLikes - aLikes;
-        });
-        categoryObj.posts = categoryObj.posts.slice(0, 10);
-      }
-
-      return trendingPostsByCategory;
+      return trendingPosts;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -760,6 +736,12 @@ export class PostService {
       );
     }
   }
+
+  /*
+                                                                                      ### 23.03.22
+                                                                                      ### 이드보라
+                                                                                      ### 내 주변 피드
+                                                                                      */
 
   async getPostsAroundMe(x: string, y: string, userId, page: string) {
     try {
