@@ -6,7 +6,7 @@ import {
   ApiOAuth2,
 } from '@nestjs/swagger';
 import { UpdateUserProfileResponseDto } from './dto/update-user-response.dto';
-import { UserDto } from './dto/user.dto';
+import { UserDto } from './dto/user-response.dto';
 
 //TODO: 카카오 회원가입시 로그인 시 request 어떻게 할까?
 //TODO:구글 회원가입시 로그인 시 request 어떻게 할까?
