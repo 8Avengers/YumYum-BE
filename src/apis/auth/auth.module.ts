@@ -12,20 +12,31 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtGoogleStrategy } from './strategies/jwt-social-google.strategy';
 import { JwtKakaoStrategy } from './strategies/jwt-social-kakao.strategy';
 import { JwtNaverStrategy } from './strategies/jwt-social-naver.strategy';
+
+//passport미사용 service
+import { SocialKakaoService } from './social.kakao.service';
+import { SocialNaverService } from './social.naver.service';
+import { HttpModule } from '@nestjs/axios';
+
 @Module({
   imports: [
     JwtModule.register({}),
     TypeOrmModule.forFeature([User]),
     UserModule,
+    HttpModule,
   ],
   providers: [
-    JwtGoogleStrategy, //
-    JwtNaverStrategy, //
-    JwtKakaoStrategy, //
-    JwtRefreshStrategy, //
-    JwtAccessStrategy, //
+    JwtGoogleStrategy,
+    JwtNaverStrategy,
+    JwtKakaoStrategy,
+    JwtRefreshStrategy,
+    JwtAccessStrategy,
     AuthService,
     UserSignupService,
+    //
+    //아래는passport미사용
+    SocialNaverService,
+    SocialKakaoService,
   ],
 
   controllers: [AuthController],
