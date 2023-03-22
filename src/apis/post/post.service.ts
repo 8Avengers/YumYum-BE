@@ -4,10 +4,9 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _ from 'lodash';
+// import _ from 'lodash';
 import { Repository, Between, MoreThan } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { PostLikeService } from './post-like.service';
@@ -18,10 +17,8 @@ import { RestaurantService } from '../restaurant/restaurant.service';
 import { ImageRepository } from './image.repository';
 import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
-import shuffle from 'lodash/shuffle';
+// import shuffle from 'lodash/shuffle';
 import { PostLike } from './entities/post-like.entity';
-import { subMonths } from 'date-fns';
-import { Restaurant } from '../restaurant/entities/restaurant.entity';
 // import { fromSubQuery} from
 // type Image = string | Express.Multer.File;
 // import { PostUserTag } from './entities/post-usertag.entity';
@@ -50,8 +47,9 @@ export class PostService {
                                                                                     ### 조건 없이 모든 포스팅 불러오기(뉴스피드 페이지).불러오는 유저 정보 수정
                                                                                     */
 
-  async getPosts(userId: number) {
+  async getPosts(userId: number, page: string) {
     try {
+      const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public' },
         select: {
@@ -59,6 +57,7 @@ export class PostService {
           content: true,
           rating: true,
           updated_at: true,
+          created_at: true,
           visibility: true,
           restaurant: {
             kakao_place_id: true,
@@ -82,12 +81,13 @@ export class PostService {
           },
         },
         order: { created_at: 'desc' },
+        skip: pageNum * 8,
+        take: 8,
       });
       if (!posts || posts.length === 0) {
         throw new NotFoundException('포스트가 없습니다.');
       }
       const postIds = posts.map((post) => post.id);
-      // console.log('*****', posts[4].collectionItems);
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
@@ -487,8 +487,9 @@ export class PostService {
                                                                                       ### 내 포스트만 불러오기
                                                                                       */
 
-  async getPostsByMyId(userId: number) {
+  async getPostsByMyId(userId: number, page: string) {
     try {
+      const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
         select: {
@@ -497,6 +498,7 @@ export class PostService {
           rating: true,
           updated_at: true,
           visibility: true,
+          created_at: true,
           restaurant: {
             kakao_place_id: true,
             address_name: true,
@@ -519,7 +521,9 @@ export class PostService {
           },
         },
         order: { created_at: 'desc' },
-      });
+        offset: pageNum * 8,
+        take: 8,
+      } as any);
       if (!posts || posts.length === 0) {
         return [];
       }
@@ -568,8 +572,9 @@ export class PostService {
     }
   }
 
-  async getPostsByOtherUserId(userId: number, myUserId: number) {
+  async getPostsByOtherUserId(userId: number, myUserId: number, page: string) {
     try {
+      const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
         where: { deleted_at: null, visibility: 'public', user: { id: userId } },
         select: {
@@ -578,6 +583,7 @@ export class PostService {
           rating: true,
           updated_at: true,
           visibility: true,
+          created_at: true,
           restaurant: {
             kakao_place_id: true,
             address_name: true,
@@ -600,7 +606,9 @@ export class PostService {
           },
         },
         order: { created_at: 'desc' },
-      });
+        offset: pageNum * 8,
+        take: 8,
+      } as any);
       if (!posts || posts.length === 0) {
         return [];
       }
@@ -659,8 +667,12 @@ export class PostService {
       const trendingPosts = await this.postRepository
         .createQueryBuilder('post')
         .select('post.id')
-        .addSelect('post.content')
-        .addSelect('post.rating')
+        .addSelect([
+          'post.content',
+          'post.rating',
+          'post.updated_at',
+          'post.created_at',
+        ])
         .leftJoin('post.postLikes', 'postLikes')
         .leftJoin('post.restaurant', 'restaurant')
         .leftJoin('post.user', 'user')
@@ -728,8 +740,9 @@ export class PostService {
     }
   }
 
-  async getPostsAroundMe(x: string, y: string, userId) {
+  async getPostsAroundMe(x: string, y: string, userId, page: string) {
     try {
+      const pageNum = Number(page) - 1;
       const postsAroundMe = await this.postRepository
         .createQueryBuilder('post')
         .leftJoin('post.restaurant', 'restaurant')
@@ -744,6 +757,7 @@ export class PostService {
           'post.rating',
           'post.updated_at',
           'post.visibility',
+          'post.created_at',
         ])
         .addSelect([
           'restaurant.kakao_place_id',
@@ -759,13 +773,12 @@ export class PostService {
         )
         .addSelect('hashtags.name')
         .addSelect('image.file_url')
-        // .addSelect('collectionItem.collection')
         .addSelect('collection.id', 'collection_id')
-        .having(`distance <= 5`)
+        .having(`distance <= 3`)
         .orderBy('post.created_at', 'DESC')
+        .skip(pageNum * 8)
+        .take(8)
         .getRawAndEntities();
-
-      console.log('********', postsAroundMe);
 
       if (!postsAroundMe) {
         throw new NotFoundException('포스트가 없습니다.');
@@ -816,39 +829,3 @@ export class PostService {
     }
   }
 }
-
-// if (!posts || posts.length === 0) {
-//        throw new NotFoundException('포스트가 없습니다.');
-//      }
-//      const postIds = posts.map((post) => post.id);
-//
-//      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
-//
-//      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
-//        postIds,
-//        userId,
-//      );
-//
-//      return posts.map((post) => {
-//        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
-//        const likes =
-//          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
-//        const isLiked =
-//          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
-//          'False';
-//        const totalComments = post.comments ? post.comments.length : 0;
-//        return {
-//          id: post.id,
-//          content: post.content,
-//          rating: post.rating,
-//          updated_at: post.updated_at,
-//          user: post.user,
-//          restaurant: post.restaurant,
-//          images: post.images,
-//          hashtags,
-//          totalLikes: likes,
-//          isLiked,
-//          totalComments,
-//          myList: post.collectionItems,
-//          visibility: post.visibility,
-//        };

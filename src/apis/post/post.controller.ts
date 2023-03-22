@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 
 import { PostService } from './post.service';
@@ -50,8 +51,8 @@ export class PostController {
   @ApiOperation({ summary: '모든 최신 포스팅 불러오기' })
   @Get()
   @UseGuards(AuthAccessGuard)
-  async getPosts(@CurrentUser() currentUser: any) {
-    const posts = await this.postService.getPosts(currentUser.id);
+  async getPosts(@CurrentUser() currentUser: any, @Query('page') page: string) {
+    const posts = await this.postService.getPosts(currentUser.id, page);
     return posts;
   }
 
@@ -213,7 +214,13 @@ export class PostController {
   async getPostsAroundMe(
     @Body() data: Partial<LocationDto>,
     @CurrentUser() currentUser: any,
+    @Query('page') page: string,
   ) {
-    return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id);
+    return this.postService.getPostsAroundMe(
+      data.x,
+      data.y,
+      currentUser.id,
+      page,
+    );
   }
 }
