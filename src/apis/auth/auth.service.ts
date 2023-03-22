@@ -5,9 +5,10 @@ import { UserSignupService } from '../user/user-signup.service';
 
 //passport미사용
 import { SocialLoginBodyDTO } from './dto/social-login.dto';
+import { SocialGoogleService } from './social-google.service';
 
-import { SocialKakaoService } from './social.kakao.service';
-import { SocialNaverService } from './social.naver.service';
+import { SocialKakaoService } from './social-kakao.service';
+import { SocialNaverService } from './social-naver.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +20,7 @@ export class AuthService {
     //passport미사용
     private socialKaKaoService: SocialKakaoService,
     private socialNaverService: SocialNaverService,
+    private readonly socialGoogleService: SocialGoogleService,
   ) {}
 
   //소셜로그인API-Passport미사용
@@ -57,6 +59,7 @@ export class AuthService {
       const userIdFromKakao = info.id;
       const userEmailFromKakao = info.kakao_account.email;
       const userNicknameFromKakao = info.kakao_account.profile.nickname;
+      const providerId = info.id;
 
       console.log('useridFromKakao info.id 통과', userIdFromKakao);
       console.log('userEmailFromKakao통과', userEmailFromKakao);
@@ -64,14 +67,16 @@ export class AuthService {
 
       // 1. 가입확인
       const existingUser = await this.userSignupService.findOne({
-        email: userIdFromKakao,
+        email: userEmailFromKakao,
       });
       // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
       if (!existingUser) {
         user = await this.userSignupService.createOauthUser({
           email: userEmailFromKakao,
           nickname: userNicknameFromKakao,
-          name: info.name,
+          // name: info.name, 카카오는 이름이 없음
+          provider: provider,
+          provider_id: providerId,
         });
       } else {
         user = existingUser; // 가입이미되어있다면, 로그인 진행
@@ -156,7 +161,7 @@ export class AuthService {
 
       // 2. 존재하는 유저가 없으면, 회원가입 후 바로 로그인
       if (!existingUser) {
-        user = await this.userSignupService.createOauthUser({
+        user = await this.userSignupService.createUserWithPassport({
           email: user.email,
           nickname: user.nickname,
           name: user.name,

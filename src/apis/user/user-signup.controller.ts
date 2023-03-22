@@ -18,7 +18,7 @@ export class UserSignupController {
 
       const hashedPassword = await bcrypt.hash(password, 12);
 
-      const response = await this.userSignupService.createUser({
+      const response = await this.userSignupService.createLocalUser({
         email,
         hashedPassword,
         nickname,

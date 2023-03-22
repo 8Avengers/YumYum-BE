@@ -7,9 +7,9 @@ import { SocialLoginBodyDTO } from './dto/social-login.dto';
 
 @Injectable()
 export class SocialNaverService {
-  private clientId = this.configService.get('OAUTH2_NAVER_CLIENT_ID');
-  private clientSecert = this.configService.get('OAUTH2_NAVER_CLIENT_SECRET');
-  private redirectUri = this.configService.get('OAUTH2_NAVER_REDIRECT_URI');
+  private clientId = this.configService.get('NAVER_CLIENTID');
+  private clientSecert = this.configService.get('NAVER_CLIENTSECRET');
+  private redirectUri = this.configService.get('NAVER_CALLBACKURL');
 
   constructor(
     private configService: ConfigService,
@@ -33,6 +33,8 @@ export class SocialNaverService {
       });
     });
 
+    console.log('getOauth2Token통과후response.data', response.data.response);
+
     return response.data;
   }
 
@@ -48,6 +50,11 @@ export class SocialNaverService {
         message: '올바르지 않은 접근입니다.',
       });
     });
+
+    console.log(
+      'getUserInfo통과후response.data.response',
+      response.data.response,
+    );
 
     return response.data.response;
   }

@@ -20,9 +20,16 @@ import { IsEnum } from 'class-validator';
 import { Collection } from '../../collection/entities/collection.entity';
 @Entity()
 @Unique(['email'])
+@Unique(['provider_id'])
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column('varchar', { nullable: true })
+  provider_id: string | null;
+
+  @Column('varchar', { nullable: true })
+  provider: 'local' | 'naver' | 'kakao' | 'google';
 
   @Column()
   name: string;
