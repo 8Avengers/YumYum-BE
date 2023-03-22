@@ -96,19 +96,6 @@ export class PostService {
         userId,
       );
 
-      // const collectionItemIds = posts.reduce((ids, post) => {
-      //   post.collectionItems.forEach((collectionItem) => {
-      //     ids.add(collectionItem.collection.id);
-      //   });
-      //   return ids;
-      // }, new Set());
-      //
-      // const collections = await this.collectionItemRepository.find({
-      //   where: { id: collectionItemIds },
-      //   select: { collection: { id: true } },
-      //   relations: ['collection'],
-      // });
-
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
@@ -740,38 +727,128 @@ export class PostService {
       );
     }
   }
+
+  async getPostsAroundMe(x: string, y: string, userId) {
+    try {
+      const postsAroundMe = await this.postRepository
+        .createQueryBuilder('post')
+        .leftJoin('post.restaurant', 'restaurant')
+        .leftJoin('post.images', 'image')
+        .leftJoinAndSelect('post.hashtags', 'hashtags')
+        .leftJoin('post.user', 'user')
+        .leftJoinAndSelect('post.collectionItems', 'collectionItem')
+        .leftJoinAndSelect('collectionItem.collection', 'collection')
+        .select([
+          'post.id',
+          'post.content',
+          'post.rating',
+          'post.updated_at',
+          'post.visibility',
+        ])
+        .addSelect([
+          'restaurant.kakao_place_id',
+          'restaurant.address_name',
+          'restaurant.category_name',
+          'restaurant.place_name',
+          'restaurant.road_address_name',
+        ])
+        .addSelect(['user.id', 'user.nickname', 'user.profile_image'])
+        .addSelect(
+          `6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`,
+          'distance',
+        )
+        .addSelect('hashtags.name')
+        .addSelect('image.file_url')
+        // .addSelect('collectionItem.collection')
+        .addSelect('collection.id', 'collection_id')
+        .having(`distance <= 5`)
+        .orderBy('post.created_at', 'DESC')
+        .getRawAndEntities();
+
+      console.log('********', postsAroundMe);
+
+      if (!postsAroundMe) {
+        throw new NotFoundException('포스트가 없습니다.');
+      }
+
+      const postIds = postsAroundMe.entities.map((post) => post.id);
+
+      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
+
+      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+        postIds,
+        userId,
+      );
+
+      return postsAroundMe.entities.map((post, index) => {
+        const likes =
+          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+        const isLiked =
+          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+          'False';
+        const totalComments = post.comments ? post.comments.length : 0;
+        const myList = postsAroundMe.raw[index].collection_id;
+        return {
+          id: post.id,
+          content: post.content,
+          rating: post.rating,
+          updated_at: post.updated_at,
+          user: post.user,
+          restaurant: post.restaurant,
+          images: post.images,
+          hashtags: post.hashtags,
+          totalLikes: likes,
+          isLiked,
+          totalComments,
+          myList,
+          visibility: post.visibility,
+        };
+      });
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw new HttpException(err.message, HttpStatus.NOT_FOUND);
+      } else {
+        console.error(err);
+        throw new InternalServerErrorException(
+          'Something went wrong while processing your request. Please try again later.',
+        );
+      }
+    }
+  }
 }
 
-// const postLikes = posts.map((post) => {
-//   const totalLikes = post.postLikes.filter(
-//     (like) => like.updated_at >= date,
-//   ).length;
-//   return {
-//     post,
-//     totalLikes,
-//   };
-// });
+// if (!posts || posts.length === 0) {
+//        throw new NotFoundException('포스트가 없습니다.');
+//      }
+//      const postIds = posts.map((post) => post.id);
 //
-// const postsByCategory = postLikes.reduce((result, postLike) => {
-//   const category = postLike.post.restaurant.category_name;
-//   if (!result[category]) {
-//     result[category] = [];
-//   }
-//   result[category].push(postLike.post);
-//   return result;
-// }, {});
+//      const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 //
-// for (const category of Object.keys(postsByCategory)) {
-//   const postsInCategory = postsByCategory[category];
-//   postsInCategory.sort((a, b) => {
-//     const aLikes = postLikes.find(
-//       (postLike) => postLike.post.id === a.id,
-//     ).totalLikes;
-//     const bLikes = postLikes.find(
-//       (postLike) => postLike.post.id === b.id,
-//     ).totalLikes;
-//     return bLikes - aLikes;
-//   });
+//      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+//        postIds,
+//        userId,
+//      );
 //
-//   postsByCategory[category] = shuffle(postsInCategory.slice(0, 10));
-// }
+//      return posts.map((post) => {
+//        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
+//        const likes =
+//          postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
+//        const isLiked =
+//          likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
+//          'False';
+//        const totalComments = post.comments ? post.comments.length : 0;
+//        return {
+//          id: post.id,
+//          content: post.content,
+//          rating: post.rating,
+//          updated_at: post.updated_at,
+//          user: post.user,
+//          restaurant: post.restaurant,
+//          images: post.images,
+//          hashtags,
+//          totalLikes: likes,
+//          isLiked,
+//          totalComments,
+//          myList: post.collectionItems,
+//          visibility: post.visibility,
+//        };

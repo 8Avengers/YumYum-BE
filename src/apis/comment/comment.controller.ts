@@ -14,7 +14,9 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Comment')
 @Controller('posts/:postId/comments')
 export class CommentController {
   constructor(private readonly commentService: CommentService) {}
@@ -24,6 +26,7 @@ export class CommentController {
       ### 이드보라
       ### 특정 포스팅에 해당하는 모든 댓글 불러오기
      */
+  @ApiOperation({ summary: '한 포스트의 모든 댓글 불러오기' })
   @Get()
   @UseGuards(AuthAccessGuard)
   async getAllComments(
@@ -38,6 +41,7 @@ export class CommentController {
       ### 이드보라
       ### 댓글 작성
      */
+  @ApiOperation({ summary: '댓글 작성' })
   @Post()
   @UseGuards(AuthAccessGuard)
   createComment(
@@ -57,6 +61,7 @@ export class CommentController {
       ### 이드보라
       ### 댓글 수정
      */
+  @ApiOperation({ summary: '댓글 수정' })
   @Put(':commentId')
   @UseGuards(AuthAccessGuard)
   async updateComment(
@@ -72,6 +77,7 @@ export class CommentController {
        ### 이드보라
        ###댓글 삭제
      */
+  @ApiOperation({ summary: '댓글 수정' })
   @Delete(':commentId')
   @UseGuards(AuthAccessGuard)
   async deleteComment(
