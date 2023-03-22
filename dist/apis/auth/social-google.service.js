@@ -33,6 +33,9 @@ let SocialGoogleService = class SocialGoogleService {
                     redirect_uri: this.redirectUri,
                     grant_type: 'authorization_code',
                 },
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
             }));
             console.log('getOauth2Token from social-google.service.ts?', response.data);
             return response.data;
