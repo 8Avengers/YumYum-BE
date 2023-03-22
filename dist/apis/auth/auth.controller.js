@@ -82,7 +82,7 @@ let AuthController = class AuthController {
     }
 };
 __decorate([
-    (0, common_1.Post)('oauth/login/google'),
+    (0, common_1.Post)('oauth/login/:google'),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, common_1.Body)()),
@@ -92,7 +92,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "oauthSignUpGoogle", null);
 __decorate([
-    (0, common_1.Post)('oauth/login/kakao'),
+    (0, common_1.Post)('oauth/login/:kakao'),
     (0, common_1.HttpCode)(200),
     __param(0, (0, common_1.Param)()),
     __param(1, (0, common_1.Body)()),

@@ -1,5 +1,5 @@
 export declare class SocialLoginProviderDTO {
-    provider: 'kakao' | 'naver';
+    provider: 'kakao' | 'naver' | 'google';
 }
 export declare class SocialLoginBodyDTO {
     code: string;
