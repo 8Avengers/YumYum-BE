@@ -40,7 +40,7 @@ export class AuthController {
   ) {}
 
   //구글로그인-Passport미사용
-  @Post('oauth/login/google')
+  @Post('oauth/login/:google')
   @HttpCode(200)
   async oauthSignUpGoogle(
     @Param() params: SocialLoginProviderDTO,
@@ -52,7 +52,7 @@ export class AuthController {
   }
 
   //카카오/네이버로그인-Passport미사용
-  @Post('oauth/login/kakao')
+  @Post('oauth/login/:kakao')
   @HttpCode(200)
   async oauthSignUpKakao(
     @Param() params: SocialLoginProviderDTO,
