@@ -39,16 +39,28 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
-  //소셜로그인API-Passport미사용
-  @Post('oauth/login/:provider')
+  //구글로그인-Passport미사용
+  @Post('oauth/login/google')
   @HttpCode(200)
-  async oauthSignIn(
+  async oauthSignUpGoogle(
     @Param() params: SocialLoginProviderDTO,
     @Body() body: SocialLoginBodyDTO,
   ) {
     const { provider } = params;
     console.log('들어오나 확인', provider, body);
-    return await this.authService.oauthLogin(provider, body);
+    return await this.authService.oauthLoginGoogle(provider, body);
+  }
+
+  //카카오/네이버로그인-Passport미사용
+  @Post('oauth/login/kakao')
+  @HttpCode(200)
+  async oauthSignUpKakao(
+    @Param() params: SocialLoginProviderDTO,
+    @Body() body: SocialLoginBodyDTO,
+  ) {
+    const { provider } = params;
+    console.log('들어오나 확인', provider, body);
+    return await this.authService.oauthLoginKakao(provider, body);
   }
 
   /*
@@ -105,7 +117,7 @@ export class AuthController {
 
   //구글로그인-Passport 사용
   // @loginGoogle() //스웨거전용커스텀데코레이터
-  @Get('/login/google')
+  @Get('/login/passport/google')
   @UseGuards(AuthGuard('google'))
   async loginGoogle(
     @CurrentUser() user: OauthPassportDto, //
@@ -118,7 +130,7 @@ export class AuthController {
   }
 
   //카카오로그인-Passport 사용
-  @Get('/login/kakao')
+  @Get('/login/passport/kakao')
   @UseGuards(AuthGuard('kakao'))
   async loginKakao(
     @CurrentUser() user: OauthPassportDto, //
@@ -132,7 +144,7 @@ export class AuthController {
 
   //네이버로그인-passport 사용
   // @loginNaver() //스웨거전용커스텀데코레이터
-  @Get('/login/naver')
+  @Get('/login/passport/naver')
   @UseGuards(AuthGuard('naver'))
   async loginNaver(
     @CurrentUser() user: OauthPassportDto, //
