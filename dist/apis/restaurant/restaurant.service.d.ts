@@ -9,4 +9,5 @@ export declare class RestaurantService {
     catch(err: any): void;
     deleteRestaurant(kakao_place_id: any): Promise<void>;
     getNearRestaurant(x: string, y: string): Promise<any[]>;
+    getRelatedRestaurant(kakao_place_id: any): Promise<Restaurant[]>;
 }

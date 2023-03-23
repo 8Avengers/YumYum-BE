@@ -38,6 +38,9 @@ let RestaurantController = class RestaurantController {
     async getCloseRestaurant(data) {
         return await this.restaurantService.getNearRestaurant(data.x, data.y);
     }
+    async getRelatedRestaurant(kakao_place_id) {
+        return await this.restaurantService.getRelatedRestaurant(kakao_place_id);
+    }
 };
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '가게 상세 데이터 받기' }),
@@ -72,13 +75,21 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], RestaurantController.prototype, "deleteRestaurant", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: '메인 페이지' }),
+    (0, swagger_1.ApiOperation)({ summary: '메인 페이지 주변 맛집' }),
     (0, common_1.Get)('/main/near-restaurant'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], RestaurantController.prototype, "getCloseRestaurant", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: '가게 관련 포스트 ' }),
+    (0, common_1.Get)('/restaurant-detail/related-posting/:kakao_place_id'),
+    __param(0, (0, common_1.Param)('kakao_place_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], RestaurantController.prototype, "getRelatedRestaurant", null);
 RestaurantController = __decorate([
     (0, swagger_1.ApiTags)('Restaurant'),
     (0, common_1.Controller)('restaurant'),

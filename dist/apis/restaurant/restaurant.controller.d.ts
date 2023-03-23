@@ -10,4 +10,5 @@ export declare class RestaurantController {
     updateRestaurant(data: UpdateRestaurantDto): Promise<import("typeorm").UpdateResult>;
     deleteRestaurant(kakao_place_id: string): Promise<void>;
     getCloseRestaurant(data: Partial<LocationRestaurantDto>): Promise<any[]>;
+    getRelatedRestaurant(kakao_place_id: string): Promise<import("./entities/restaurant.entity").Restaurant[]>;
 }
