@@ -87,7 +87,7 @@ export class MyListService {
                 x: true,
                 y: true,
                 place_name: true,
-                category_group_name: true,
+                category_name: true,
               },
             },
           },
@@ -195,7 +195,6 @@ export class MyListService {
             category_name: true,
             place_name: true,
             road_address_name: true,
-            category_group_name: true, //이게맞나?
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true },
@@ -652,7 +651,6 @@ export class MyListService {
         relations: {
           post: {
             postLikes: true,
-            user: true,
             images: true,
           },
           collection: {
@@ -663,12 +661,10 @@ export class MyListService {
           // 컬렉션 타입이 myList 이면서 삭제되지 않은 것을 가져온다
           collection: {
             type: 'myList',
-            deletedAt: null,
           },
           post: {
             // 좋아요가 삭제되지 않았고, 1달 이내에 좋아요 업데이트된 게시물만 가져온다
             postLikes: {
-              deleted_at: null,
               updated_at: MoreThan(oneMonthAgo),
             },
           },
@@ -681,10 +677,6 @@ export class MyListService {
             postLikes: {
               id: true,
             },
-            user: {
-              id: true,
-              nickname: true,
-            },
           },
           collection: {
             id: true,
@@ -692,6 +684,7 @@ export class MyListService {
             user: {
               id: true,
               nickname: true,
+              profile_image: true,
             },
           },
         },
@@ -726,12 +719,15 @@ export class MyListService {
       const top3Collections = collectionSumLikes
         // .slice(0, 10)
         .map(({ collection, user, sumLikes, images }: any) => {
+          console.log('콘솔로그!!!!!!!!!!!!!!', user.profile_image);
+
           return {
             id: collection.id,
             name: collection.name,
             user: {
               id: user.id,
               nickname: user.nickname,
+              profile_image: user.profile_image,
             },
             sumLikes,
             images,
