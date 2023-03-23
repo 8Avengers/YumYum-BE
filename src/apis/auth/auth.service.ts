@@ -47,8 +47,11 @@ export class AuthService {
     console.log('info에는 뭐가 들어가 있을까?', info);
 
     console.log('getUserInfo통과후info.email', info.email);
-    console.log('getUserInfo통과후info.nickname', info.nickname);
-    console.log('getUserInfo통과후info.name', info.name);
+    console.log('getUserInfo통과후info.nickname', info.name);
+    console.log(
+      'getUserInfo통과후info.fullname',
+      info.family_name + info.given_name,
+    );
 
     let user; // 먼저 유저 정의
 
@@ -59,13 +62,13 @@ export class AuthService {
       어카운트 닉네임을 
       내가정의한 변수로 담는다.
       */
-      const providerIdFromGoogle = info.id;
-      const userEmailFromGoogle = info.kakao_account.email;
-      const userNicknameFromGoogle = info.kakao_account.profile.nickname;
+      const providerIdFromGoogle = info.sub;
+      const userEmailFromGoogle = info.email;
+      const userNicknameFromGoogle = info.name;
 
-      console.log('useridFromKakao info.id 통과', providerIdFromGoogle);
-      console.log('userEmailFromKakao통과', userEmailFromGoogle);
-      console.log('userNicknameFromKakao통과', userNicknameFromGoogle);
+      console.log('useridFromGoogle info.id 통과', providerIdFromGoogle);
+      console.log('userEmailFromGoogle통과', userEmailFromGoogle);
+      console.log('userNicknameFromGoogle통과', userNicknameFromGoogle);
 
       // 1. 가입확인
       const existingUser = await this.userSignupService.findOne({
