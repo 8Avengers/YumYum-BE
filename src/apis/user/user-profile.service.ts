@@ -273,11 +273,15 @@ export class UserProfileService {
   //유저의 팔로워 조회하기
   async getFollowers(
     userId: number,
+    page: string,
   ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     try {
+      const pageNum = Number(page) - 1;
       const follows = await this.FollowRepository.find({
         where: { following: { id: userId } },
         relations: ['follower'],
+        skip: pageNum * 15,
+        take: 15,
       });
       const result = follows.map((follow) => ({
         id: follow.follower.id,
@@ -297,11 +301,15 @@ export class UserProfileService {
   //유저의 팔로잉 조회하기
   async getFollowings(
     userId: number,
+    page: string,
   ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     try {
+      const pageNum = Number(page) - 1;
       const follows = await this.FollowRepository.find({
         where: { follower: { id: userId } },
         relations: ['following'],
+        skip: pageNum * 15,
+        take: 15,
       });
       const result = follows.map((follow) => ({
         id: follow.following.id,
