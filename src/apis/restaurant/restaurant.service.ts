@@ -127,6 +127,8 @@ export class RestaurantService {
     }
   }
   async getNearRestaurant(x: string, y: string) {
+    const xNum = Number(x);
+    const yNum = Number(y);
     const nearRestaurant = await this.restaurantRepository
       .createQueryBuilder('restaurant')
       .leftJoin('restaurant.posts', 'post')
@@ -140,7 +142,7 @@ export class RestaurantService {
         'image.file_url',
       ])
       .addSelect(
-        `6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`,
+        `6371 * acos(cos(radians(${yNum})) * cos(radians(y)) * cos(radians(x) - radians(${xNum})) + sin(radians(${yNum})) * sin(radians(y)))`,
         'distance',
       )
       .having(`distance <= 3`)
