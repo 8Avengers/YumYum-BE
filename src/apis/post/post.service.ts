@@ -255,7 +255,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
-    userTags: string[],
+    // userTags: string[],
     files: Express.Multer.File[],
     // usernames: string[],
   ) {
@@ -313,7 +313,7 @@ export class PostService {
 
       await this.myListService.myListPlusPosting(postId, myListIds);
 
-      await this.postUserTagService.tagUsersInPost(postId, userTags);
+      // await this.postUserTagService.tagUsersInPost(postId, userTags);
 
       return { postId: postId };
     } catch (err) {
@@ -346,7 +346,7 @@ export class PostService {
     rating: number,
     visibility,
     hashtagNames: string[],
-    userTags: string[],
+    // userTags: string[],
     newFiles: Express.Multer.File[],
     originalFiles: string[],
   ) {
@@ -449,9 +449,9 @@ export class PostService {
         await this.myListService.myListUpdatePosting(id, myListId);
       }
 
-      if (userTags) {
-        await this.postUserTagService.updateUserTagInPost(id, userTags);
-      }
+      // if (userTags) {
+      //   await this.postUserTagService.updateUserTagInPost(id, userTags);
+      // }
 
       return { postId: id };
     } catch (err) {
