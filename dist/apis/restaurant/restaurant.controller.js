@@ -35,8 +35,9 @@ let RestaurantController = class RestaurantController {
     async deleteRestaurant(kakao_place_id) {
         return this.restaurantService.deleteRestaurant(kakao_place_id);
     }
-    async getCloseRestaurant(data) {
-        return await this.restaurantService.getNearRestaurant(data.x, data.y);
+    async getCloseRestaurant(x, y) {
+        console.log('현재 위치 좌표 !!!!!!!!!', x, y);
+        return await this.restaurantService.getNearRestaurant(x, y);
     }
     async getRelatedRestaurant(kakao_place_id) {
         return await this.restaurantService.getRelatedRestaurant(kakao_place_id);
@@ -77,9 +78,10 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: '메인 페이지 주변 맛집' }),
     (0, common_1.Get)('/main/near-restaurant'),
-    __param(0, (0, common_1.Body)()),
+    __param(0, (0, common_1.Query)('x')),
+    __param(1, (0, common_1.Query)('y')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], RestaurantController.prototype, "getCloseRestaurant", null);
 __decorate([

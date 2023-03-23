@@ -97,6 +97,8 @@ let RestaurantService = class RestaurantService {
         }
     }
     async getNearRestaurant(x, y) {
+        const xNum = Number(x);
+        const yNum = Number(y);
         const nearRestaurant = await this.restaurantRepository
             .createQueryBuilder('restaurant')
             .leftJoin('restaurant.posts', 'post')
@@ -109,7 +111,7 @@ let RestaurantService = class RestaurantService {
             'AVG(post.rating)',
             'image.file_url',
         ])
-            .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
+            .addSelect(`6371 * acos(cos(radians(${yNum})) * cos(radians(y)) * cos(radians(x) - radians(${xNum})) + sin(radians(${yNum})) * sin(radians(y)))`, 'distance')
             .having(`distance <= 3`)
             .groupBy('restaurant.place_name')
             .orderBy('rand()')
