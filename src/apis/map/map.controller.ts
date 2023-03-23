@@ -3,7 +3,6 @@ import { Body, Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MapService } from './map.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { LocationRestaurantDto } from './dto/location-restaurant.dto';
 
 @ApiTags('Map')
 @Controller('map')
@@ -31,6 +30,15 @@ export class MapController {
     @Param('collectionId') collectionId: number,
     @CurrentUser() currentUser: any,
   ) {
-    return await this.mapService.getMyPosting(currentUser.id, collectionId);
+    return await this.mapService.getMyCollectionPosting(
+      currentUser.id,
+      collectionId,
+    );
+  }
+
+  @ApiOperation({ summary: '내 포스팅 지도' })
+  @Get('/user-posting/:userId')
+  async getUserPostingSearchInMap(@Param('userId') userId: number) {
+    return await this.mapService.getUserPosting(userId);
   }
 }
