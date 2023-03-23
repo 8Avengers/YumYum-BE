@@ -41,22 +41,66 @@ export class AuthController {
   ) {}
 
   // 소셜 로그인 API - Passport 미사용
+  // @Post('oauth/login/:provider')
+  // @HttpCode(200)
+  // async oauthSignIn(
+  //   @Param('provider') provider: string,
+  //   @Body() body: SocialLoginBodyDTO,
+  // ) {
+  //   console.log('들어오나 확인', provider, body);
+
+  //   if (provider === 'google') {
+  //     return await this.authService.oauthLoginGoogle(provider, body);
+  //   } else if (provider === 'kakao') {
+  //     return await this.authService.oauthLoginKakao(provider, body);
+  //   } else {
+  //     throw new BadRequestException(`Invalid provider: ${provider}`);
+  //   }
+  // }
+
+  // Social Login API - Passport not used
   @Post('oauth/login/:provider')
   @HttpCode(200)
   async oauthSignIn(
     @Param('provider') provider: string,
     @Body() body: SocialLoginBodyDTO,
   ) {
-    console.log('들어오나 확인', provider, body);
+    console.log('Check if its coming in', provider, body);
 
     if (provider === 'google') {
       return await this.authService.oauthLoginGoogle(provider, body);
     } else if (provider === 'kakao') {
-      return await this.authService.oauthLoginKakao(provider, body);
+      return await this.authService.oauthLoginSocial(provider, body);
+    } else if (provider === 'naver') {
+      return await this.authService.oauthLoginSocial(provider, body);
     } else {
       throw new BadRequestException(`Invalid provider: ${provider}`);
     }
   }
+
+  // //구글로그인-Passport미사용
+  // @Post('oauth/login/:google')
+  // @HttpCode(200)
+  // async oauthSignUpGoogle(
+  //   @Param() params: SocialLoginProviderDTO,
+  //   @Body() body: SocialLoginBodyDTO,
+  // ) {
+  //   const { provider } = params;
+  //   console.log('들어오나 확인', provider, body);
+  //   return await this.authService.oauthLoginGoogle(provider, body);
+  // }
+
+  // //카카오/네이버로그인-Passport미사용
+  // @Post('oauth/login/:kakao')
+  // @HttpCode(200)
+  // async oauthSignUpKakao(
+  //   @Param() params: SocialLoginProviderDTO,
+  //   @Body() body: SocialLoginBodyDTO,
+  // ) {
+  //   const { provider } = params;
+  //   console.log('들어오나 확인', provider, body);
+  //   return await this.authService.oauthLoginKakao(provider, body);
+  // }
 
   /*
 

@@ -19,7 +19,6 @@ export class CreatePostDto {
   @IsString({ each: true })
   readonly hashtagNames?: string;
 
-  // @IsArray()
-  // @IsString({ each: true })
-  // readonly userNames?: string[];
+  @IsString({ each: true })
+  readonly userTags?: string;
 }
