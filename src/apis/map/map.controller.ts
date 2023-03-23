@@ -3,7 +3,6 @@ import { Body, Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MapService } from './map.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { LocationRestaurantDto } from './dto/location-restaurant.dto';
 
 @ApiTags('Map')
 @Controller('map')
