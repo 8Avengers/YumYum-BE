@@ -183,11 +183,14 @@ let UserProfileService = class UserProfileService {
             throw new common_1.InternalServerErrorException('Failed to delete follow relationship');
         }
     }
-    async getFollowers(userId) {
+    async getFollowers(userId, page) {
         try {
+            const pageNum = Number(page) - 1;
             const follows = await this.FollowRepository.find({
                 where: { following: { id: userId } },
                 relations: ['follower'],
+                skip: pageNum * 15,
+                take: 15,
             });
             const result = follows.map((follow) => ({
                 id: follow.follower.id,
@@ -201,11 +204,14 @@ let UserProfileService = class UserProfileService {
             throw new Error(`Failed to retrieve followers for user with id ${userId}.`);
         }
     }
-    async getFollowings(userId) {
+    async getFollowings(userId, page) {
         try {
+            const pageNum = Number(page) - 1;
             const follows = await this.FollowRepository.find({
                 where: { follower: { id: userId } },
                 relations: ['following'],
+                skip: pageNum * 15,
+                take: 15,
             });
             const result = follows.map((follow) => ({
                 id: follow.following.id,

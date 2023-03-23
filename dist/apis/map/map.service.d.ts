@@ -9,5 +9,6 @@ export declare class MapService {
     constructor(postRepository: Repository<Post>, followRepository: Repository<Follow>, restaurantRepository: Repository<Restaurant>);
     getFollowerPosting(userId: number): Promise<any[]>;
     getFollowerPostingList(userId: number): Promise<any[]>;
-    getMyPosting(userId: number, collectionId: number): Promise<Post[]>;
+    getMyCollectionPosting(userId: number, collectionId: number): Promise<Post[]>;
+    getUserPosting(userId: number): Promise<Post[]>;
 }

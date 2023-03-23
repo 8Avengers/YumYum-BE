@@ -44,12 +44,12 @@ export declare class UserProfileController {
         userTags: string[];
     }[]>;
     followUser(follower: User, followingId: number): Promise<string>;
-    getFollowersOfUser(userId: number): Promise<{
+    getFollowersOfUser(userId: number, page: string): Promise<{
         id: number;
         nickname: string;
         profile_image: string;
     }[]>;
-    getFollowingsOfUser(userId: number): Promise<{
+    getFollowingsOfUser(userId: number, page: string): Promise<{
         id: number;
         nickname: string;
         profile_image: string;

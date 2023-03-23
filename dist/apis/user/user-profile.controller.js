@@ -109,12 +109,12 @@ let UserProfileController = class UserProfileController {
             return `${follower.nickname}님이 ${followingUser.nickname}님을 팔로우하였어요`;
         }
     }
-    async getFollowersOfUser(userId) {
-        const userIdFollowers = await this.userProfileService.getFollowers(userId);
+    async getFollowersOfUser(userId, page) {
+        const userIdFollowers = await this.userProfileService.getFollowers(userId, page);
         return userIdFollowers;
     }
-    async getFollowingsOfUser(userId) {
-        const userIdFollowings = await this.userProfileService.getFollowings(userId);
+    async getFollowingsOfUser(userId, page) {
+        const userIdFollowings = await this.userProfileService.getFollowings(userId, page);
         return userIdFollowings;
     }
 };
@@ -178,15 +178,17 @@ __decorate([
 __decorate([
     (0, common_1.Get)('/:userId/followers'),
     __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getFollowersOfUser", null);
 __decorate([
     (0, common_1.Get)('/:userId/followings'),
     __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Query)('page')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [Number, String]),
     __metadata("design:returntype", Promise)
 ], UserProfileController.prototype, "getFollowingsOfUser", null);
 UserProfileController = __decorate([

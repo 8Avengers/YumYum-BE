@@ -77,7 +77,7 @@ let MyListService = class MyListService {
                                 x: true,
                                 y: true,
                                 place_name: true,
-                                category_group_name: true,
+                                category_name: true,
                             },
                         },
                     },
@@ -155,7 +155,6 @@ let MyListService = class MyListService {
                         category_name: true,
                         place_name: true,
                         road_address_name: true,
-                        category_group_name: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true },
@@ -338,7 +337,6 @@ let MyListService = class MyListService {
                 myListInfo.image = myListInfo.image;
             }
             const updateMyListInfo = await this.collectionRepository.save(myListInfo);
-            console.log('updateMyListInfo 정보:::::::::', updateMyListInfo);
             return {
                 name: updateMyListInfo.name,
                 image: updateMyListInfo.image,
@@ -461,7 +459,6 @@ let MyListService = class MyListService {
                 relations: {
                     post: {
                         postLikes: true,
-                        user: true,
                         images: true,
                     },
                     collection: {
@@ -471,11 +468,9 @@ let MyListService = class MyListService {
                 where: {
                     collection: {
                         type: 'myList',
-                        deletedAt: null,
                     },
                     post: {
                         postLikes: {
-                            deleted_at: null,
                             updated_at: (0, typeorm_2.MoreThan)(oneMonthAgo),
                         },
                     },
@@ -488,10 +483,6 @@ let MyListService = class MyListService {
                         postLikes: {
                             id: true,
                         },
-                        user: {
-                            id: true,
-                            nickname: true,
-                        },
                     },
                     collection: {
                         id: true,
@@ -499,10 +490,11 @@ let MyListService = class MyListService {
                         user: {
                             id: true,
                             nickname: true,
+                            profile_image: true,
                         },
                     },
                 },
-                take: 2,
+                take: 5,
             });
             const groupedData = myListSumLikes.reduce((groups, item) => {
                 var _a, _b, _c, _d, _e;
@@ -530,6 +522,7 @@ let MyListService = class MyListService {
                     user: {
                         id: user.id,
                         nickname: user.nickname,
+                        profile_image: user.profile_image,
                     },
                     sumLikes,
                     images,

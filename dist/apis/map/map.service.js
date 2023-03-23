@@ -69,13 +69,15 @@ let MapService = class MapService {
         console.log('followerList : ', followerList);
         for (let following of followerList) {
             const followerPost = await this.postRepository.find({
-                relations: ['restaurant', 'user'],
+                relations: ['restaurant', 'user', 'images'],
                 where: { user: { id: following.following.id } },
                 select: {
                     id: true,
                     rating: true,
                     content: true,
-                    images: true,
+                    images: {
+                        file_url: true,
+                    },
                     updated_at: true,
                     restaurant: {
                         place_name: true,
@@ -94,7 +96,7 @@ let MapService = class MapService {
         }
         return followerPostingResult;
     }
-    async getMyPosting(userId, collectionId) {
+    async getMyCollectionPosting(userId, collectionId) {
         return await this.postRepository.find({
             relations: ['user', 'collectionItems', 'restaurant'],
             where: {
@@ -110,6 +112,29 @@ let MapService = class MapService {
             },
             order: {
                 updated_at: 'DESC',
+            },
+        });
+    }
+    async getUserPosting(userId) {
+        return await this.postRepository.find({
+            relations: ['restaurant'],
+            where: {
+                user: { id: userId },
+            },
+            select: {
+                id: true,
+                rating: true,
+                user: {
+                    id: true,
+                    profile_image: true,
+                },
+                restaurant: {
+                    id: true,
+                    place_name: true,
+                    category_name: true,
+                    x: true,
+                    y: true,
+                },
             },
         });
     }

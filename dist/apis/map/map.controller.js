@@ -29,7 +29,10 @@ let MapController = class MapController {
         return await this.mapService.getFollowerPostingList(currentUser.id);
     }
     async getMyPostingSearchInMap(collectionId, currentUser) {
-        return await this.mapService.getMyPosting(currentUser.id, collectionId);
+        return await this.mapService.getMyCollectionPosting(currentUser.id, collectionId);
+    }
+    async getUserPostingSearchInMap(userId) {
+        return await this.mapService.getUserPosting(userId);
     }
 };
 __decorate([
@@ -60,6 +63,14 @@ __decorate([
     __metadata("design:paramtypes", [Number, Object]),
     __metadata("design:returntype", Promise)
 ], MapController.prototype, "getMyPostingSearchInMap", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: '내 포스팅 지도' }),
+    (0, common_1.Get)('/user-posting/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", Promise)
+], MapController.prototype, "getUserPostingSearchInMap", null);
 MapController = __decorate([
     (0, swagger_1.ApiTags)('Map'),
     (0, common_1.Controller)('map'),

@@ -29,12 +29,12 @@ export declare class UserProfileService {
     getFollowByFollowerAndFollowingIds(followerId: number, followingId: number): Promise<Follow>;
     createUserFollowRelation(follower: User, followingId: number): Promise<User>;
     deleteUserFollowRelation(follower: User, followingId: number): Promise<User>;
-    getFollowers(userId: number): Promise<{
+    getFollowers(userId: number, page: string): Promise<{
         id: number;
         nickname: string;
         profile_image: string;
     }[]>;
-    getFollowings(userId: number): Promise<{
+    getFollowings(userId: number, page: string): Promise<{
         id: number;
         nickname: string;
         profile_image: string;
