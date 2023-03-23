@@ -6,7 +6,7 @@ export class SocialLoginProviderDTO {
   @IsIn(['kakao', 'naver'], {
     message: '소셜 로그인은 kakao와 naver와 google만 지원합니다.',
   })
-  provider: 'kakao' | 'naver';
+  provider: 'kakao' | 'naver' | 'google';
 }
 
 export class SocialLoginBodyDTO {
