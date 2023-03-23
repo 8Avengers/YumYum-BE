@@ -62,7 +62,7 @@ export class AuthService {
       어카운트 닉네임을 
       내가정의한 변수로 담는다.
       */
-      const providerIdFromGoogle = info.id;
+      const providerIdFromGoogle = info.sub;
       const userEmailFromGoogle = info.email;
       const userNicknameFromGoogle = info.name;
 
