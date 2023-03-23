@@ -470,9 +470,8 @@ export class MyListService {
       } else {
         myListInfo.image = myListInfo.image;
       }
-      // 담은 정보를 저장한다.
+
       const updateMyListInfo = await this.collectionRepository.save(myListInfo);
-      console.log('updateMyListInfo 정보:::::::::', updateMyListInfo);
 
       return {
         name: updateMyListInfo.name,
@@ -719,8 +718,6 @@ export class MyListService {
       const top3Collections = collectionSumLikes
         // .slice(0, 10)
         .map(({ collection, user, sumLikes, images }: any) => {
-          console.log('콘솔로그!!!!!!!!!!!!!!', user.profile_image);
-
           return {
             id: collection.id,
             name: collection.name,
