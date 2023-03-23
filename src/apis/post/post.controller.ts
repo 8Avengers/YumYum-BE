@@ -94,7 +94,7 @@ export class PostController {
 
     const parsedHashtagNames = JSON.parse(data.hashtagNames);
 
-    const parsedUserTags = JSON.parse(data.userTags);
+    // const parsedUserTags = JSON.parse(data.userTags);
 
     return this.postService.createPost(
       currentUser.id,
@@ -113,7 +113,7 @@ export class PostController {
       parsedRating,
       data.visibility,
       parsedHashtagNames,
-      parsedUserTags,
+      // parsedUserTags
       files,
       // data.userNames,
     );
@@ -162,9 +162,9 @@ export class PostController {
       parsedHashtagNames = JSON.parse(data.hashtagNames);
     }
 
-    if (data.userTags) {
-      parsedUserTags = JSON.parse(data.userTags);
-    }
+    // if (data.userTags) {
+    //   parsedUserTags = JSON.parse(data.userTags);
+    // }
 
     return this.postService.updatePost(
       postId,
@@ -183,7 +183,7 @@ export class PostController {
       parsedRating,
       data.visibility,
       parsedHashtagNames,
-      parsedUserTags,
+      // parsedUserTags,
       files,
       data.files,
     );
