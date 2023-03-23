@@ -36,8 +36,7 @@ let PostController = class PostController {
         const parsedMyListId = JSON.parse(data.myListId);
         const parsedRating = JSON.parse(data.rating);
         const parsedHashtagNames = JSON.parse(data.hashtagNames);
-        const parsedUserTags = JSON.parse(data.userTags);
-        return this.postService.createPost(currentUser.id, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, parsedUserTags, files);
+        return this.postService.createPost(currentUser.id, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, files);
     }
     async updatePost(files, postId, data, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }) {
         let parsedMyListId;
@@ -53,10 +52,7 @@ let PostController = class PostController {
         if (data.hashtagNames) {
             parsedHashtagNames = JSON.parse(data.hashtagNames);
         }
-        if (data.userTags) {
-            parsedUserTags = JSON.parse(data.userTags);
-        }
-        return this.postService.updatePost(postId, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, parsedUserTags, files, data.files);
+        return this.postService.updatePost(postId, address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, parsedMyListId, data.content, parsedRating, data.visibility, parsedHashtagNames, files, data.files);
     }
     async deletePost(postId) {
         return this.postService.deletePost(postId);

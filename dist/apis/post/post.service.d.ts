@@ -60,10 +60,10 @@ export declare class PostService {
         visibility: "public" | "private";
         userTags: string[];
     }>;
-    createPost(userId: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListIds: number[], content: string, rating: number, visibility: any, hashtagNames: string[], userTags: string[], files: Express.Multer.File[]): Promise<{
+    createPost(userId: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListIds: number[], content: string, rating: number, visibility: any, hashtagNames: string[], files: Express.Multer.File[]): Promise<{
         postId: number;
     }>;
-    updatePost(id: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListId: number[], content: string, rating: number, visibility: any, hashtagNames: string[], userTags: string[], newFiles: Express.Multer.File[], originalFiles: string[]): Promise<{
+    updatePost(id: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListId: number[], content: string, rating: number, visibility: any, hashtagNames: string[], newFiles: Express.Multer.File[], originalFiles: string[]): Promise<{
         postId: number;
     }>;
     deletePost(id: number): Promise<void>;

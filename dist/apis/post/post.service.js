@@ -197,7 +197,7 @@ let PostService = class PostService {
             }
         }
     }
-    async createPost(userId, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListIds, content, rating, visibility, hashtagNames, userTags, files) {
+    async createPost(userId, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListIds, content, rating, visibility, hashtagNames, files) {
         try {
             const createdRestaurant = await this.restaurantService.createRestaurant(address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y);
             const restaurantId = createdRestaurant;
@@ -226,7 +226,6 @@ let PostService = class PostService {
                 }
             });
             await this.myListService.myListPlusPosting(postId, myListIds);
-            await this.postUserTagService.tagUsersInPost(postId, userTags);
             return { postId: postId };
         }
         catch (err) {
@@ -234,7 +233,7 @@ let PostService = class PostService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    async updatePost(id, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListId, content, rating, visibility, hashtagNames, userTags, newFiles, originalFiles) {
+    async updatePost(id, address_name, category_group_code, category_group_name, category_name, kakao_place_id, phone, place_name, road_address_name, x, y, myListId, content, rating, visibility, hashtagNames, newFiles, originalFiles) {
         try {
             const post = await this.postRepository.findOne({
                 where: { id },
@@ -292,9 +291,6 @@ let PostService = class PostService {
             await this.imageRepository.updatePostImages(newPostImages, originalFiles, post);
             if (myListId) {
                 await this.myListService.myListUpdatePosting(id, myListId);
-            }
-            if (userTags) {
-                await this.postUserTagService.updateUserTagInPost(id, userTags);
             }
             return { postId: id };
         }
