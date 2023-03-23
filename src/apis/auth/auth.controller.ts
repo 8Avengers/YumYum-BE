@@ -40,9 +40,7 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
-  //구글로그인 - passport 미사용
-
-  //소셜로그인 - passport 미사용
+  //소셜로그인 - passport 미사용 (구글 + 네이버 + 카카오)
   @Post('oauth/login/:provider')
   @HttpCode(200)
   async oauthSignIn(
