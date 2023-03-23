@@ -39,6 +39,9 @@ export class SocialGoogleService {
         response.data,
       );
 
+      //   console.log("code가 socialgoogleservice에 들어오는가", code);
+      //   console.log('getOauth2Token from social-google.service.ts?', response.data);
+
       return response.data;
     } catch (err) {
       console.error(err); // log the error for debugging
@@ -47,30 +50,6 @@ export class SocialGoogleService {
       });
     }
   }
-
-  // async getOauth2Token({ code }: SocialLoginBodyDTO) {
-
-  //   console.log("code가 socialgoogleservice에 들어오는가", code);
-  //   const response = await lastValueFrom(
-  //     this.httpService.post('https://oauth2.googleapis.com/token', null, {
-  //       params: {
-  //         code,
-  //         client_id: this.clientId,
-  //         client_secret: this.clientSecret,
-  //         redirect_uri: this.redirectUri,
-  //         grant_type: 'authorization_code',
-  //       },
-  //     }),
-  //   ).catch((err: AxiosError) => {
-  //     throw new BadRequestException({
-  //       message: 'Invalid login request.',
-  //     });
-  //   });
-  //   console.log("code가 socialgoogleservice에 들어오는가", code);
-  //   console.log('getOauth2Token from social-google.service.ts?', response.data);
-
-  //   return response.data;
-  // }
 
   async getUserInfo(accessToken: string) {
     const response = await lastValueFrom(
