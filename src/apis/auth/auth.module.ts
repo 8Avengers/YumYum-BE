@@ -18,8 +18,6 @@ import { SocialKakaoService } from './social-kakao.service';
 import { SocialNaverService } from './social-naver.service';
 import { HttpModule } from '@nestjs/axios';
 import { SocialGoogleService } from './social-google.service';
-import { GoogleOauthService } from './google-oauth.service';
-import { GoogleOauthController } from './google-oauth.controller';
 
 @Module({
   imports: [
@@ -41,11 +39,8 @@ import { GoogleOauthController } from './google-oauth.controller';
     SocialNaverService,
     SocialKakaoService,
     SocialGoogleService,
-
-    //아래는 구글전용
-    GoogleOauthService,
   ],
 
-  controllers: [AuthController, GoogleOauthController],
+  controllers: [AuthController],
 })
 export class AuthModule {}
