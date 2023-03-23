@@ -695,7 +695,7 @@ export class MyListService {
             },
           },
         },
-        take: 2,
+        take: 5,
       });
 
       // 컬렉션별 좋아요 수를 합산하여 그룹화한다
