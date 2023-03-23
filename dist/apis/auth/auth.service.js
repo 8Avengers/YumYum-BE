@@ -35,16 +35,16 @@ let AuthService = class AuthService {
         console.log('token에는 뭐가 들어가 있을까?', token);
         console.log('info에는 뭐가 들어가 있을까?', info);
         console.log('getUserInfo통과후info.email', info.email);
-        console.log('getUserInfo통과후info.nickname', info.nickname);
-        console.log('getUserInfo통과후info.name', info.name);
+        console.log('getUserInfo통과후info.nickname', info.name);
+        console.log('getUserInfo통과후info.fullname', info.family_name + info.given_name);
         let user;
         try {
-            const providerIdFromGoogle = info.id;
-            const userEmailFromGoogle = info.kakao_account.email;
-            const userNicknameFromGoogle = info.kakao_account.profile.nickname;
-            console.log('useridFromKakao info.id 통과', providerIdFromGoogle);
-            console.log('userEmailFromKakao통과', userEmailFromGoogle);
-            console.log('userNicknameFromKakao통과', userNicknameFromGoogle);
+            const providerIdFromGoogle = info.sub;
+            const userEmailFromGoogle = info.email;
+            const userNicknameFromGoogle = info.name;
+            console.log('useridFromGoogle info.id 통과', providerIdFromGoogle);
+            console.log('userEmailFromGoogle통과', userEmailFromGoogle);
+            console.log('userNicknameFromGoogle통과', userNicknameFromGoogle);
             const existingUser = await this.userSignupService.findOne({
                 email: userEmailFromGoogle,
             });
