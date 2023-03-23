@@ -101,7 +101,7 @@ export class MapService {
     return followerPostingResult;
   }
 
-  async getMyPosting(userId: number, collectionId: number) {
+  async getMyCollectionPosting(userId: number, collectionId: number) {
     return await this.postRepository.find({
       relations: ['user', 'collectionItems', 'restaurant'],
       where: {
@@ -117,6 +117,30 @@ export class MapService {
       },
       order: {
         updated_at: 'DESC',
+      },
+    });
+  }
+
+  async getUserPosting(userId: number) {
+    return await this.postRepository.find({
+      relations: ['restaurant'],
+      where: {
+        user: { id: userId },
+      },
+      select: {
+        id: true,
+        rating: true,
+        user: {
+          id: true,
+          profile_image: true,
+        },
+        restaurant: {
+          id: true,
+          place_name: true,
+          category_name: true,
+          x: true,
+          y: true,
+        },
       },
     });
   }
