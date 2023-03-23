@@ -257,7 +257,6 @@ export class PostService {
     hashtagNames: string[],
     // userTags: string[],
     files: Express.Multer.File[],
-    // usernames: string[],
   ) {
     try {
       const createdRestaurant = await this.restaurantService.createRestaurant(
