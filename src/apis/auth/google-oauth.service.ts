@@ -47,16 +47,14 @@ export class GoogleOauthService {
       grant_type: 'authorization_code',
     };
 
+    console.log(values);
+
     try {
-      const res = await axios.post<GoogleTokensResult>(
-        url,
-        new URLSearchParams(values).toString(),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
+      const res = await axios.post<GoogleTokensResult>(url, values, {
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+      });
 
       console.log('getOAuthTokensFromGoogle통과후', res.data);
 
