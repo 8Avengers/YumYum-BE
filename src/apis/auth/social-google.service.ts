@@ -26,7 +26,7 @@ export class SocialGoogleService {
             code,
             client_id: this.clientId,
             client_secret: this.clientSecret,
-            redirect_uri: this.redirectUri,
+            redirect_url: this.redirectUri,
             grant_type: 'authorization_code',
           },
           headers: {
