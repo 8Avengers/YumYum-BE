@@ -74,15 +74,6 @@ export declare class MyListService {
     myListPlusPosting(postId: number, collectionId: number[]): Promise<any[]>;
     myListMinusPosting(postId: number, collectionId: number): Promise<void>;
     myListUpdatePosting(postId: number, collectionId: number[]): Promise<void>;
-    HotMyList(): Promise<{
-        id: any;
-        name: any;
-        user: {
-            id: any;
-            nickname: any;
-            profile_image: any;
-        };
-        sumLikes: any;
-    }[]>;
+    HotMyList(): Promise<any>;
     FollowersMyList(userId: number): Promise<CollectionItem[]>;
 }
