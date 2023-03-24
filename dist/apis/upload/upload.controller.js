@@ -20,9 +20,6 @@ let UploadController = class UploadController {
     constructor(uploadService) {
         this.uploadService = uploadService;
     }
-    getHello() {
-        return 'hello, we are 8Avengers!';
-    }
     async uploadMediaFile(file) {
         console.log('file::::::', file);
         return await this.uploadService.uploadProfileImageToS3('yumyumdb-test', file);
@@ -33,12 +30,6 @@ let UploadController = class UploadController {
         return await Promise.all(promises);
     }
 };
-__decorate([
-    (0, common_1.Get)(),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], UploadController.prototype, "getHello", null);
 __decorate([
     (0, common_1.Post)('upload'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
