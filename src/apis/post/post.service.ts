@@ -531,7 +531,7 @@ export class PostService {
           postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
-        offset: pageNum * 8,
+        skip: pageNum * 8,
         take: 8,
       } as any);
       if (!posts || posts.length === 0) {
@@ -622,7 +622,7 @@ export class PostService {
           postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
-        offset: pageNum * 8,
+        skip: pageNum * 8,
         take: 8,
       } as any);
       if (!posts || posts.length === 0) {
