@@ -844,7 +844,7 @@ export class PostService {
           `6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`,
           'distance',
         )
-        .addSelect('hashtags.name')
+        .addSelect(['hashtags.id', 'hashtags.name'])
         .addSelect(['image.id', 'image.file_url', 'image.created_at'])
         // .addSelect('collection.id', 'collection_id')
         // .addSelect('userTags.user AS taggedUser')
@@ -873,6 +873,7 @@ export class PostService {
       // });
 
       return postsAroundMe.map((post, index) => {
+        const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
         const isLiked =
@@ -898,7 +899,7 @@ export class PostService {
           user: post.user,
           restaurant: post.restaurant,
           images: sortedImages,
-          hashtags: post.hashtags,
+          hashtags,
           totalLikes: likes,
           isLiked,
           totalComments,
