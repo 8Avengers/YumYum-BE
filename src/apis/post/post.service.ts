@@ -781,6 +781,7 @@ export class PostService {
         .addSelect(['image.id', 'image.file_url', 'image.created_at'])
         // .addSelect('collection.id', 'collection_id')
         // .addSelect('userTags.user AS taggedUser')
+        .where('post.visibility = :visibility', { visibility: 'public' })
         .having(`distance <= 3`)
         .orderBy('post.created_at', 'DESC')
         .addOrderBy('image.created_at', 'ASC')
