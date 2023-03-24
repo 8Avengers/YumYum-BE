@@ -257,7 +257,6 @@ export class PostService {
     hashtagNames: string[],
     // userTags: string[],
     files: Express.Multer.File[],
-    // usernames: string[],
   ) {
     try {
       const createdRestaurant = await this.restaurantService.createRestaurant(
@@ -532,7 +531,7 @@ export class PostService {
           postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
-        offset: pageNum * 8,
+        skip: pageNum * 8,
         take: 8,
       } as any);
       if (!posts || posts.length === 0) {
@@ -623,7 +622,7 @@ export class PostService {
           postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
-        offset: pageNum * 8,
+        skip: pageNum * 8,
         take: 8,
       } as any);
       if (!posts || posts.length === 0) {
