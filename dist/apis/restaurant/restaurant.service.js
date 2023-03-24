@@ -114,6 +114,7 @@ let RestaurantService = class RestaurantService {
             .addSelect(`6371 * acos(cos(radians(${yNum})) * cos(radians(y)) * cos(radians(x) - radians(${xNum})) + sin(radians(${yNum})) * sin(radians(y)))`, 'distance')
             .having(`distance <= 3`)
             .groupBy('restaurant.place_name')
+            .where('image.file_url IS NOT NULL')
             .orderBy('rand()')
             .limit(3)
             .getRawMany();

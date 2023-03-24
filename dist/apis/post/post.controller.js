@@ -60,8 +60,8 @@ let PostController = class PostController {
     async getTrendingPostsByCategory(category) {
         return this.postService.getTrendingPosts(category);
     }
-    async getPostsAroundMe(data, currentUser, page) {
-        return this.postService.getPostsAroundMe(data.x, data.y, currentUser.id, page);
+    async getPostsAroundMe(currentUser, page, x, y) {
+        return this.postService.getPostsAroundMe(x, y, currentUser.id, page);
     }
 };
 __decorate([
@@ -133,11 +133,12 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: '내 주변 피드' }),
     (0, common_1.Get)('/feed/aroundMe'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, current_user_decorator_1.CurrentUser)()),
-    __param(2, (0, common_1.Query)('page')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('x')),
+    __param(3, (0, common_1.Query)('y')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], PostController.prototype, "getPostsAroundMe", null);
 PostController = __decorate([

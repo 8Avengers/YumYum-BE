@@ -90,18 +90,19 @@ let AuthService = class AuthService {
     }
     async oauthLoginSocial(provider, body) {
         const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
-        console.log('socialService 통과후 body', body, 'socialService 통과후 provider', provider);
         const token = await socialService.getOauth2Token(body);
         const info = await socialService.getUserInfo(token.access_token);
-        console.log('token에는 뭐가 들어가 있을까?', token);
-        console.log('info에는 뭐가 들어가 있을까?', info);
-        console.log('info에는 뭐가 들어가 있을까?', provider);
-        console.log('getUserInfo통과후info.email', info.email);
-        console.log('getUserInfo통과후info.nickname', info.nickname);
-        console.log('getUserInfo통과후info.name', info.name);
+        console.log('socialService 통과후 body', body, 'socialService 통과후 provider', provider);
         let user;
         if (provider === 'kakao') {
             try {
+                console.log('body 확인', body, 'provider 확인', provider);
+                console.log('token에는 뭐가 들어가 있을까?', token);
+                console.log('info에는 뭐가 들어가 있을까?', info);
+                console.log('info에는 뭐가 들어가 있을까?', provider);
+                console.log('getUserInfo통과후info.email', info.email);
+                console.log('getUserInfo통과후info.nickname', info.nickname);
+                console.log('getUserInfo통과후info.name', info.name);
                 const providerIdFromKakao = info.id;
                 const userEmailFromKakao = info.kakao_account.email;
                 const userNicknameFromKakao = info.kakao_account.profile.nickname;
@@ -137,6 +138,7 @@ let AuthService = class AuthService {
             }
         }
         else if (provider === 'naver') {
+            console.log('body 확인', body, 'provider 확인', provider);
             const providerIdFromNaver = info.id;
             const userEmailFromNaver = info.email;
             const userNicknameFromNaver = info.nickname;
@@ -144,6 +146,7 @@ let AuthService = class AuthService {
             console.log('userEmailFromNaver passed', userEmailFromNaver);
             console.log('passed userNicknameFromNaver', userNicknameFromNaver);
             console.log('info', info);
+            console.log('provider', provider);
             try {
                 const existingUser = await this.userSignupService.findOne({
                     email: userEmailFromNaver,
@@ -173,7 +176,6 @@ let AuthService = class AuthService {
                 }
             }
         }
-        console.log('try catch문 통과한 이후의 user', user);
         const accessToken = await this.createAccessToken({ user });
         const refreshToken = await this.createRefreshToken({ user });
         return {

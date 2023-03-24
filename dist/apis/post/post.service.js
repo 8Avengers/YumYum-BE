@@ -358,7 +358,7 @@ let PostService = class PostService {
                     postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
-                offset: pageNum * 8,
+                skip: pageNum * 8,
                 take: 8,
             });
             if (!posts || posts.length === 0) {
@@ -439,7 +439,7 @@ let PostService = class PostService {
                     postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
-                offset: pageNum * 8,
+                skip: pageNum * 8,
                 take: 8,
             });
             if (!posts || posts.length === 0) {

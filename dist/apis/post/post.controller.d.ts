@@ -2,7 +2,6 @@
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { LocationDto } from './dto/location.dto';
 import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 export declare class PostController {
     private readonly postService;
@@ -51,7 +50,7 @@ export declare class PostController {
     }>;
     deletePost(postId: number): Promise<void>;
     getTrendingPostsByCategory(category: string): Promise<any>;
-    getPostsAroundMe(data: Partial<LocationDto>, currentUser: any, page: string): Promise<{
+    getPostsAroundMe(currentUser: any, page: string, x: string, y: string): Promise<{
         id: number;
         content: string;
         rating: number;
