@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 // import _ from 'lodash';
-import { Repository, Between, MoreThan } from 'typeorm';
+import { Repository, Between, MoreThan, Not } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { PostLikeService } from './post-like.service';
 import { PostHashtagService } from './post-hashtag.service';
@@ -147,7 +147,10 @@ export class PostService {
   async getPostById(postId: number, userId: number) {
     try {
       const post = await this.postRepository.find({
-        where: { id: postId, deleted_at: null },
+        where: [
+          { id: postId, user: { id: userId } },
+          { id: postId, user: { id: Not(userId) }, visibility: 'public' },
+        ],
         select: {
           id: true,
           content: true,
@@ -181,7 +184,7 @@ export class PostService {
         order: { images: { created_at: 'asc' } },
       });
 
-      if (!post) {
+      if (!post || post.length === 0) {
         throw new NotFoundException(`존재하지 않는 포스트입니다.`);
       }
 
