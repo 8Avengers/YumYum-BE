@@ -520,8 +520,8 @@ export class MyListService {
     */
   async deleteMyList(collectionId: number) {
     try {
-      const deleteResult = await this.collectionItemRepository.delete({
-        collection: { id: collectionId },
+      const deleteResult = await this.collectionRepository.delete({
+        id: collectionId,
       });
 
       if (deleteResult.affected === 0) {
