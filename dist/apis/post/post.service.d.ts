@@ -93,7 +93,7 @@ export declare class PostService {
         user: import("../user/entities/user.entity").User;
         restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
         images: import("./entities/image.entity").Image[];
-        hashtags: import("./entities/hashtag.entity").Hashtag[];
+        hashtags: string[];
         totalLikes: number;
         isLiked: any;
         totalComments: number;

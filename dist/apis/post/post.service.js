@@ -622,7 +622,7 @@ let PostService = class PostService {
             ])
                 .addSelect(['user.id', 'user.nickname', 'user.profile_image'])
                 .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
-                .addSelect('hashtags.name')
+                .addSelect(['hashtags.id', 'hashtags.name'])
                 .addSelect(['image.id', 'image.file_url', 'image.created_at'])
                 .where('post.visibility = :visibility', { visibility: 'public' })
                 .having(`distance <= 3`)
@@ -638,6 +638,7 @@ let PostService = class PostService {
             const likedStatuses = await this.likeService.getLikedStatusforAllPosts(postIds, userId);
             return postsAroundMe.map((post, index) => {
                 var _a, _b;
+                const hashtags = post.hashtags.map((hashtag) => hashtag.name);
                 const likes = ((_a = postLikes.find((like) => like.postId === post.id)) === null || _a === void 0 ? void 0 : _a.totalLikes) || 0;
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
@@ -659,7 +660,7 @@ let PostService = class PostService {
                     user: post.user,
                     restaurant: post.restaurant,
                     images: sortedImages,
-                    hashtags: post.hashtags,
+                    hashtags,
                     totalLikes: likes,
                     isLiked,
                     totalComments,
