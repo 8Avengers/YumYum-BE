@@ -83,22 +83,7 @@ export declare class PostService {
         visibility: "public" | "private";
         userTags: string[];
     }[]>;
-    getPostsByOtherUserId(userId: number, myUserId: number, page: string): Promise<{
-        id: number;
-        content: string;
-        rating: number;
-        updated_at: Date;
-        user: import("../user/entities/user.entity").User;
-        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
-        images: import("./entities/image.entity").Image[];
-        hashtags: string[];
-        totalLikes: number;
-        isLiked: any;
-        totalComments: number;
-        myList: CollectionItem[];
-        visibility: "public" | "private";
-        userTags: string[];
-    }[]>;
+    getPostsByOtherUserId(userId: number, myUserId: number, page: string): Promise<any>;
     getTrendingPosts(category: string): Promise<any>;
     getPostsAroundMe(x: string, y: string, userId: any, page: string): Promise<{
         id: number;

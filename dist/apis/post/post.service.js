@@ -76,7 +76,7 @@ let PostService = class PostService {
                     },
                     postUserTags: { user: true },
                 },
-                order: { created_at: 'desc', images: { created_at: 'asc' } },
+                order: { created_at: 'desc' },
                 skip: pageNum * 8,
                 take: 8,
             });
@@ -94,6 +94,15 @@ let PostService = class PostService {
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
                 const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
+                const sortedImages = post.images.sort((a, b) => {
+                    if (a.created_at > b.created_at) {
+                        return 1;
+                    }
+                    else if (a.created_at < b.created_at) {
+                        return -1;
+                    }
+                    return 0;
+                });
                 return {
                     id: post.id,
                     content: post.content,
@@ -101,7 +110,7 @@ let PostService = class PostService {
                     updated_at: post.updated_at,
                     user: post.user,
                     restaurant: post.restaurant,
-                    images: post.images,
+                    images: sortedImages,
                     hashtags,
                     totalLikes: likes,
                     isLiked,
@@ -361,7 +370,7 @@ let PostService = class PostService {
                     },
                     postUserTags: { user: true },
                 },
-                order: { created_at: 'desc', images: { created_at: 'asc' } },
+                order: { created_at: 'desc' },
                 skip: pageNum * 8,
                 take: 8,
             });
@@ -379,6 +388,15 @@ let PostService = class PostService {
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
                 const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
+                const sortedImages = post.images.sort((a, b) => {
+                    if (a.created_at > b.created_at) {
+                        return 1;
+                    }
+                    else if (a.created_at < b.created_at) {
+                        return -1;
+                    }
+                    return 0;
+                });
                 return {
                     id: post.id,
                     content: post.content,
@@ -386,7 +404,7 @@ let PostService = class PostService {
                     updated_at: post.updated_at,
                     user: post.user,
                     restaurant: post.restaurant,
-                    images: post.images,
+                    images: sortedImages,
                     hashtags,
                     totalLikes: likes,
                     isLiked,
@@ -410,42 +428,83 @@ let PostService = class PostService {
     async getPostsByOtherUserId(userId, myUserId, page) {
         try {
             const pageNum = Number(page) - 1;
-            const posts = await this.postRepository.find({
-                where: { deleted_at: null, visibility: 'public', user: { id: userId } },
-                select: {
-                    id: true,
-                    content: true,
-                    rating: true,
-                    updated_at: true,
-                    visibility: true,
-                    created_at: true,
-                    restaurant: {
-                        kakao_place_id: true,
-                        address_name: true,
-                        category_name: true,
-                        place_name: true,
-                        road_address_name: true,
+            let posts;
+            if (userId === myUserId) {
+                posts = await this.postRepository.find({
+                    where: { user: { id: userId } },
+                    select: {
+                        id: true,
+                        content: true,
+                        rating: true,
+                        updated_at: true,
+                        visibility: true,
+                        created_at: true,
+                        restaurant: {
+                            kakao_place_id: true,
+                            address_name: true,
+                            category_name: true,
+                            place_name: true,
+                            road_address_name: true,
+                        },
+                        user: { id: true, nickname: true, profile_image: true },
+                        images: { id: true, file_url: true, created_at: true },
+                        collectionItems: { id: true, collection: { id: true } },
+                        postUserTags: { id: true, user: { nickname: true } },
                     },
-                    user: { id: true, nickname: true, profile_image: true },
-                    images: { id: true, file_url: true, created_at: true },
-                    collectionItems: { id: true, collection: { id: true } },
-                    postUserTags: { id: true, user: { nickname: true } },
-                },
-                relations: {
-                    user: true,
-                    restaurant: true,
-                    hashtags: true,
-                    comments: true,
-                    images: true,
-                    collectionItems: {
-                        collection: true,
+                    relations: {
+                        user: true,
+                        restaurant: true,
+                        hashtags: true,
+                        comments: true,
+                        images: true,
+                        collectionItems: {
+                            collection: true,
+                        },
+                        postUserTags: { user: true },
                     },
-                    postUserTags: { user: true },
-                },
-                order: { created_at: 'desc', images: { created_at: 'asc' } },
-                skip: pageNum * 8,
-                take: 8,
-            });
+                    order: { created_at: 'desc' },
+                    skip: pageNum * 8,
+                    take: 8,
+                });
+            }
+            else {
+                posts = await this.postRepository.find({
+                    where: { visibility: 'public', user: { id: userId } },
+                    select: {
+                        id: true,
+                        content: true,
+                        rating: true,
+                        updated_at: true,
+                        visibility: true,
+                        created_at: true,
+                        restaurant: {
+                            kakao_place_id: true,
+                            address_name: true,
+                            category_name: true,
+                            place_name: true,
+                            road_address_name: true,
+                        },
+                        user: { id: true, nickname: true, profile_image: true },
+                        images: { id: true, file_url: true, created_at: true },
+                        collectionItems: { id: true, collection: { id: true } },
+                        postUserTags: { id: true, user: { nickname: true } },
+                    },
+                    relations: {
+                        user: true,
+                        restaurant: true,
+                        hashtags: true,
+                        comments: true,
+                        images: true,
+                        collectionItems: {
+                            collection: true,
+                        },
+                        postUserTags: { user: true },
+                    },
+                    order: { created_at: 'desc' },
+                    skip: pageNum * 8,
+                    take: 8,
+                });
+            }
             if (!posts || posts.length === 0) {
                 return [];
             }
@@ -460,6 +519,15 @@ let PostService = class PostService {
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
                 const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
+                const sortedImages = post.images.sort((a, b) => {
+                    if (a.created_at > b.created_at) {
+                        return 1;
+                    }
+                    else if (a.created_at < b.created_at) {
+                        return -1;
+                    }
+                    return 0;
+                });
                 return {
                     id: post.id,
                     content: post.content,
@@ -467,7 +535,7 @@ let PostService = class PostService {
                     updated_at: post.updated_at,
                     user: post.user,
                     restaurant: post.restaurant,
-                    images: post.images,
+                    images: sortedImages,
                     hashtags,
                     totalLikes: likes,
                     isLiked,
@@ -559,7 +627,6 @@ let PostService = class PostService {
                 .where('post.visibility = :visibility', { visibility: 'public' })
                 .having(`distance <= 3`)
                 .orderBy('post.created_at', 'DESC')
-                .addOrderBy('image.created_at', 'ASC')
                 .skip(pageNum * 8)
                 .take(8)
                 .getMany();
@@ -575,6 +642,15 @@ let PostService = class PostService {
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
+                const sortedImages = post.images.sort((a, b) => {
+                    if (a.created_at > b.created_at) {
+                        return 1;
+                    }
+                    else if (a.created_at < b.created_at) {
+                        return -1;
+                    }
+                    return 0;
+                });
                 return {
                     id: post.id,
                     content: post.content,
@@ -582,7 +658,7 @@ let PostService = class PostService {
                     updated_at: post.updated_at,
                     user: post.user,
                     restaurant: post.restaurant,
-                    images: post.images,
+                    images: sortedImages,
                     hashtags: post.hashtags,
                     totalLikes: likes,
                     isLiked,

@@ -30,22 +30,7 @@ export declare class UserProfileController {
         profile_image: string;
         follow_relationship: any;
     }>;
-    getUserIdPosts(userId: number, currentUser: User, page: string): Promise<{
-        id: number;
-        content: string;
-        rating: number;
-        updated_at: Date;
-        user: User;
-        restaurant: import("../restaurant/entities/restaurant.entity").Restaurant;
-        images: import("../post/entities/image.entity").Image[];
-        hashtags: string[];
-        totalLikes: number;
-        isLiked: any;
-        totalComments: number;
-        myList: import("../collection/entities/collection-item.entity").CollectionItem[];
-        visibility: "public" | "private";
-        userTags: string[];
-    }[]>;
+    getUserIdPosts(userId: number, currentUser: User, page: string): Promise<any>;
     followUser(follower: User, followingId: number): Promise<string>;
     getFollowersOfUser(userId: number, page: string): Promise<{
         id: number;
