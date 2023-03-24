@@ -3,6 +3,13 @@ import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserProfileDto {
   @ApiProperty({
+    description: 'name',
+    required: true,
+  })
+  @IsString({ message: '닉네임은 문자열로 입력해주세요.' })
+  name: string;
+
+  @ApiProperty({
     example: '승윤123',
     description: 'nickanme',
     required: true,

@@ -8,10 +8,10 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { RestaurantService } from './restaurant.service';
-import { LocationRestaurantDto } from '../map/dto/location-restaurant.dto';
 
 @ApiTags('Restaurant')
 @Controller('restaurant')
@@ -68,9 +68,16 @@ export class RestaurantController {
     return this.restaurantService.deleteRestaurant(kakao_place_id);
   }
 
-  @ApiOperation({ summary: '메인 페이지' })
+  @ApiOperation({ summary: '메인 페이지 주변 맛집' })
   @Get('/main/near-restaurant')
-  async getCloseRestaurant(@Body() data: Partial<LocationRestaurantDto>) {
-    return await this.restaurantService.getNearRestaurant(data.x, data.y);
+  async getCloseRestaurant(@Query('x') x: string, @Query('y') y: string) {
+    console.log('현재 위치 좌표 !!!!!!!!!', x, y);
+    return await this.restaurantService.getNearRestaurant(x, y);
+  }
+
+  @ApiOperation({ summary: '가게 관련 포스트 ' })
+  @Get('/restaurant-detail/related-posting/:kakao_place_id')
+  async getRelatedRestaurant(@Param('kakao_place_id') kakao_place_id: string) {
+    return await this.restaurantService.getRelatedRestaurant(kakao_place_id);
   }
 }

@@ -32,7 +32,7 @@ export class AuthService {
 
   //구글로그인-Passport미사용
   async oauthLoginGoogle(
-    provider: 'kakao' | 'naver' | 'google', //
+    provider: 'google', //
     body: SocialLoginBodyDTO,
   ) {
     const socialService = this.socialGoogleService;
@@ -47,8 +47,11 @@ export class AuthService {
     console.log('info에는 뭐가 들어가 있을까?', info);
 
     console.log('getUserInfo통과후info.email', info.email);
-    console.log('getUserInfo통과후info.nickname', info.nickname);
-    console.log('getUserInfo통과후info.name', info.name);
+    console.log('getUserInfo통과후info.nickname', info.name);
+    console.log(
+      'getUserInfo통과후info.fullname',
+      info.family_name + info.given_name,
+    );
 
     let user; // 먼저 유저 정의
 
@@ -59,13 +62,13 @@ export class AuthService {
       어카운트 닉네임을 
       내가정의한 변수로 담는다.
       */
-      const providerIdFromGoogle = info.id;
-      const userEmailFromGoogle = info.kakao_account.email;
-      const userNicknameFromGoogle = info.kakao_account.profile.nickname;
+      const providerIdFromGoogle = info.sub;
+      const userEmailFromGoogle = info.email;
+      const userNicknameFromGoogle = info.name;
 
-      console.log('useridFromKakao info.id 통과', providerIdFromGoogle);
-      console.log('userEmailFromKakao통과', userEmailFromGoogle);
-      console.log('userNicknameFromKakao통과', userNicknameFromGoogle);
+      console.log('useridFromGoogle info.id 통과', providerIdFromGoogle);
+      console.log('userEmailFromGoogle통과', userEmailFromGoogle);
+      console.log('userNicknameFromGoogle통과', userNicknameFromGoogle);
 
       // 1. 가입확인
       const existingUser = await this.userSignupService.findOne({
@@ -123,6 +126,8 @@ export class AuthService {
   ) {
     const socialService =
       provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
+    const token = await socialService.getOauth2Token(body); //body안에는 code와 state가 들어있어.
+    const info = await socialService.getUserInfo(token.access_token);
 
     console.log(
       'socialService 통과후 body',
@@ -131,28 +136,20 @@ export class AuthService {
       provider,
     );
 
-    const token = await socialService.getOauth2Token(body); //body안에는 code와 state가 들어있어.
-    const info = await socialService.getUserInfo(token.access_token);
-
-    console.log('token에는 뭐가 들어가 있을까?', token);
-    console.log('info에는 뭐가 들어가 있을까?', info);
-    console.log('info에는 뭐가 들어가 있을까?', provider);
-
-    console.log('getUserInfo통과후info.email', info.email);
-    console.log('getUserInfo통과후info.nickname', info.nickname);
-    console.log('getUserInfo통과후info.name', info.name);
-
-    // const id = info.id;
-    // let nickname =
-    //   provider === 'kakao'
-    //     ? info.kakao_account.profile.nickname
-    //     : info.nickname;
-
     let user; // 먼저 유저 정의
 
     if (provider === 'kakao') {
       try {
         // KAKAO API로 부터 응답받은 카카오 어카운트 이메일, 카카오어카운트 닉네임을 내가정의한 변수로 담는다.
+        console.log('body 확인', body, 'provider 확인', provider);
+
+        console.log('token에는 뭐가 들어가 있을까?', token);
+        console.log('info에는 뭐가 들어가 있을까?', info);
+        console.log('info에는 뭐가 들어가 있을까?', provider);
+
+        console.log('getUserInfo통과후info.email', info.email);
+        console.log('getUserInfo통과후info.nickname', info.nickname);
+        console.log('getUserInfo통과후info.name', info.name);
 
         const providerIdFromKakao = info.id;
         const userEmailFromKakao = info.kakao_account.email;
@@ -193,16 +190,17 @@ export class AuthService {
         }
       }
     } else if (provider === 'naver') {
+      console.log('body 확인', body, 'provider 확인', provider);
+
       const providerIdFromNaver = info.id;
       const userEmailFromNaver = info.email;
       const userNicknameFromNaver = info.nickname;
-      // Naver파트
-      // profie_image, gender, phone_number, birth 받도록 리팩토링 필요
 
       console.log('useridFromNaver response.id passed', providerIdFromNaver);
       console.log('userEmailFromNaver passed', userEmailFromNaver);
       console.log('passed userNicknameFromNaver', userNicknameFromNaver);
       console.log('info', info);
+      console.log('provider', provider);
 
       try {
         const existingUser = await this.userSignupService.findOne({
@@ -214,10 +212,6 @@ export class AuthService {
             email: userEmailFromNaver,
             nickname: userNicknameFromNaver,
             name: info.name,
-            // profile_image: userProfileFromNaver,
-            // gender: info.gender,
-            // phone_number: info.phone_number,
-            // birth: info.birthyear + '-' + info.birthday,
             provider: provider,
             provider_id: providerIdFromNaver,
           });
@@ -225,13 +219,9 @@ export class AuthService {
           user = existingUser;
         }
 
-        // console.log('If you have already signed up, user in progress of logging in', user);
-
         user = await this.userSignupService.findOne({
           email: user.email,
         });
-
-        // console.log('email from DB: user after user.email', user);
       } catch (error) {
         if (error instanceof ConflictException) {
           console.error(`Error: ${error.message}`);
@@ -240,8 +230,6 @@ export class AuthService {
         }
       }
     }
-
-    console.log('try catch문 통과한 이후의 user', user);
 
     // 3. 로그인 : 소셜 로그인했지만, 우리서비스에서 로그인한 것처럼 AT,RT발급
     const accessToken = await this.createAccessToken({ user });

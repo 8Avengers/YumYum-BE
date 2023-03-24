@@ -2,7 +2,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { PostService } from '../post.service';
-import { Test } from '@nestjs/testing';
+import { Test, mocked } from '@nestjs/testing';
 import {
   InternalServerErrorException,
   NotFoundException,
@@ -52,6 +52,8 @@ describe('PostService', () => {
   });
 
   describe('getPosts', () => {
+    const mockUserId = 1;
+    const mockPage = '1';
     it('should return an array of posts', async () => {
       const mockPosts = [
         {
@@ -82,7 +84,7 @@ describe('PostService', () => {
         getMany: jest.fn().mockResolvedValueOnce(mockPosts),
       } as any);
 
-      const result = await postService.getPosts();
+      const result = await postService.getPosts(mockUserId, mockPage);
 
       expect(result).toEqual(mockPosts);
       expect(mockPostRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
@@ -97,9 +99,9 @@ describe('PostService', () => {
         getMany: jest.fn().mockResolvedValueOnce([]),
       } as any);
 
-      await expect(postService.getPosts()).rejects.toThrowError(
-        new NotFoundException('No posts found.'),
-      );
+      await expect(
+        postService.getPosts(mockUserId, mockPage),
+      ).rejects.toThrowError(new NotFoundException('No posts found.'));
     });
 
     it('should throw an InternalServerErrorException if an error occurs', async () => {
@@ -109,7 +111,9 @@ describe('PostService', () => {
           throw new Error('Something went wrong');
         });
 
-      await expect(postService.getPosts()).rejects.toThrowError(
+      await expect(
+        postService.getPosts(mockUserId, mockPage),
+      ).rejects.toThrowError(
         new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         ),
@@ -118,6 +122,7 @@ describe('PostService', () => {
   });
 
   describe('getPostById', () => {
+    const mockUserId = 1;
     it('should return a post by given id', async () => {
       const id = 1;
       const post = new Post();
@@ -130,7 +135,7 @@ describe('PostService', () => {
         getOne: jest.fn().mockResolvedValueOnce(post),
       } as any);
 
-      const result = await postService.getPostById(id);
+      const result = await postService.getPostById(id, mockUserId);
 
       expect(result).toBe(post);
     });
@@ -145,7 +150,7 @@ describe('PostService', () => {
         getOne: jest.fn().mockResolvedValueOnce(undefined),
       } as any);
 
-      await expect(postService.getPostById(id)).rejects.toThrow(
+      await expect(postService.getPostById(id, mockUserId)).rejects.toThrow(
         new NotFoundException(`Post with id ${id} not found.`),
       );
     });
@@ -158,7 +163,7 @@ describe('PostService', () => {
           throw new Error();
         });
 
-      await expect(postService.getPostById(id)).rejects.toThrow(
+      await expect(postService.getPostById(id, mockUserId)).rejects.toThrow(
         new InternalServerErrorException(
           'Something went wrong while processing your request. Please try again later.',
         ),
@@ -167,27 +172,82 @@ describe('PostService', () => {
   });
 
   describe('createPost', () => {
+   const files: Express.Multer.File[] = [
+  {
+    fieldname: 'file',
+    originalname: 'test.txt',
+    encoding: '7bit',
+    mimetype: 'text/plain',
+    size: 1024,
+    destination: './uploads',
+    filename: 'test.txt',
+    path: './uploads/test.txt',
+    buffer: Buffer.from('test'),
+  },
+];
     const newPost = {
+      userId: 1,
       content: 'content1',
       rating: 5,
-      img_url: 'img_url',
+      // img_url: 'img_url',
       visibility: 'public',
+      address_name: '구의동',
+      category_group_code: 'FFF',
+      category_group_name: '음식점',
+      category_name: '한식',
+      kakao_place_id: '12322424',
+      phone: '123214215',
+      place_name: '식당이름',
+      road_address_name: '자양로',
+      x: '332423523',
+      y: '23252533',
+      myListIds: [14, 25],
+      hashtagNames: ['dkddkfd'],
+      files: File[],
     };
     it('should create a new post', async () => {
       const expectedPost = {
+        userId: newPost.userId,
         content: newPost.content,
         rating: newPost.rating,
-        img_url: newPost.img_url,
+        // img_url: newPost.img_url,
         visibility: newPost.visibility,
+        address_name: newPost.address_name,
+        category_group_code: newPost.category_group_code,
+        category_group_name: newPost.category_group_name,
+        category_name: newPost.category_name,
+        kakao_place_id: newPost.kakao_place_id,
+        phone: newPost.phone,
+        place_name: newPost.place_name,
+        road_address_name: newPost.road_address_name,
+        x: newPost.x,
+        y: newPost.y,
+        myListIds: newPost.myListIds,
+        hashtagNames: newPost.hashtagNames,
+        files: newPost.files,
       };
 
       mockPostRepository.insert = jest.fn().mockResolvedValueOnce(expectedPost);
 
       const createdPost = await postService.createPost(
+        newPost.userId,
+        newPost.address_name,
+        newPost.category_group_code,
+        newPost.category_group_name,
+        newPost.category_name,
+        newPost.kakao_place_id,
+        newPost.phone,
+        newPost.place_name,
+        newPost.road_address_name,
+        newPost.x,
+        newPost.y,
+        newPost.myListIds,
         newPost.content,
         newPost.rating,
-        newPost.img_url,
+        // newPost.img_url,
         newPost.visibility,
+        newPost.hashtagNames,
+        newPost.files,
       );
 
       expect(createdPost).toEqual(expectedPost);

@@ -16,7 +16,6 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { LocationDto } from './dto/location.dto';
 import { CreateRestaurantDto } from '../restaurant/dto/create-restaurant.dto';
 import { AuthAccessGuard } from '../auth/guards/auth.guards';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -94,7 +93,7 @@ export class PostController {
 
     const parsedHashtagNames = JSON.parse(data.hashtagNames);
 
-    const parsedUserTags = JSON.parse(data.userTags);
+    // const parsedUserTags = JSON.parse(data.userTags);
 
     return this.postService.createPost(
       currentUser.id,
@@ -113,7 +112,7 @@ export class PostController {
       parsedRating,
       data.visibility,
       parsedHashtagNames,
-      parsedUserTags,
+      // parsedUserTags
       files,
       // data.userNames,
     );
@@ -162,9 +161,9 @@ export class PostController {
       parsedHashtagNames = JSON.parse(data.hashtagNames);
     }
 
-    if (data.userTags) {
-      parsedUserTags = JSON.parse(data.userTags);
-    }
+    // if (data.userTags) {
+    //   parsedUserTags = JSON.parse(data.userTags);
+    // }
 
     return this.postService.updatePost(
       postId,
@@ -183,7 +182,7 @@ export class PostController {
       parsedRating,
       data.visibility,
       parsedHashtagNames,
-      parsedUserTags,
+      // parsedUserTags,
       files,
       data.files,
     );
@@ -221,15 +220,11 @@ export class PostController {
   @Get('/feed/aroundMe')
   @UseGuards(AuthAccessGuard)
   async getPostsAroundMe(
-    @Body() data: Partial<LocationDto>,
     @CurrentUser() currentUser: any,
     @Query('page') page: string,
+    @Query('x') x: string,
+    @Query('y') y: string,
   ) {
-    return this.postService.getPostsAroundMe(
-      data.x,
-      data.y,
-      currentUser.id,
-      page,
-    );
+    return this.postService.getPostsAroundMe(x, y, currentUser.id, page);
   }
 }

@@ -14,18 +14,44 @@ export class MapService {
     private restaurantRepository: Repository<Restaurant>,
   ) {}
 
-  async getFollowerPosting(userId: number) {
-    let followerPostingResult = [];
-    const followerList = await this.followRepository.find({
-      relations: ['following'],
-      where: { follower: { id: userId } },
-      select: { following: { id: true } },
-    });
-    console.log('followerList : ', followerList);
-    for (let following of followerList) {
-      const followerPost = await this.postRepository.find({
+  async getFollowerPosting(userId: number, type: string) {
+    if (type == 'FOLLOWING') {
+      let followerPostingResult = [];
+      const followerList = await this.followRepository.find({
+        relations: ['following'],
+        where: { follower: { id: userId } },
+        select: { following: { id: true } },
+      });
+      console.log('followerList : ', followerList);
+      for (let following of followerList) {
+        const followerPost = await this.postRepository.find({
+          relations: ['restaurant', 'user'],
+          where: { visibility: 'public', user: { id: following.following.id } },
+          select: {
+            id: true,
+            rating: true,
+            content: true,
+            updated_at: true,
+            restaurant: {
+              place_name: true,
+              kakao_place_id: true,
+              category_name: true,
+              x: true,
+              y: true,
+            },
+            user: { id: true, nickname: true, profile_image: true },
+          },
+          order: {
+            updated_at: 'DESC',
+          },
+        });
+        followerPostingResult.push(...followerPost);
+      }
+      return followerPostingResult;
+    } else {
+      return await this.postRepository.find({
         relations: ['restaurant', 'user'],
-        where: { user: { id: following.following.id } },
+        where: { visibility: 'public' },
         select: {
           id: true,
           rating: true,
@@ -44,9 +70,7 @@ export class MapService {
           updated_at: 'DESC',
         },
       });
-      followerPostingResult.push(...followerPost);
     }
-    return followerPostingResult;
 
     // 팔로워 마다 리스트가 묶여있어서 데이터 뽑기가 힘들다.
     // return await Promise.all(
@@ -75,13 +99,15 @@ export class MapService {
     console.log('followerList : ', followerList);
     for (let following of followerList) {
       const followerPost = await this.postRepository.find({
-        relations: ['restaurant', 'user'],
-        where: { user: { id: following.following.id } },
+        relations: ['restaurant', 'user', 'images'],
+        where: { visibility: 'public', user: { id: following.following.id } },
         select: {
           id: true,
           rating: true,
           content: true,
-          images: true,
+          images: {
+            file_url: true,
+          },
           updated_at: true,
           restaurant: {
             place_name: true,
@@ -101,7 +127,7 @@ export class MapService {
     return followerPostingResult;
   }
 
-  async getMyPosting(userId: number, collectionId: number) {
+  async getMyCollectionPosting(userId: number, collectionId: number) {
     return await this.postRepository.find({
       relations: ['user', 'collectionItems', 'restaurant'],
       where: {
@@ -117,6 +143,31 @@ export class MapService {
       },
       order: {
         updated_at: 'DESC',
+      },
+    });
+  }
+
+  async getUserPosting(userId: number) {
+    return await this.postRepository.find({
+      relations: ['restaurant'],
+      where: {
+        visibility: 'public',
+        user: { id: userId },
+      },
+      select: {
+        id: true,
+        rating: true,
+        user: {
+          id: true,
+          profile_image: true,
+        },
+        restaurant: {
+          id: true,
+          place_name: true,
+          category_name: true,
+          x: true,
+          y: true,
+        },
       },
     });
   }

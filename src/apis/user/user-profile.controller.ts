@@ -43,6 +43,8 @@ export class UserProfileController {
 
     const response = {
       id: myProfile.id,
+      name: myProfile.name,
+      email: myProfile.email,
       nickname: myProfile.nickname,
       introduce: myProfile.introduce,
       profile_image: myProfile.profile_image,
@@ -72,6 +74,7 @@ export class UserProfileController {
 
     const response = {
       id: updatedUserProfile.id,
+      name: updatedUserProfile.name,
       nickname: updatedUserProfile.nickname,
       introduce: updatedUserProfile.introduce,
       profile_image: updatedUserProfile.profile_image,
@@ -199,8 +202,12 @@ export class UserProfileController {
   @Get('/:userId/followers')
   async getFollowersOfUser(
     @Param('userId') userId: number,
+    @Query('page') page: string,
   ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
-    const userIdFollowers = await this.userProfileService.getFollowers(userId);
+    const userIdFollowers = await this.userProfileService.getFollowers(
+      userId,
+      page,
+    );
     return userIdFollowers;
   }
 
@@ -208,9 +215,11 @@ export class UserProfileController {
   @Get('/:userId/followings')
   async getFollowingsOfUser(
     @Param('userId') userId: number,
+    @Query('page') page: string,
   ): Promise<{ id: number; nickname: string; profile_image: string }[]> {
     const userIdFollowings = await this.userProfileService.getFollowings(
       userId,
+      page,
     );
     return userIdFollowings;
   }
