@@ -1,5 +1,5 @@
 import { AuthAccessGuard } from './../auth/guards/auth.guards';
-import { Body, Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { MapService } from './map.service';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -9,11 +9,14 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 export class MapController {
   constructor(private readonly mapService: MapService) {}
 
-  @ApiOperation({ summary: '맵 탐색 페이지' })
+  @ApiOperation({ summary: '맵 탐색 페이지1' })
   @UseGuards(AuthAccessGuard)
-  @Get('/followerPosting')
-  async getFollowerSearchInMap(@CurrentUser() currentUser: any) {
-    return await this.mapService.getFollowerPosting(currentUser.id);
+  @Get('/following-posting')
+  async getFollowerSearchInMap(
+    @Query('type') type: string,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.mapService.getFollowerPosting(currentUser.id, type);
   }
 
   @ApiOperation({ summary: '맵 탐색 페이지 리스트' })
@@ -35,7 +38,7 @@ export class MapController {
       collectionId,
     );
   }
-
+  A;
   @ApiOperation({ summary: '내 포스팅 지도' })
   @Get('/user-posting/:userId')
   async getUserPostingSearchInMap(@Param('userId') userId: number) {
