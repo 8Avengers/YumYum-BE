@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { CollectionItem } from './entities/collection-item.entity';
 import { Post } from '../post/entities/post.entity';
-import { In, MoreThan } from 'typeorm';
+import { In, MoreThan, Not } from 'typeorm';
 import { Comment } from '../comment/entities/comment.entity';
 import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
@@ -48,7 +48,7 @@ export class MyListService {
     ### MyList 상세보기 [가게명/평점/포스팅내용/이미지]
     */
 
-  async getMyListDetail(collectionId: number, page: string) {
+  async getMyListDetail(collectionId: number, page: string, userId: number) {
     try {
       let pageNum = Number(page) - 1;
       const myListInOnePage = 1; //세준님에게 물어보기
@@ -64,12 +64,19 @@ export class MyListService {
             post: { images: true, restaurant: true },
           },
         },
-        where: {
-          id: collectionId,
-          // user_id: userId,
-          deletedAt: null,
-          type: 'myList',
-        },
+        where: [
+          {
+            id: collectionId,
+            user_id: userId,
+            type: 'myList',
+          },
+          {
+            id: collectionId,
+            user_id: Not(userId),
+            type: 'myList',
+            collectionItems: { post: { visibility: 'public' } },
+          },
+        ],
         select: {
           id: true,
           name: true,
@@ -177,12 +184,25 @@ export class MyListService {
       }
 
       const posts = await this.postRepository.find({
-        where: {
-          deleted_at: null,
-          visibility: 'public',
-          restaurant: { id: restaurantId },
-          collectionItems: { collection: { id: collectionId } },
-        },
+        // where: {
+        //   deleted_at: null,
+        //   visibility: 'public',
+        //   restaurant: { id: restaurantId },
+        //   collectionItems: { collection: { id: collectionId } },
+        // },
+        where: [
+          {
+            user: { id: userId },
+            restaurant: { id: restaurantId },
+            collectionItems: { collection: { id: collectionId } },
+          },
+          {
+            user: { id: Not(userId) },
+            restaurant: { id: restaurantId },
+            collectionItems: { collection: { id: collectionId } },
+            visibility: 'public',
+          },
+        ],
         select: {
           id: true,
           content: true,
