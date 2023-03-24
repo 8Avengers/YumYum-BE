@@ -25,18 +25,44 @@ let MapService = class MapService {
         this.followRepository = followRepository;
         this.restaurantRepository = restaurantRepository;
     }
-    async getFollowerPosting(userId) {
-        let followerPostingResult = [];
-        const followerList = await this.followRepository.find({
-            relations: ['following'],
-            where: { follower: { id: userId } },
-            select: { following: { id: true } },
-        });
-        console.log('followerList : ', followerList);
-        for (let following of followerList) {
-            const followerPost = await this.postRepository.find({
+    async getFollowerPosting(userId, type) {
+        if (type == 'FOLLOWING') {
+            let followerPostingResult = [];
+            const followerList = await this.followRepository.find({
+                relations: ['following'],
+                where: { follower: { id: userId } },
+                select: { following: { id: true } },
+            });
+            console.log('followerList : ', followerList);
+            for (let following of followerList) {
+                const followerPost = await this.postRepository.find({
+                    relations: ['restaurant', 'user'],
+                    where: { user: { id: following.following.id } },
+                    select: {
+                        id: true,
+                        rating: true,
+                        content: true,
+                        updated_at: true,
+                        restaurant: {
+                            place_name: true,
+                            kakao_place_id: true,
+                            category_name: true,
+                            x: true,
+                            y: true,
+                        },
+                        user: { id: true, nickname: true, profile_image: true },
+                    },
+                    order: {
+                        updated_at: 'DESC',
+                    },
+                });
+                followerPostingResult.push(...followerPost);
+            }
+            return followerPostingResult;
+        }
+        else {
+            return await this.postRepository.find({
                 relations: ['restaurant', 'user'],
-                where: { user: { id: following.following.id } },
                 select: {
                     id: true,
                     rating: true,
@@ -55,9 +81,7 @@ let MapService = class MapService {
                     updated_at: 'DESC',
                 },
             });
-            followerPostingResult.push(...followerPost);
         }
-        return followerPostingResult;
     }
     async getFollowerPostingList(userId) {
         let followerPostingResult = [];

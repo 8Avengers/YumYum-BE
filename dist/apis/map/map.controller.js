@@ -22,8 +22,8 @@ let MapController = class MapController {
     constructor(mapService) {
         this.mapService = mapService;
     }
-    async getFollowerSearchInMap(currentUser) {
-        return await this.mapService.getFollowerPosting(currentUser.id);
+    async getFollowerSearchInMap(type, currentUser) {
+        return await this.mapService.getFollowerPosting(currentUser.id, type);
     }
     async getFollowerSearchInMapList(currentUser) {
         return await this.mapService.getFollowerPostingList(currentUser.id);
@@ -36,12 +36,13 @@ let MapController = class MapController {
     }
 };
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: '맵 탐색 페이지' }),
+    (0, swagger_1.ApiOperation)({ summary: '맵 탐색 페이지1' }),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
-    (0, common_1.Get)('/followerPosting'),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    (0, common_1.Get)('/following-posting'),
+    __param(0, (0, common_1.Query)('type')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], MapController.prototype, "getFollowerSearchInMap", null);
 __decorate([
