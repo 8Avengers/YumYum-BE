@@ -82,6 +82,7 @@ export class UserProfileService {
     }
 
     if (existUser) {
+      existUser.name = updateUserProfileDto.name;
       existUser.nickname = updateUserProfileDto.nickname;
       existUser.introduce = updateUserProfileDto.introduce;
       if (file) {
@@ -107,6 +108,7 @@ export class UserProfileService {
 
       return {
         id: updatedUserProfile.id,
+        name: updatedUserProfile.name,
         nickname: updatedUserProfile.nickname,
         introduce: updatedUserProfile.introduce,
         profile_image: updatedUserProfile.profile_image,
