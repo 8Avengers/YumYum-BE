@@ -61,7 +61,7 @@ let PostService = class PostService {
                         road_address_name: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
-                    images: { id: true, file_url: true },
+                    images: { id: true, file_url: true, created_at: true },
                     collectionItems: { id: true, collection: { id: true } },
                     postUserTags: { id: true, user: { nickname: true } },
                 },
@@ -76,7 +76,7 @@ let PostService = class PostService {
                     },
                     postUserTags: { user: true },
                 },
-                order: { created_at: 'desc' },
+                order: { created_at: 'desc', images: { created_at: 'asc' } },
                 skip: pageNum * 8,
                 take: 8,
             });
@@ -142,7 +142,7 @@ let PostService = class PostService {
                         y: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
-                    images: { id: true, file_url: true },
+                    images: { id: true, file_url: true, created_at: true },
                     collectionItems: { id: true, collection: { id: true } },
                     postUserTags: { id: true, user: { nickname: true } },
                 },
@@ -156,6 +156,7 @@ let PostService = class PostService {
                     },
                     postUserTags: { user: true },
                 },
+                order: { images: { created_at: 'asc' } },
             });
             if (!post) {
                 throw new common_1.NotFoundException(`존재하지 않는 포스트입니다.`);
@@ -326,7 +327,7 @@ let PostService = class PostService {
         try {
             const pageNum = Number(page) - 1;
             const posts = await this.postRepository.find({
-                where: { deleted_at: null, visibility: 'public', user: { id: userId } },
+                where: { deleted_at: null, user: { id: userId } },
                 select: {
                     id: true,
                     content: true,
@@ -342,7 +343,7 @@ let PostService = class PostService {
                         road_address_name: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
-                    images: { id: true, file_url: true },
+                    images: { id: true, file_url: true, created_at: true },
                     collectionItems: { id: true, collection: { id: true } },
                     postUserTags: { id: true, user: { nickname: true } },
                 },
@@ -357,7 +358,7 @@ let PostService = class PostService {
                     },
                     postUserTags: { user: true },
                 },
-                order: { created_at: 'desc' },
+                order: { created_at: 'desc', images: { created_at: 'asc' } },
                 skip: pageNum * 8,
                 take: 8,
             });
@@ -423,7 +424,7 @@ let PostService = class PostService {
                         road_address_name: true,
                     },
                     user: { id: true, nickname: true, profile_image: true },
-                    images: { id: true, file_url: true },
+                    images: { id: true, file_url: true, created_at: true },
                     collectionItems: { id: true, collection: { id: true } },
                     postUserTags: { id: true, user: { nickname: true } },
                 },
@@ -438,7 +439,7 @@ let PostService = class PostService {
                     },
                     postUserTags: { user: true },
                 },
-                order: { created_at: 'desc' },
+                order: { created_at: 'desc', images: { created_at: 'asc' } },
                 skip: pageNum * 8,
                 take: 8,
             });
@@ -503,7 +504,6 @@ let PostService = class PostService {
             ])
                 .addSelect('COUNT(postLikes.id) as postLikesCount')
                 .groupBy("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname")
-                .orderBy('postLikesCount', 'DESC')
                 .where('post.visibility = :visibility', { visibility: 'public' })
                 .where('postLikes.updated_at >= :date', { date })
                 .where("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END) = :category", { category: category })
@@ -511,8 +511,9 @@ let PostService = class PostService {
                 .addSelect('restaurant.place_name')
                 .addSelect('user.profile_image')
                 .addSelect('user.nickname')
-                .addSelect('image.file_url')
+                .addSelect(['image.id', 'image.file_url', 'image.created_at'])
                 .addSelect('postLikes.id')
+                .orderBy('postLikesCount', 'DESC')
                 .take(5)
                 .getMany();
             return trendingPosts;
@@ -531,6 +532,8 @@ let PostService = class PostService {
                 .leftJoin('post.images', 'image')
                 .leftJoinAndSelect('post.hashtags', 'hashtags')
                 .leftJoin('post.user', 'user')
+                .leftJoinAndSelect('post.collectionItems', 'collectionItem')
+                .leftJoinAndSelect('collectionItem.collection', 'collection')
                 .select([
                 'post.id',
                 'post.content',
@@ -549,9 +552,10 @@ let PostService = class PostService {
                 .addSelect(['user.id', 'user.nickname', 'user.profile_image'])
                 .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
                 .addSelect('hashtags.name')
-                .addSelect('image.file_url')
+                .addSelect(['image.id', 'image.file_url', 'image.created_at'])
                 .having(`distance <= 3`)
                 .orderBy('post.created_at', 'DESC')
+                .addOrderBy('image.created_at', 'ASC')
                 .skip(pageNum * 8)
                 .take(8)
                 .getMany();
