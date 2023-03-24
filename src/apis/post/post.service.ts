@@ -68,7 +68,7 @@ export class PostService {
             road_address_name: true,
           },
           user: { id: true, nickname: true, profile_image: true },
-          images: { id: true, file_url: true },
+          images: { id: true, file_url: true, created_at: true },
           collectionItems: { id: true, collection: { id: true } },
           postUserTags: { id: true, user: { nickname: true } },
         },
@@ -83,7 +83,7 @@ export class PostService {
           },
           postUserTags: { user: true },
         },
-        order: { created_at: 'desc' },
+        order: { created_at: 'desc', images: { created_at: 'asc' } },
         skip: pageNum * 8,
         take: 8,
       });
@@ -164,7 +164,7 @@ export class PostService {
             y: true,
           },
           user: { id: true, nickname: true, profile_image: true },
-          images: { id: true, file_url: true },
+          images: { id: true, file_url: true, created_at: true },
           collectionItems: { id: true, collection: { id: true } },
           postUserTags: { id: true, user: { nickname: true } },
         },
@@ -178,6 +178,7 @@ export class PostService {
           },
           postUserTags: { user: true },
         },
+        order: { images: { created_at: 'asc' } },
       });
 
       if (!post) {
@@ -499,7 +500,7 @@ export class PostService {
     try {
       const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
-        where: { deleted_at: null, visibility: 'public', user: { id: userId } },
+        where: { deleted_at: null, user: { id: userId } },
         select: {
           id: true,
           content: true,
@@ -515,7 +516,7 @@ export class PostService {
             road_address_name: true,
           },
           user: { id: true, nickname: true, profile_image: true },
-          images: { id: true, file_url: true },
+          images: { id: true, file_url: true, created_at: true },
           collectionItems: { id: true, collection: { id: true } },
           postUserTags: { id: true, user: { nickname: true } },
         },
@@ -530,10 +531,10 @@ export class PostService {
           },
           postUserTags: { user: true },
         },
-        order: { created_at: 'desc' },
+        order: { created_at: 'desc', images: { created_at: 'asc' } },
         skip: pageNum * 8,
         take: 8,
-      } as any);
+      });
       if (!posts || posts.length === 0) {
         return [];
       }
@@ -606,7 +607,7 @@ export class PostService {
             road_address_name: true,
           },
           user: { id: true, nickname: true, profile_image: true },
-          images: { id: true, file_url: true },
+          images: { id: true, file_url: true, created_at: true },
           collectionItems: { id: true, collection: { id: true } },
           postUserTags: { id: true, user: { nickname: true } },
         },
@@ -621,10 +622,10 @@ export class PostService {
           },
           postUserTags: { user: true },
         },
-        order: { created_at: 'desc' },
+        order: { created_at: 'desc', images: { created_at: 'asc' } },
         skip: pageNum * 8,
         take: 8,
-      } as any);
+      });
       if (!posts || posts.length === 0) {
         return [];
       }
@@ -707,7 +708,6 @@ export class PostService {
         .groupBy(
           "TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname",
         )
-        .orderBy('postLikesCount', 'DESC')
         // .addOrderBy('RAND()')
         .where('post.visibility = :visibility', { visibility: 'public' })
         .where('postLikes.updated_at >= :date', { date })
@@ -722,8 +722,10 @@ export class PostService {
         .addSelect('restaurant.place_name')
         .addSelect('user.profile_image')
         .addSelect('user.nickname')
-        .addSelect('image.file_url')
+        .addSelect(['image.id', 'image.file_url', 'image.created_at'])
         .addSelect('postLikes.id')
+        .orderBy('postLikesCount', 'DESC')
+        // .addOrderBy('image.created_at', 'ASC')
         .take(5)
         .getMany();
 
@@ -751,8 +753,8 @@ export class PostService {
         .leftJoin('post.images', 'image')
         .leftJoinAndSelect('post.hashtags', 'hashtags')
         .leftJoin('post.user', 'user')
-        // .leftJoinAndSelect('post.collectionItems', 'collectionItem')
-        // // .leftJoinAndSelect('collectionItem.collection', 'collection')
+        .leftJoinAndSelect('post.collectionItems', 'collectionItem')
+        .leftJoinAndSelect('collectionItem.collection', 'collection')
         // .leftJoinAndSelect('post.postUserTags', 'userTags')
         // .innerJoin('userTags.user', 'taggedUser')
         .select([
@@ -776,11 +778,12 @@ export class PostService {
           'distance',
         )
         .addSelect('hashtags.name')
-        .addSelect('image.file_url')
-        // .addSelect('collectionItem.collection')
+        .addSelect(['image.id', 'image.file_url', 'image.created_at'])
+        // .addSelect('collection.id', 'collection_id')
         // .addSelect('userTags.user AS taggedUser')
         .having(`distance <= 3`)
         .orderBy('post.created_at', 'DESC')
+        .addOrderBy('image.created_at', 'ASC')
         .skip(pageNum * 8)
         .take(8)
         .getMany();
@@ -798,6 +801,10 @@ export class PostService {
         userId,
       );
 
+      // const myList = postsAroundMe.raw.map((rawPost) => {
+      //   return rawPost.collection_id;
+      // });
+
       return postsAroundMe.map((post, index) => {
         const likes =
           postLikes.find((like) => like.postId === post.id)?.totalLikes || 0;
@@ -805,10 +812,7 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        // const myList =
-        //   post.collectionItems.map(
-        //     (collectionItem) => collectionItem.collection.id,
-        //   ) || [];
+
         // const userTags =
         //   post.postUserTags.map((userTag) => userTag.user.nickname) || [];
         return {
