@@ -500,7 +500,7 @@ export class PostService {
     try {
       const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
-        where: { deleted_at: null, visibility: 'public', user: { id: userId } },
+        where: { deleted_at: null, user: { id: userId } },
         select: {
           id: true,
           content: true,
