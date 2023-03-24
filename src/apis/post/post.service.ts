@@ -147,7 +147,7 @@ export class PostService {
   async getPostById(postId: number, userId: number) {
     try {
       const post = await this.postRepository.find({
-        where: { id: postId, deleted_at: null, visibility: 'public' },
+        where: { id: postId, deleted_at: null },
         select: {
           id: true,
           content: true,
