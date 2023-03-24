@@ -665,43 +665,93 @@ export class MyListService {
       // 1달 전 날짜를 구한다
       const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-      // 컬렉션별로 포스트의 좋아요를 모두 합쳐서 가장 좋아요수가 많은 컬렉션 5개를 순서대로 가져온다
-      const top5Collections = await this.collectionItemRepository
-        .createQueryBuilder('collectionItem')
-        .leftJoinAndSelect('collectionItem.collection', 'collection')
-        .leftJoinAndSelect('collection.user', 'user')
-        .leftJoinAndSelect('collectionItem.post', 'post')
-        .leftJoinAndSelect('post.postLikes', 'postLikes')
-        .where('collection.type = :type', { type: 'myList' })
-        .andWhere('postLikes.updated_at > :oneMonthAgo', { oneMonthAgo })
-        .select([
-          'collection.id',
-          'collection.name',
-          'user.id',
-          'user.nickname',
-          'user.profile_image',
-          'COUNT(postLikes.id) as sumLikes',
-        ])
-        .groupBy('collection.id')
-        .orderBy('sumLikes', 'DESC')
-        .limit(5)
-        .getRawMany();
-
-      // 상위 5개 컬렉션 정보를 구성하여 반환한다
-      const topCollections = top5Collections.map((item: any) => {
-        return {
-          id: item.collection_id,
-          name: item.collection_name,
-          user: {
-            id: item.user_id,
-            nickname: item.user_nickname,
-            profile_image: item.user_profile_image,
+      // 컬렉션과 게시물, 좋아요 정보를 가져온다
+      const myListSumLikes = await this.collectionItemRepository.find({
+        relations: {
+          post: {
+            postLikes: true,
+            images: true,
           },
-          sumLikes: item.sumLikes,
-        };
+          collection: {
+            user: true,
+          },
+        },
+        where: {
+          // 컬렉션 타입이 myList 이면서 삭제되지 않은 것을 가져온다
+          collection: {
+            type: 'myList',
+          },
+          post: {
+            // 좋아요가 삭제되지 않았고, 1달 이내에 좋아요 업데이트된 게시물만 가져온다
+            postLikes: {
+              updated_at: MoreThan(oneMonthAgo),
+            },
+          },
+        },
+        select: {
+          id: true,
+          post: {
+            id: true,
+            images: { id: true, file_url: true },
+            postLikes: {
+              id: true,
+            },
+          },
+          collection: {
+            id: true,
+            name: true,
+            user: {
+              id: true,
+              nickname: true,
+              profile_image: true,
+            },
+          },
+        },
+        take: 5,
       });
 
-      return topCollections;
+      // 컬렉션별 좋아요 수를 합산하여 그룹화한다
+      const groupedData = myListSumLikes.reduce((groups: any, item: any) => {
+        const collectionId = item.collection.id;
+        if (!groups[collectionId]) {
+          groups[collectionId] = {
+            collection: item.collection,
+            user: item.collection.user,
+            sumLikes: 0,
+          };
+        }
+        groups[collectionId].sumLikes += item.post?.postLikes?.length ?? 0;
+
+        // 게시물에 포함된 이미지 URL 정보를 가져온다
+        const images = item.post?.images ?? [];
+        const fileUrls = images.map((image: any) => image.file_url);
+        groups[collectionId].images = fileUrls;
+
+        return groups;
+      }, {});
+
+      // 컬렉션별 좋아요 합산값에 따라 내림차순으로 정렬한다
+      const collectionSumLikes: any = Object.values(groupedData);
+      collectionSumLikes.sort((a: any, b: any) => b.sumLikes - a.sumLikes);
+
+      // 상위 10개 컬렉션 정보를 구성하여 반환한다
+      const top3Collections = collectionSumLikes
+        // .slice(0, 10)
+        .map(({ collection, user, sumLikes, images }: any) => {
+          return {
+            id: collection.id,
+            name: collection.name,
+            user: {
+              id: user.id,
+              nickname: user.nickname,
+              profile_image: user.profile_image,
+            },
+            sumLikes,
+            images,
+          };
+        });
+
+      return top3Collections;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;

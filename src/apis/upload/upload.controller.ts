@@ -16,7 +16,10 @@ import { UploadService } from './upload.service';
 @Controller('/')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
-
+  @Get()
+  getHello() {
+    return 'hello, we are 8Avengers!';
+  }
   //하나의 파일을 업로드
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
