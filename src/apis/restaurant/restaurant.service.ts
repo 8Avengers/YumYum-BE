@@ -147,6 +147,7 @@ export class RestaurantService {
       )
       .having(`distance <= 3`)
       .groupBy('restaurant.place_name')
+      .where('image.file_url IS NOT NULL')
       .orderBy('rand()')
       .limit(3)
       .getRawMany();
