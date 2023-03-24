@@ -76,7 +76,10 @@ export class SearchService {
     const postInOnePageWithSearchHashtag = 15;
     const postSearchByHashtagResult = await this.hashtagRepository.find({
       relations: ['posts'],
-      where: [{ deleted_at: null }, { name: hashtag }],
+      where: {
+        name: hashtag,
+        posts: { visibility: 'public' },
+      },
       skip: pageNum * postInOnePageWithSearchHashtag,
       take: postInOnePageWithSearchHashtag,
     });

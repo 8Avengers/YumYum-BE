@@ -147,7 +147,7 @@ export class PostService {
   async getPostById(postId: number, userId: number) {
     try {
       const post = await this.postRepository.find({
-        where: { id: postId, deleted_at: null, visibility: 'public' },
+        where: { id: postId, deleted_at: null },
         select: {
           id: true,
           content: true,
@@ -781,6 +781,7 @@ export class PostService {
         .addSelect(['image.id', 'image.file_url', 'image.created_at'])
         // .addSelect('collection.id', 'collection_id')
         // .addSelect('userTags.user AS taggedUser')
+        .where('post.visibility = :visibility', { visibility: 'public' })
         .having(`distance <= 3`)
         .orderBy('post.created_at', 'DESC')
         .addOrderBy('image.created_at', 'ASC')
