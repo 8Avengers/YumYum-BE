@@ -30,11 +30,12 @@ let MyListController = class MyListController {
         this.myListService = myListService;
         this.postService = postService;
     }
-    async getMyListDetail(collectionId, page) {
-        const myLists = await this.myListService.getMyListDetail(collectionId, page);
+    async getMyListDetail(collectionId, page, currentUser) {
+        const myLists = await this.myListService.getMyListDetail(collectionId, page, currentUser.id);
         return await myLists;
     }
     async getMyListsDetailPost(restaurantId, collectionId, currentUser, page) {
+        console.log('****', currentUser.id);
         const myLists = await this.myListService.getMyListsDetailPost(currentUser.id, restaurantId, collectionId, page);
         return await myLists;
     }
@@ -90,10 +91,12 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'MyList 상세보기' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'MyList 상세보기 성공' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'MyList 상세보기 실패' }),
+    (0, decorators_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     __param(0, (0, decorators_1.Param)('collectionId')),
     __param(1, (0, decorators_1.Query)('page')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:paramtypes", [Number, String, Object]),
     __metadata("design:returntype", Promise)
 ], MyListController.prototype, "getMyListDetail", null);
 __decorate([

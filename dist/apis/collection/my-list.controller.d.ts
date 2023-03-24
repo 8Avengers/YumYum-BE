@@ -9,7 +9,7 @@ export declare class MyListController {
     private readonly myListService;
     private readonly postService;
     constructor(myListService: MyListService, postService: PostService);
-    getMyListDetail(collectionId: number, page: string): Promise<{
+    getMyListDetail(collectionId: number, page: string, currentUser: any): Promise<{
         id: number;
         name: string;
         description: string;

@@ -125,7 +125,10 @@ let PostService = class PostService {
     async getPostById(postId, userId) {
         try {
             const post = await this.postRepository.find({
-                where: { id: postId, deleted_at: null, visibility: 'public' },
+                where: [
+                    { id: postId, user: { id: userId } },
+                    { id: postId, user: { id: (0, typeorm_2.Not)(userId) }, visibility: 'public' },
+                ],
                 select: {
                     id: true,
                     content: true,
@@ -158,7 +161,7 @@ let PostService = class PostService {
                 },
                 order: { images: { created_at: 'asc' } },
             });
-            if (!post) {
+            if (!post || post.length === 0) {
                 throw new common_1.NotFoundException(`존재하지 않는 포스트입니다.`);
             }
             const totalLikes = await this.likeService.getLikesForPost(postId);
@@ -553,6 +556,7 @@ let PostService = class PostService {
                 .addSelect(`6371 * acos(cos(radians(${y})) * cos(radians(y)) * cos(radians(x) - radians(${x})) + sin(radians(${y})) * sin(radians(y)))`, 'distance')
                 .addSelect('hashtags.name')
                 .addSelect(['image.id', 'image.file_url', 'image.created_at'])
+                .where('post.visibility = :visibility', { visibility: 'public' })
                 .having(`distance <= 3`)
                 .orderBy('post.created_at', 'DESC')
                 .addOrderBy('image.created_at', 'ASC')

@@ -126,6 +126,7 @@ let RestaurantService = class RestaurantService {
             relations: ['posts', 'posts.user'],
             where: {
                 kakao_place_id: kakao_place_id,
+                posts: { visibility: 'public' },
             },
             select: {
                 id: true,

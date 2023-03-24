@@ -42,7 +42,7 @@ let MyListService = class MyListService {
         this.restaurantService = restaurantService;
         this.uploadService = uploadService;
     }
-    async getMyListDetail(collectionId, page) {
+    async getMyListDetail(collectionId, page, userId) {
         try {
             let pageNum = Number(page) - 1;
             const myListInOnePage = 1;
@@ -55,11 +55,19 @@ let MyListService = class MyListService {
                         post: { images: true, restaurant: true },
                     },
                 },
-                where: {
-                    id: collectionId,
-                    deletedAt: null,
-                    type: 'myList',
-                },
+                where: [
+                    {
+                        id: collectionId,
+                        user_id: userId,
+                        type: 'myList',
+                    },
+                    {
+                        id: collectionId,
+                        user_id: (0, typeorm_2.Not)(userId),
+                        type: 'myList',
+                        collectionItems: { post: { visibility: 'public' } },
+                    },
+                ],
                 select: {
                     id: true,
                     name: true,
@@ -137,12 +145,19 @@ let MyListService = class MyListService {
                 pageNum = 0;
             }
             const posts = await this.postRepository.find({
-                where: {
-                    deleted_at: null,
-                    visibility: 'public',
-                    restaurant: { id: restaurantId },
-                    collectionItems: { collection: { id: collectionId } },
-                },
+                where: [
+                    {
+                        user: { id: userId },
+                        restaurant: { id: restaurantId },
+                        collectionItems: { collection: { id: collectionId } },
+                    },
+                    {
+                        user: { id: (0, typeorm_2.Not)(userId) },
+                        restaurant: { id: restaurantId },
+                        collectionItems: { collection: { id: collectionId } },
+                        visibility: 'public',
+                    },
+                ],
                 select: {
                     id: true,
                     content: true,
@@ -356,8 +371,8 @@ let MyListService = class MyListService {
     }
     async deleteMyList(collectionId) {
         try {
-            const deleteResult = await this.collectionItemRepository.delete({
-                collection: { id: collectionId },
+            const deleteResult = await this.collectionRepository.delete({
+                id: collectionId,
             });
             if (deleteResult.affected === 0) {
                 throw new common_1.NotFoundException('마이리스트가 없습니다.');

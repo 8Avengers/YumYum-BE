@@ -24,7 +24,7 @@ export declare class MyListService {
     private readonly restaurantService;
     private readonly uploadService;
     constructor(collectionRepository: Repository<Collection>, collectionItemRepository: Repository<CollectionItem>, postRepository: Repository<Post>, commentRepository: Repository<Comment>, likeService: PostLikeService, followRepository: Repository<Follow>, userRepository: Repository<User>, imageRepository: ImageRepository, postHashtagService: PostHashtagService, restaurantService: RestaurantService, uploadService: UploadService);
-    getMyListDetail(collectionId: number, page: string): Promise<{
+    getMyListDetail(collectionId: number, page: string, userId: number): Promise<{
         id: number;
         name: string;
         description: string;
