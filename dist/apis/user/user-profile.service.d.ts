@@ -18,6 +18,7 @@ export declare class UserProfileService {
         file: any;
     }): Promise<{
         id: number;
+        name: string;
         nickname: string;
         introduce: string;
         profile_image: string;

@@ -9,12 +9,15 @@ export declare class UserProfileController {
     constructor(userProfileService: UserProfileService, postService: PostService);
     getMyProfile(user: User): Promise<{
         id: number;
+        name: string;
+        email: string;
         nickname: string;
         introduce: string;
         profile_image: string;
     }>;
     updateMyProfile(user: any, file: Express.Multer.File, updateUserProfileDto: UpdateUserProfileDto): Promise<{
         id: number;
+        name: string;
         nickname: string;
         introduce: string;
         profile_image: string;

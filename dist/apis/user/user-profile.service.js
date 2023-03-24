@@ -69,6 +69,7 @@ let UserProfileService = class UserProfileService {
             throw new common_1.HttpException('존재하지 않는 유저입니다.', common_1.HttpStatus.NOT_FOUND);
         }
         if (existUser) {
+            existUser.name = updateUserProfileDto.name;
             existUser.nickname = updateUserProfileDto.nickname;
             existUser.introduce = updateUserProfileDto.introduce;
             if (file) {
@@ -84,6 +85,7 @@ let UserProfileService = class UserProfileService {
             console.log('업데이트완료후!updatedUserProfile::', updatedUserProfile);
             return {
                 id: updatedUserProfile.id,
+                name: updatedUserProfile.name,
                 nickname: updatedUserProfile.nickname,
                 introduce: updatedUserProfile.introduce,
                 profile_image: updatedUserProfile.profile_image,

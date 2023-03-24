@@ -16,6 +16,14 @@ class UpdateUserProfileDto {
 }
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: 'name',
+        required: true,
+    }),
+    (0, class_validator_1.IsString)({ message: '닉네임은 문자열로 입력해주세요.' }),
+    __metadata("design:type", String)
+], UpdateUserProfileDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         example: '승윤123',
         description: 'nickanme',
         required: true,

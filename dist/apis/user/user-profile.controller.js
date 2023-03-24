@@ -33,6 +33,8 @@ let UserProfileController = class UserProfileController {
         console.log(myProfile);
         const response = {
             id: myProfile.id,
+            name: myProfile.name,
+            email: myProfile.email,
             nickname: myProfile.nickname,
             introduce: myProfile.introduce,
             profile_image: myProfile.profile_image,
@@ -48,6 +50,7 @@ let UserProfileController = class UserProfileController {
         });
         const response = {
             id: updatedUserProfile.id,
+            name: updatedUserProfile.name,
             nickname: updatedUserProfile.nickname,
             introduce: updatedUserProfile.introduce,
             profile_image: updatedUserProfile.profile_image,
