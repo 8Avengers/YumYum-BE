@@ -26,7 +26,7 @@ export class MapService {
       for (let following of followerList) {
         const followerPost = await this.postRepository.find({
           relations: ['restaurant', 'user'],
-          where: { user: { id: following.following.id } },
+          where: { visibility: 'public', user: { id: following.following.id } },
           select: {
             id: true,
             rating: true,
@@ -51,6 +51,7 @@ export class MapService {
     } else {
       return await this.postRepository.find({
         relations: ['restaurant', 'user'],
+        where: { visibility: 'public' },
         select: {
           id: true,
           rating: true,
@@ -99,7 +100,7 @@ export class MapService {
     for (let following of followerList) {
       const followerPost = await this.postRepository.find({
         relations: ['restaurant', 'user', 'images'],
-        where: { user: { id: following.following.id } },
+        where: { visibility: 'public', user: { id: following.following.id } },
         select: {
           id: true,
           rating: true,
@@ -150,6 +151,7 @@ export class MapService {
     return await this.postRepository.find({
       relations: ['restaurant'],
       where: {
+        visibility: 'public',
         user: { id: userId },
       },
       select: {
