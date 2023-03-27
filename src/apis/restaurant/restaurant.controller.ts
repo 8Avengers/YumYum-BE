@@ -71,7 +71,6 @@ export class RestaurantController {
   @ApiOperation({ summary: '메인 페이지 주변 맛집' })
   @Get('/main/near-restaurant')
   async getCloseRestaurant(@Query('x') x: string, @Query('y') y: string) {
-    console.log('현재 위치 좌표 !!!!!!!!!', x, y);
     return await this.restaurantService.getNearRestaurant(x, y);
   }
 

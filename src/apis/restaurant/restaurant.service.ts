@@ -155,7 +155,6 @@ export class RestaurantService {
   }
 
   async getRelatedRestaurant(kakao_place_id) {
-    console.log(kakao_place_id);
     const relatedRestaurantResualt = await this.restaurantRepository.find({
       relations: ['posts', 'posts.user'],
       where: {
