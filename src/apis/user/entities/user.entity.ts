@@ -66,6 +66,9 @@ export class User {
   @Column({ name: 'following_count', default: 0 })
   followingCount: number;
 
+  @Column({ name: 'ban_count', default: 0 })
+  banCount: number;
+
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
 
