@@ -71,13 +71,18 @@ export class RestaurantController {
   @ApiOperation({ summary: '메인 페이지 주변 맛집' })
   @Get('/main/near-restaurant')
   async getCloseRestaurant(@Query('x') x: string, @Query('y') y: string) {
-    console.log('현재 위치 좌표 !!!!!!!!!', x, y);
     return await this.restaurantService.getNearRestaurant(x, y);
   }
 
   @ApiOperation({ summary: '가게 관련 포스트 ' })
-  @Get('/restaurant-detail/related-posting/:kakao_place_id')
-  async getRelatedRestaurant(@Param('kakao_place_id') kakao_place_id: string) {
-    return await this.restaurantService.getRelatedRestaurant(kakao_place_id);
+  @Get('/restaurant-detail/related-posting')
+  async getRelatedRestaurant(
+    @Query('kakao_place_id') kakao_place_id: string,
+    @Query('page') page: string,
+  ) {
+    return await this.restaurantService.getRelatedRestaurant(
+      kakao_place_id,
+      page,
+    );
   }
 }
