@@ -81,6 +81,7 @@ let UserSignupService = class UserSignupService {
             });
             const collection = new collection_entity_1.Collection();
             collection.type = 'bookmark';
+            collection.name = '모든 게시물';
             collection.visibility = 'private';
             collection.user = newUser;
             await this.collectionRepository.save(collection);

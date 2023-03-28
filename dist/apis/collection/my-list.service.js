@@ -470,80 +470,43 @@ let MyListService = class MyListService {
     async HotMyList() {
         try {
             const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            const myListSumLikes = await this.collectionItemRepository.find({
-                relations: {
-                    post: {
-                        postLikes: true,
-                        images: true,
-                    },
-                    collection: {
-                        user: true,
-                    },
-                },
-                where: {
-                    collection: {
-                        type: 'myList',
-                    },
-                    post: {
-                        postLikes: {
-                            updated_at: (0, typeorm_2.MoreThan)(oneMonthAgo),
-                        },
-                    },
-                },
-                select: {
-                    id: true,
-                    post: {
-                        id: true,
-                        images: { id: true, file_url: true },
-                        postLikes: {
-                            id: true,
-                        },
-                    },
-                    collection: {
-                        id: true,
-                        name: true,
-                        user: {
-                            id: true,
-                            nickname: true,
-                            profile_image: true,
-                        },
-                    },
-                },
-                take: 5,
-            });
-            const groupedData = myListSumLikes.reduce((groups, item) => {
-                var _a, _b, _c, _d, _e;
-                const collectionId = item.collection.id;
-                if (!groups[collectionId]) {
-                    groups[collectionId] = {
-                        collection: item.collection,
-                        user: item.collection.user,
-                        sumLikes: 0,
-                    };
-                }
-                groups[collectionId].sumLikes += (_c = (_b = (_a = item.post) === null || _a === void 0 ? void 0 : _a.postLikes) === null || _b === void 0 ? void 0 : _b.length) !== null && _c !== void 0 ? _c : 0;
-                const images = (_e = (_d = item.post) === null || _d === void 0 ? void 0 : _d.images) !== null && _e !== void 0 ? _e : [];
-                const fileUrls = images.map((image) => image.file_url);
-                groups[collectionId].images = fileUrls;
-                return groups;
-            }, {});
-            const collectionSumLikes = Object.values(groupedData);
-            collectionSumLikes.sort((a, b) => b.sumLikes - a.sumLikes);
-            const top3Collections = collectionSumLikes
-                .map(({ collection, user, sumLikes, images }) => {
+            const top5Collections = await this.collectionItemRepository
+                .createQueryBuilder('collectionItem')
+                .leftJoinAndSelect('collectionItem.collection', 'collection')
+                .leftJoinAndSelect('collection.user', 'user')
+                .leftJoinAndSelect('collectionItem.post', 'post')
+                .leftJoinAndSelect('post.postLikes', 'postLikes')
+                .leftJoinAndSelect('post.images', 'images')
+                .where('collection.type = :type', { type: 'myList' })
+                .andWhere('postLikes.updated_at > :oneMonthAgo', { oneMonthAgo })
+                .select([
+                'collection.id',
+                'collection.name',
+                'user.id',
+                'user.nickname',
+                'user.profile_image',
+                'COUNT(postLikes.id) as sumLikes',
+                'images.file_url as file_url',
+            ])
+                .groupBy('collection.id')
+                .addGroupBy('images.id')
+                .orderBy('sumLikes', 'DESC')
+                .limit(5)
+                .getRawMany();
+            const topCollections = top5Collections.map((item) => {
                 return {
-                    id: collection.id,
-                    name: collection.name,
+                    id: item.collection_id,
+                    name: item.collection_name,
                     user: {
-                        id: user.id,
-                        nickname: user.nickname,
-                        profile_image: user.profile_image,
+                        id: item.user_id,
+                        nickname: item.user_nickname,
+                        profile_image: item.user_profile_image,
                     },
-                    sumLikes,
-                    images,
+                    sumLikes: item.sumLikes,
+                    images: [item.file_url],
                 };
             });
-            return top3Collections;
+            return topCollections;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {
