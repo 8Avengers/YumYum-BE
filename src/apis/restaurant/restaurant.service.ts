@@ -6,11 +6,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { Post } from '../post/entities/post.entity';
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private restaurantRepository: Repository<Restaurant>,
+    @InjectRepository(Post) private postRepository: Repository<Post>,
   ) {}
 
   /*
@@ -135,6 +137,9 @@ export class RestaurantService {
       .leftJoin('post.images', 'image')
       .select([
         'restaurant.id',
+        'restaurant.kakao_place_id',
+        'restaurant.address_name',
+        'restaurant.road_address_name',
         'restaurant.place_name',
         'restaurant.x',
         'restaurant.y',
@@ -154,26 +159,31 @@ export class RestaurantService {
     return nearRestaurant;
   }
 
-  async getRelatedRestaurant(kakao_place_id) {
-    const relatedRestaurantResualt = await this.restaurantRepository.find({
-      relations: ['posts', 'posts.user'],
+  async getRelatedRestaurant(kakao_place_id: string, page: string) {
+    const pageNum = Number(page) - 1;
+    const relatedRestaurantResualt = await this.postRepository.find({
+      relations: ['restaurant', 'user'],
       where: {
-        kakao_place_id: kakao_place_id,
-        posts: { visibility: 'public' },
+        restaurant: { kakao_place_id: kakao_place_id },
+        visibility: 'public',
       },
       select: {
         id: true,
-        posts: {
+        content: true,
+        rating: true,
+        images: true,
+        user: {
           id: true,
-          content: true,
-          rating: true,
-          images: true,
-          user: {
-            id: true,
-            nickname: true,
-          },
+          nickname: true,
+        },
+        restaurant: {
+          kakao_place_id: true,
+          address_name: true,
+          road_address_name: true,
         },
       },
+      skip: pageNum * 5,
+      take: 5,
     });
     return relatedRestaurantResualt;
   }
