@@ -5,6 +5,7 @@ import { HttpExceptionFilter } from './common/exceptions/http-exception.filter';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { SwaggerModule } from '@nestjs/swagger/dist';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap() {
   const port = process.env.PORT;

@@ -5,12 +5,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { Post } from '../post/entities/post.entity';
+import { Comment } from '../comment/entities/comment.entity';
+import { LessThan, Repository } from 'typeorm';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Post) private postRepository: Repository<Post>,
+    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
   ) {}
 
   /*
@@ -37,15 +41,43 @@ export class AdminService {
     ### 최호인, 표정훈
     ### 유저 정지 기능 3일 7일 1달 삭제 => 킹호인!
     */
-  async userBanLists(userId: number) {
+  async userBan(userId: number) {
     try {
-      // 1. 정지를 시켰을때, conut를 확인하여 정지일 수를 정한다.
-      const userBan = await this.userRepository.findOne({
-        where: { id: userId, deleted_at: null },
-        select: { deleted_at: true },
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
       });
+      const banCount = user.banCount;
 
-      // 2. 정지일수가 지나면 다시 NULL로 변경한다. 타이머?
+      let days = 0;
+      switch (banCount) {
+        case 0:
+          days = 3;
+          break;
+        case 1:
+          days = 7;
+          break;
+        case 2:
+          days = 30;
+          break;
+        default:
+          throw new InternalServerErrorException('Invalid ban count');
+      }
+
+      const now = new Date();
+      const banExpiration = new Date(
+        now.getTime() + days * 24 * 60 * 60 * 1000,
+      );
+
+      await this.userRepository.update(
+        { id: userId },
+        {
+          isBanned: true,
+          banCount: banCount + 1,
+          banExpiration: banExpiration,
+        },
+      );
+
+      return { message: '유저 정지 성공' };
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -54,20 +86,17 @@ export class AdminService {
     }
   }
 
-  /*
-    ### 23.03.27
-    ### 최호인, 표정훈
-    ### 레스토랑 정보수정
-    */
-  async updateRestaurant(userId: number) {
-    try {
-    } catch (err) {
-      console.error(err);
-      throw new InternalServerErrorException(
-        'Something went wrong while processing your request. Please try again later.',
-      );
+  async liftBanOnExpiredUsers() {
+    const now = new Date();
+    const expiredBans = await this.userRepository.find({
+      where: { banExpiration: LessThan(now) },
+    });
+
+    for (const user of expiredBans) {
+      await this.userRepository.update({ id: user.id }, { isBanned: false });
     }
   }
+
   /*
     ### 23.03.27
     ### 최호인, 표정훈
@@ -75,6 +104,10 @@ export class AdminService {
     */
   async deletePost(postId: number) {
     try {
+      const result = await this.postRepository.softDelete(postId);
+      if (result.affected === 0) {
+        throw new NotFoundException('존재하지 않는 포스트입니다.');
+      }
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -90,6 +123,10 @@ export class AdminService {
     */
   async deleteComment(commentId: number) {
     try {
+      const result = await this.commentRepository.softDelete(commentId);
+      if (result.affected === 0) {
+        throw new NotFoundException('존재하지 않는 코멘트입니다.');
+      }
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -97,6 +134,4 @@ export class AdminService {
       );
     }
   }
-
-  //
 }

@@ -1,5 +1,5 @@
 import { MapModule } from './apis/map/map.module';
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './common/config/typeorm.config.service';
@@ -11,6 +11,9 @@ import { UserModule } from './apis/user/user.module';
 import { CollectionModule } from './apis/collection/collection.module';
 import { RestaurantModule } from './apis/restaurant/restaurant.module';
 import { UploadModule } from './apis/upload/upload.module';
+import * as cron from 'node-cron';
+import { AdminModule } from './apis/administrator/admin.module';
+import { AdminService } from './apis/administrator/admin.service';
 
 @Module({
   imports: [
@@ -21,7 +24,7 @@ import { UploadModule } from './apis/upload/upload.module';
     CollectionModule,
     SearchModule,
     PostModule,
-
+    AdminModule,
     UserModule,
     AuthModule,
     CommentModule,
@@ -32,4 +35,11 @@ import { UploadModule } from './apis/upload/upload.module';
     MapModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  constructor(private adminService: AdminService) {}
+  onModuleInit() {
+    cron.schedule('* * * * *', async () => {
+      await this.adminService.liftBanOnExpiredUsers();
+    });
+  }
+}

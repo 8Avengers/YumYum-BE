@@ -32,22 +32,10 @@ export class AdminController {
   @ApiResponse({ status: 200, description: '유저 정지 성공' })
   @ApiResponse({ status: 400, description: '유저 정지 실패' })
   @Post('/add-ban-list/:userId')
-  async userBanLists(@Param('userId') userId: number) {
-    return await this.adminService.userBanLists(userId);
+  async userBan(@Param('userId') userId: number) {
+    return await this.adminService.userBan(userId);
   }
-  /*
-    ### 23.03.27
-    ### 최호인, 표정훈
-    ### 레스토랑 정보수정
-    */
-  @ApiOperation({ summary: '레스토랑 정보 수정' })
-  @UseGuards(AuthAccessGuard)
-  @ApiResponse({ status: 200, description: '유저 정지 성공' })
-  @ApiResponse({ status: 400, description: '유저 정지 실패' })
-  @Post('/restaurant/:restaurantId')
-  async updateRestaurant(@Param('restaurantId') restaurantId: number) {
-    return await this.adminService.updateRestaurant(restaurantId);
-  }
+
   /*
     ### 23.03.27
     ### 최호인, 표정훈
@@ -62,7 +50,7 @@ export class AdminController {
     return await this.adminService.deletePost(postId);
   }
   /*
-    ### 23.03.27ddd
+    ### 23.03.27
     ### 최호인, 표정훈
     ### 코멘트 삭제
     */

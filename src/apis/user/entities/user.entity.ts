@@ -66,8 +66,17 @@ export class User {
   @Column({ name: 'following_count', default: 0 })
   followingCount: number;
 
+  @Column({ nullable: true })
+  banExpiration: Date;
+
   @Column({ name: 'ban_count', default: 0 })
   banCount: number;
+
+  @Column({ name: 'is_Banned', default: false })
+  isBanned: boolean;
+
+  @Column({ name: 'is_Admin', default: false })
+  isAdmin: boolean;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;
