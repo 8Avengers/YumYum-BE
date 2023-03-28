@@ -24,7 +24,7 @@ export declare class PostController {
             id: number;
         }[];
         visibility: "public" | "private";
-        userTags: string[];
+        isBookmarked: string;
     }>;
     getPosts(currentUser: any, page: string): Promise<{
         id: number;
@@ -38,9 +38,9 @@ export declare class PostController {
         totalLikes: number;
         isLiked: any;
         totalComments: number;
-        myList: import("../collection/entities/collection-item.entity").CollectionItem[];
+        myList: number[];
         visibility: "public" | "private";
-        userTags: string[];
+        isBookmarked: string;
     }[]>;
     createPost(files: Array<Express.Multer.File>, data: CreatePostDto, { address_name, category_group_code, category_group_name, category_name, id, phone, place_name, road_address_name, x, y, }: CreateRestaurantDto, currentUser: any): Promise<{
         postId: number;
@@ -63,5 +63,6 @@ export declare class PostController {
         isLiked: any;
         totalComments: number;
         visibility: "public" | "private";
+        isBookmarked: string;
     }[]>;
 }

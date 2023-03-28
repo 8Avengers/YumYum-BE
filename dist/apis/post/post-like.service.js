@@ -59,7 +59,6 @@ let PostLikeService = class PostLikeService {
             const postliked = await this.postLikeRepository.findOne({
                 where: { post: { id: postId }, user: { id: userId } },
             });
-            console.log('postLiked', postliked);
             return {
                 isLiked: postliked ? 'True' : 'False',
             };

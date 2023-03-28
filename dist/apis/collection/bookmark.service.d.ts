@@ -14,4 +14,11 @@ export declare class BookmarkService {
     collectionMinusPosting(collectionId: number, postId: number): Promise<import("typeorm").DeleteResult>;
     collectionPlusRestaurant(collectionId: number, restaurantId: number): Promise<CollectionItem>;
     collectionMinusRestaurant(collectionId: number, restaurantId: number): Promise<import("typeorm").DeleteResult>;
+    isAllPostsBookmarkedByUser(userId: number, postIds: number[]): Promise<{
+        postId: number;
+        isBookmarked: string;
+    }[]>;
+    isOnePostBookmarkedByUser(userId: number, postId: number): Promise<{
+        isBookmarked: string;
+    }>;
 }

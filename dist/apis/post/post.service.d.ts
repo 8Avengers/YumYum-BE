@@ -11,6 +11,7 @@ import { UploadService } from '../upload/upload.service';
 import { CollectionItem } from '../collection/entities/collection-item.entity';
 import { PostLike } from './entities/post-like.entity';
 import { PostUserTagService } from './post-user-tag.service';
+import { BookmarkService } from '../collection/bookmark.service';
 export declare class PostService {
     private postRepository;
     private commentRepository;
@@ -23,7 +24,8 @@ export declare class PostService {
     private readonly restaurantService;
     private readonly uploadService;
     private readonly postUserTagService;
-    constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, collectionItemRepository: Repository<CollectionItem>, postLikeRepository: Repository<PostLike>, imageRepository: ImageRepository, likeService: PostLikeService, postHashtagService: PostHashtagService, myListService: MyListService, restaurantService: RestaurantService, uploadService: UploadService, postUserTagService: PostUserTagService);
+    private readonly bookmarkService;
+    constructor(postRepository: Repository<Post>, commentRepository: Repository<Comment>, collectionItemRepository: Repository<CollectionItem>, postLikeRepository: Repository<PostLike>, imageRepository: ImageRepository, likeService: PostLikeService, postHashtagService: PostHashtagService, myListService: MyListService, restaurantService: RestaurantService, uploadService: UploadService, postUserTagService: PostUserTagService, bookmarkService: BookmarkService);
     getPosts(userId: number, page: string): Promise<{
         id: number;
         content: string;
@@ -36,9 +38,9 @@ export declare class PostService {
         totalLikes: number;
         isLiked: any;
         totalComments: number;
-        myList: CollectionItem[];
+        myList: number[];
         visibility: "public" | "private";
-        userTags: string[];
+        isBookmarked: string;
     }[]>;
     getPostById(postId: number, userId: number): Promise<{
         id: number;
@@ -58,7 +60,7 @@ export declare class PostService {
             id: number;
         }[];
         visibility: "public" | "private";
-        userTags: string[];
+        isBookmarked: string;
     }>;
     createPost(userId: number, address_name: string, category_group_code: string, category_group_name: string, category_name: string, kakao_place_id: string, phone: string, place_name: string, road_address_name: string, x: string, y: string, myListIds: number[], content: string, rating: number, visibility: any, hashtagNames: string[], files: Express.Multer.File[]): Promise<{
         postId: number;
@@ -79,9 +81,9 @@ export declare class PostService {
         totalLikes: number;
         isLiked: any;
         totalComments: number;
-        myList: CollectionItem[];
+        myList: number[];
         visibility: "public" | "private";
-        userTags: string[];
+        isBookmarked: string;
     }[]>;
     getPostsByOtherUserId(userId: number, myUserId: number, page: string): Promise<any>;
     getTrendingPosts(category: string): Promise<any>;
@@ -98,5 +100,6 @@ export declare class PostService {
         isLiked: any;
         totalComments: number;
         visibility: "public" | "private";
+        isBookmarked: string;
     }[]>;
 }

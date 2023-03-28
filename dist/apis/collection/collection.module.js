@@ -65,7 +65,7 @@ CollectionModule = __decorate([
             upload_service_1.UploadService,
             post_user_tag_service_1.PostUserTagService,
         ],
-        exports: [my_list_service_1.MyListService, typeorm_1.TypeOrmModule],
+        exports: [my_list_service_1.MyListService, bookmark_service_1.BookmarkService, typeorm_1.TypeOrmModule],
     })
 ], CollectionModule);
 exports.CollectionModule = CollectionModule;

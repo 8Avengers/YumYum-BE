@@ -14,8 +14,8 @@ export declare class MyFeedController {
         totalLikes: number;
         isLiked: any;
         totalComments: number;
-        myList: import("../collection/entities/collection-item.entity").CollectionItem[];
+        myList: number[];
         visibility: "public" | "private";
-        userTags: string[];
+        isBookmarked: string;
     }[]>;
 }

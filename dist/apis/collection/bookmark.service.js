@@ -209,6 +209,43 @@ let BookmarkService = class BookmarkService {
             }
         }
     }
+    async isAllPostsBookmarkedByUser(userId, postIds) {
+        const bookmarkCollection = await this.collectionRepository.findOne({
+            where: { type: 'bookmark', user_id: userId },
+        });
+        if (!bookmarkCollection) {
+            return postIds.map((postId) => {
+                return { postId, isBookmarked: 'False' };
+            });
+        }
+        const bookmarkCollectionItems = await this.collectionItemRepository.find({
+            where: {
+                collection: { id: bookmarkCollection.id },
+                post: { id: (0, typeorm_2.In)(postIds) },
+            },
+            relations: ['post', 'collection'],
+        });
+        return postIds.map((postId) => {
+            const isBookmarked = bookmarkCollectionItems.some((bookmark) => bookmark.post.id === postId);
+            return { postId, isBookmarked: isBookmarked ? 'True' : 'False' };
+        });
+    }
+    async isOnePostBookmarkedByUser(userId, postId) {
+        const bookmarkCollection = await this.collectionRepository.findOne({
+            where: { type: 'bookmark', user_id: userId },
+        });
+        if (!bookmarkCollection) {
+            return { isBookmarked: 'False' };
+        }
+        const bookmarkCollectionItem = await this.collectionItemRepository.findOne({
+            where: {
+                collection: { id: bookmarkCollection.id },
+                post: { id: postId },
+            },
+            relations: ['post', 'collection'],
+        });
+        return { isBookmarked: bookmarkCollectionItem ? 'True' : 'False' };
+    }
 };
 BookmarkService = __decorate([
     (0, common_1.Injectable)(),

@@ -27,8 +27,9 @@ const upload_service_1 = require("../upload/upload.service");
 const collection_item_entity_1 = require("../collection/entities/collection-item.entity");
 const post_like_entity_1 = require("./entities/post-like.entity");
 const post_user_tag_service_1 = require("./post-user-tag.service");
+const bookmark_service_1 = require("../collection/bookmark.service");
 let PostService = class PostService {
-    constructor(postRepository, commentRepository, collectionItemRepository, postLikeRepository, imageRepository, likeService, postHashtagService, myListService, restaurantService, uploadService, postUserTagService) {
+    constructor(postRepository, commentRepository, collectionItemRepository, postLikeRepository, imageRepository, likeService, postHashtagService, myListService, restaurantService, uploadService, postUserTagService, bookmarkService) {
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.collectionItemRepository = collectionItemRepository;
@@ -40,12 +41,17 @@ let PostService = class PostService {
         this.restaurantService = restaurantService;
         this.uploadService = uploadService;
         this.postUserTagService = postUserTagService;
+        this.bookmarkService = bookmarkService;
     }
     async getPosts(userId, page) {
         try {
             const pageNum = Number(page) - 1;
             const posts = await this.postRepository.find({
-                where: { deleted_at: null, visibility: 'public' },
+                where: {
+                    deleted_at: null,
+                    visibility: 'public',
+                    collectionItems: { collection: { type: 'myList' } },
+                },
                 select: {
                     id: true,
                     content: true,
@@ -62,8 +68,7 @@ let PostService = class PostService {
                     },
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true, created_at: true },
-                    collectionItems: { id: true, collection: { id: true } },
-                    postUserTags: { id: true, user: { nickname: true } },
+                    collectionItems: { id: true, collection: { id: true, type: true } },
                 },
                 relations: {
                     user: true,
@@ -74,7 +79,6 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
-                    postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
                 skip: pageNum * 8,
@@ -86,14 +90,14 @@ let PostService = class PostService {
             const postIds = posts.map((post) => post.id);
             const postLikes = await this.likeService.getLikesForAllPosts(postIds);
             const likedStatuses = await this.likeService.getLikedStatusforAllPosts(postIds, userId);
+            const bookmarkedStatuses = await this.bookmarkService.isAllPostsBookmarkedByUser(userId, postIds);
             return posts.map((post) => {
-                var _a, _b;
+                var _a, _b, _c;
                 const hashtags = post.hashtags.map((hashtag) => hashtag.name);
                 const likes = ((_a = postLikes.find((like) => like.postId === post.id)) === null || _a === void 0 ? void 0 : _a.totalLikes) || 0;
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
-                const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
                 const sortedImages = post.images.sort((a, b) => {
                     if (a.created_at > b.created_at) {
                         return 1;
@@ -103,6 +107,8 @@ let PostService = class PostService {
                     }
                     return 0;
                 });
+                const myListId = post.collectionItems.map((item) => item.collection.id);
+                const isBookmarked = ((_c = bookmarkedStatuses.find((status) => status.postId === post.id)) === null || _c === void 0 ? void 0 : _c.isBookmarked) || 'False';
                 return {
                     id: post.id,
                     content: post.content,
@@ -115,9 +121,9 @@ let PostService = class PostService {
                     totalLikes: likes,
                     isLiked,
                     totalComments,
-                    myList: post.collectionItems,
+                    myList: myListId,
                     visibility: post.visibility,
-                    userTags,
+                    isBookmarked,
                 };
             });
         }
@@ -135,7 +141,11 @@ let PostService = class PostService {
         try {
             const post = await this.postRepository.find({
                 where: [
-                    { id: postId, user: { id: userId } },
+                    {
+                        id: postId,
+                        user: { id: userId },
+                        collectionItems: { collection: { type: 'myList' } },
+                    },
                     { id: postId, user: { id: (0, typeorm_2.Not)(userId) }, visibility: 'public' },
                 ],
                 select: {
@@ -155,8 +165,7 @@ let PostService = class PostService {
                     },
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true, created_at: true },
-                    collectionItems: { id: true, collection: { id: true } },
-                    postUserTags: { id: true, user: { nickname: true } },
+                    collectionItems: { id: true, collection: { id: true, type: true } },
                 },
                 relations: {
                     user: true,
@@ -166,7 +175,6 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
-                    postUserTags: { user: true },
                 },
                 order: { images: { created_at: 'asc' } },
             });
@@ -182,7 +190,8 @@ let PostService = class PostService {
             const myList = post[0].collectionItems.map((item) => ({
                 id: item.collection.id,
             }));
-            const userTags = post[0].postUserTags.map((userTag) => userTag.user.nickname);
+            const { isBookmarked } = await this.bookmarkService.isOnePostBookmarkedByUser(userId, postId);
+            console.log('******', isBookmarked);
             return {
                 id: post[0].id,
                 content: post[0].content,
@@ -197,7 +206,7 @@ let PostService = class PostService {
                 totalComments,
                 myList,
                 visibility: post[0].visibility,
-                userTags,
+                isBookmarked,
             };
         }
         catch (err) {
@@ -339,7 +348,11 @@ let PostService = class PostService {
         try {
             const pageNum = Number(page) - 1;
             const posts = await this.postRepository.find({
-                where: { deleted_at: null, user: { id: userId } },
+                where: {
+                    deleted_at: null,
+                    user: { id: userId },
+                    collectionItems: { collection: { type: 'myList' } },
+                },
                 select: {
                     id: true,
                     content: true,
@@ -356,8 +369,7 @@ let PostService = class PostService {
                     },
                     user: { id: true, nickname: true, profile_image: true },
                     images: { id: true, file_url: true, created_at: true },
-                    collectionItems: { id: true, collection: { id: true } },
-                    postUserTags: { id: true, user: { nickname: true } },
+                    collectionItems: { id: true, collection: { id: true, type: true } },
                 },
                 relations: {
                     user: true,
@@ -368,7 +380,6 @@ let PostService = class PostService {
                     collectionItems: {
                         collection: true,
                     },
-                    postUserTags: { user: true },
                 },
                 order: { created_at: 'desc' },
                 skip: pageNum * 8,
@@ -380,14 +391,14 @@ let PostService = class PostService {
             const postIds = posts.map((post) => post.id);
             const postLikes = await this.likeService.getLikesForAllPosts(postIds);
             const likedStatuses = await this.likeService.getLikedStatusforAllPosts(postIds, userId);
+            const bookmarkedStatuses = await this.bookmarkService.isAllPostsBookmarkedByUser(userId, postIds);
             return posts.map((post) => {
-                var _a, _b;
+                var _a, _b, _c;
                 const hashtags = post.hashtags.map((hashtag) => hashtag.name);
                 const likes = ((_a = postLikes.find((like) => like.postId === post.id)) === null || _a === void 0 ? void 0 : _a.totalLikes) || 0;
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
-                const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
                 const sortedImages = post.images.sort((a, b) => {
                     if (a.created_at > b.created_at) {
                         return 1;
@@ -397,6 +408,8 @@ let PostService = class PostService {
                     }
                     return 0;
                 });
+                const myListId = post.collectionItems.map((item) => item.collection.id);
+                const isBookmarked = ((_c = bookmarkedStatuses.find((status) => status.postId === post.id)) === null || _c === void 0 ? void 0 : _c.isBookmarked) || 'False';
                 return {
                     id: post.id,
                     content: post.content,
@@ -409,9 +422,9 @@ let PostService = class PostService {
                     totalLikes: likes,
                     isLiked,
                     totalComments,
-                    myList: post.collectionItems,
+                    myList: myListId,
                     visibility: post.visibility,
-                    userTags,
+                    isBookmarked,
                 };
             });
         }
@@ -431,7 +444,10 @@ let PostService = class PostService {
             let posts;
             if (userId === myUserId) {
                 posts = await this.postRepository.find({
-                    where: { user: { id: userId } },
+                    where: {
+                        user: { id: userId },
+                        collectionItems: { collection: { type: 'myList' } },
+                    },
                     select: {
                         id: true,
                         content: true,
@@ -448,8 +464,7 @@ let PostService = class PostService {
                         },
                         user: { id: true, nickname: true, profile_image: true },
                         images: { id: true, file_url: true, created_at: true },
-                        collectionItems: { id: true, collection: { id: true } },
-                        postUserTags: { id: true, user: { nickname: true } },
+                        collectionItems: { id: true, collection: { id: true, type: true } },
                     },
                     relations: {
                         user: true,
@@ -460,7 +475,6 @@ let PostService = class PostService {
                         collectionItems: {
                             collection: true,
                         },
-                        postUserTags: { user: true },
                     },
                     order: { created_at: 'desc' },
                     skip: pageNum * 8,
@@ -469,7 +483,11 @@ let PostService = class PostService {
             }
             else {
                 posts = await this.postRepository.find({
-                    where: { visibility: 'public', user: { id: userId } },
+                    where: {
+                        visibility: 'public',
+                        user: { id: userId },
+                        collectionItems: { collection: { type: 'myList' } },
+                    },
                     select: {
                         id: true,
                         content: true,
@@ -486,8 +504,7 @@ let PostService = class PostService {
                         },
                         user: { id: true, nickname: true, profile_image: true },
                         images: { id: true, file_url: true, created_at: true },
-                        collectionItems: { id: true, collection: { id: true } },
-                        postUserTags: { id: true, user: { nickname: true } },
+                        collectionItems: { id: true, collection: { id: true, type: true } },
                     },
                     relations: {
                         user: true,
@@ -498,7 +515,6 @@ let PostService = class PostService {
                         collectionItems: {
                             collection: true,
                         },
-                        postUserTags: { user: true },
                     },
                     order: { created_at: 'desc' },
                     skip: pageNum * 8,
@@ -511,14 +527,14 @@ let PostService = class PostService {
             const postIds = posts.map((post) => post.id);
             const postLikes = await this.likeService.getLikesForAllPosts(postIds);
             const likedStatuses = await this.likeService.getLikedStatusforAllPosts(postIds, myUserId);
+            const bookmarkedStatuses = await this.bookmarkService.isAllPostsBookmarkedByUser(myUserId, postIds);
             return posts.map((post) => {
-                var _a, _b;
+                var _a, _b, _c;
                 const hashtags = post.hashtags.map((hashtag) => hashtag.name);
                 const likes = ((_a = postLikes.find((like) => like.postId === post.id)) === null || _a === void 0 ? void 0 : _a.totalLikes) || 0;
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
                     'False';
                 const totalComments = post.comments ? post.comments.length : 0;
-                const userTags = post.postUserTags.map((userTag) => userTag.user.nickname);
                 const sortedImages = post.images.sort((a, b) => {
                     if (a.created_at > b.created_at) {
                         return 1;
@@ -528,6 +544,8 @@ let PostService = class PostService {
                     }
                     return 0;
                 });
+                const myListId = post.collectionItems.map((item) => item.collection.id);
+                const isBookmarked = ((_c = bookmarkedStatuses.find((status) => status.postId === post.id)) === null || _c === void 0 ? void 0 : _c.isBookmarked) || 'False';
                 return {
                     id: post.id,
                     content: post.content,
@@ -540,9 +558,9 @@ let PostService = class PostService {
                     totalLikes: likes,
                     isLiked,
                     totalComments,
-                    myList: post.collectionItems,
+                    myList: myListId,
                     visibility: post.visibility,
-                    userTags,
+                    isBookmarked,
                 };
             });
         }
@@ -638,8 +656,9 @@ let PostService = class PostService {
             const postIds = postsAroundMe.map((post) => post.id);
             const postLikes = await this.likeService.getLikesForAllPosts(postIds);
             const likedStatuses = await this.likeService.getLikedStatusforAllPosts(postIds, userId);
+            const bookmarkedStatuses = await this.bookmarkService.isAllPostsBookmarkedByUser(userId, postIds);
             return postsAroundMe.map((post, index) => {
-                var _a, _b;
+                var _a, _b, _c;
                 const hashtags = post.hashtags.map((hashtag) => hashtag.name);
                 const likes = ((_a = postLikes.find((like) => like.postId === post.id)) === null || _a === void 0 ? void 0 : _a.totalLikes) || 0;
                 const isLiked = ((_b = likedStatuses.find((status) => status.postId === post.id)) === null || _b === void 0 ? void 0 : _b.isLiked) ||
@@ -654,6 +673,7 @@ let PostService = class PostService {
                     }
                     return 0;
                 });
+                const isBookmarked = ((_c = bookmarkedStatuses.find((status) => status.postId === post.id)) === null || _c === void 0 ? void 0 : _c.isBookmarked) || 'False';
                 return {
                     id: post.id,
                     content: post.content,
@@ -667,6 +687,7 @@ let PostService = class PostService {
                     isLiked,
                     totalComments,
                     visibility: post.visibility,
+                    isBookmarked,
                 };
             });
         }
@@ -697,7 +718,8 @@ PostService = __decorate([
         my_list_service_1.MyListService,
         restaurant_service_1.RestaurantService,
         upload_service_1.UploadService,
-        post_user_tag_service_1.PostUserTagService])
+        post_user_tag_service_1.PostUserTagService,
+        bookmark_service_1.BookmarkService])
 ], PostService);
 exports.PostService = PostService;
 //# sourceMappingURL=post.service.js.map
