@@ -175,15 +175,11 @@ export class RestaurantService {
         user: {
           id: true,
           nickname: true,
-        },
-        restaurant: {
-          kakao_place_id: true,
-          address_name: true,
-          road_address_name: true,
+          profile_image : true,
         },
       },
-      skip: pageNum * 5,
-      take: 5,
+      skip: pageNum * 10,
+      take: 10,
     });
     return relatedRestaurantResualt;
   }
