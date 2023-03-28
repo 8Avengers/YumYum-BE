@@ -85,8 +85,6 @@ export class PostLikeService {
         where: { post: { id: postId }, user: { id: userId } },
       });
 
-      console.log('postLiked', postliked);
-
       return {
         isLiked: postliked ? 'True' : 'False',
       };
