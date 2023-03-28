@@ -54,6 +54,6 @@ import { PostUserTag } from '../post/entities/post-usertag.entity';
     UploadService,
     PostUserTagService,
   ],
-  exports: [MyListService, TypeOrmModule],
+  exports: [MyListService, BookmarkService, TypeOrmModule],
 })
 export class CollectionModule {}
