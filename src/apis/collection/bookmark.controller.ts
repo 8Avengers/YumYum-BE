@@ -25,7 +25,18 @@ export class BookmarkController {
   /*
     ### 23.03.22
     ### 표정훈
-    ### 북마크 전체 보기🔥
+    ### 북마크 선택시 API (만들어야함)🔥
+    get: bookmarks/:postId
+    0) API추가
+        1. 내가 가지고 있는 각각 컬렉션에서 해당 postId를 가지고 있는지
+        [{id:36, name: "", image: "", hasPost: false}]  <== 킹보라?킹호인?
+        2. 취소할 때는 이미 만들어 놓은 컬렉션에서 포스트 삭제 함수 사용
+    */
+
+  /*
+    ### 23.03.22
+    ### 표정훈
+    ### 북마크 전체 보기
     */
 
   @Get('/collections')
@@ -39,24 +50,9 @@ export class BookmarkController {
   }
 
   /*
-      ### 23.03.22
-      ### 표정훈
-      ### 북마크 상세 보기🔥
-      */
-  @Get('/collections/detail/:collectionId')
-  @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: '북마크 상세조회' })
-  @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
-  @ApiResponse({ status: 400, description: '북마크 상세조회 실패' })
-  async getCollections(@Param('collectionId') collectionId: number) {
-    const collections = await this.bookmarkService.getCollections(collectionId);
-    return await collections;
-  }
-
-  /*
       ### 23.03.13
       ### 표정훈
-      ### 북마크 생성🔥
+      ### 북마크 생성
       */
   @Post('/collections')
   @UseGuards(AuthAccessGuard)
@@ -78,7 +74,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 북마크 수정🔥
+      ### 북마크 수정
       */
 
   @Put('/collections/:collectionId')
@@ -96,7 +92,7 @@ export class BookmarkController {
   /*
       ### 23.03.13
       ### 표정훈
-      ### 북마크 삭제🔥
+      ### 북마크 삭제
       */
   @Delete('/collections/:collectionId')
   @UseGuards(AuthAccessGuard)
@@ -108,41 +104,78 @@ export class BookmarkController {
   }
 
   /*
-    ### 23.03.22
+      ### 23.03.22
+      ### 표정훈
+      ### 북마크 상세 보기
+      */
+  @Get('/collections/detail/:collectionId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: '북마크 상세조회' })
+  @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
+  @ApiResponse({ status: 400, description: '북마크 상세조회 실패' })
+  async getCollections(@Param('collectionId') collectionId: number) {
+    const collections = await this.bookmarkService.getCollections(collectionId);
+    return await collections;
+  }
+
+  /*
+    ### 23.03.29
     ### 표정훈
-    ### 북마크에 포스팅 더하기🔥
+    ### 기본 북마크에 포스팅 삭제
     */
-  @Post('/collections/plus/post/:postId')
+
+  @Delete('/collections/post/:postId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: '북마크 포스팅 삭제' })
+  @ApiResponse({ status: 200, description: '북마크 포스팅 삭제 성공' })
+  @ApiResponse({ status: 400, description: '북마크 포스팅 삭제 실패' })
+  async basicCollectionMinusPosting(
+    @Param('postId') postId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.bookmarkService.basicCollectionMinusPosting(
+      postId,
+      currentUser.id,
+    );
+  }
+
+  /*
+    ### 23.03.29
+    ### 표정훈
+    ### 기본 북마크에 포스팅 더하기 
+    */
+
+  @Post('/collections/post/:postId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 포스팅 추가' })
   @ApiResponse({ status: 200, description: '북마크 포스팅 추가 성공' })
   @ApiResponse({ status: 400, description: '북마크 포스팅 추가 실패' })
-  async collectionPlusPosting(
+  async basicCollectionPlusPosting(
     @Param('postId') postId: number,
-    @Body() data: BookmarPostDto,
+    @CurrentUser() currentUser: any,
   ) {
-    return await this.bookmarkService.collectionPlusPosting(
-      data.collectionId,
+    return await this.bookmarkService.basicCollectionPlusPosting(
       postId,
+      currentUser.id,
     );
   }
 
   /*
       ### 23.03.22
       ### 표정훈
-      ### 북마크에 포스팅 빼기🔥
+      ### 북마크에 포스팅 빼기
       */
-  @Delete('/collections/minus/post/:postId')
+  @Delete('/collections/:collectionId/post/:postId')
   @UseGuards(AuthAccessGuard)
   @ApiOperation({ summary: '북마크 포스팅 삭제' })
   @ApiResponse({ status: 200, description: '북마크 포스팅 삭제 성공' })
   @ApiResponse({ status: 400, description: '북마크 포스팅 삭제 실패' })
   async collectionMinusPosting(
+    @Param('collectionId') collectionId: number,
     @Param('postId') postId: number,
-    @Body() data: BookmarPostDto,
   ) {
     return await this.bookmarkService.collectionMinusPosting(
-      data.collectionId,
+      collectionId,
       postId,
     );
   }
@@ -150,41 +183,21 @@ export class BookmarkController {
   /*
       ### 23.03.22
       ### 표정훈
-      ### 북마크에 맛집 더하기🔥
+      ### 북마크에 포스팅 더하기
       */
 
-  @Post('/collections/plus/restaurant/:restaurantId')
+  @Post('/collections/:collectionId/post/:postId')
   @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: '북마크 맛집 추가' })
-  @ApiResponse({ status: 200, description: '북마크 맛집 추가 성공' })
-  @ApiResponse({ status: 400, description: '북마크 맛집 추가 실패' })
-  async collectionPlusRestaurant(
-    @Param('restaurantId') restaurantId: number,
-    @Body() data: BookmarRastaurantDto,
+  @ApiOperation({ summary: '북마크 포스팅 추가' })
+  @ApiResponse({ status: 200, description: '북마크 포스팅 추가 성공' })
+  @ApiResponse({ status: 400, description: '북마크 포스팅 추가 실패' })
+  async collectionPlusPosting(
+    @Param('collectionId') collectionId: number,
+    @Param('postId') postId: number,
   ) {
-    return await this.bookmarkService.collectionPlusRestaurant(
-      data.collectionId,
-      restaurantId,
-    );
-  }
-
-  /*
-        ### 23.03.22
-        ### 표정훈
-        ### 북마크에 맛집 빼기🔥
-        */
-  @Delete('/collections/minus/restaurant/:restaurantId')
-  @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: '북마크 맛집 삭제' })
-  @ApiResponse({ status: 200, description: '북마크 맛집 삭제 성공' })
-  @ApiResponse({ status: 400, description: '북마크 맛집 삭제 실패' })
-  async collectionMinusRestaurant(
-    @Param('restaurantId') restaurantId: number,
-    @Body() data: BookmarRastaurantDto,
-  ) {
-    return await this.bookmarkService.collectionMinusRestaurant(
-      data.collectionId,
-      restaurantId,
+    return await this.bookmarkService.collectionPlusPosting(
+      collectionId,
+      postId,
     );
   }
 }
