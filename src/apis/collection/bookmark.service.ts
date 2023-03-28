@@ -6,7 +6,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Post } from '../post/entities/post.entity';
 import { Collection } from './entities/collection.entity';
 import { CollectionItem } from './entities/collection-item.entity';
@@ -274,4 +274,54 @@ export class BookmarkService {
       }
     }
   }
+
+  async isAllPostsBookmarkedByUser(
+    userId: number,
+    postIds: number[],
+  ): Promise<{ postId: number; isBookmarked: string }[]> {
+    const bookmarkCollection = await this.collectionRepository.findOne({
+      where: { type: 'bookmark', user_id: userId },
+    });
+    if (!bookmarkCollection) {
+      return postIds.map((postId) => {
+        return { postId, isBookmarked: 'False' };
+      });
+    }
+
+    const bookmarkCollectionItems = await this.collectionItemRepository.find({
+      where: {
+        collection: { id: bookmarkCollection.id },
+        post: { id: In(postIds) },
+      },
+      relations: ['post', 'collection'],
+    });
+
+    return postIds.map((postId) => {
+      const isBookmarked = bookmarkCollectionItems.some(
+        (bookmark) => bookmark.post.id === postId,
+      );
+      return { postId, isBookmarked: isBookmarked ? 'True' : 'False' };
+    });
+  }
+
+  async isOnePostBookmarkedByUser(userId: number, postId: number) {
+    const bookmarkCollection = await this.collectionRepository.findOne({
+      where: { type: 'bookmark', user_id: userId },
+    });
+    if (!bookmarkCollection) {
+      return { isBookmarked: 'False' };
+    }
+
+    const bookmarkCollectionItem = await this.collectionItemRepository.findOne({
+      where: {
+        collection: { id: bookmarkCollection.id },
+        post: { id: postId },
+      },
+      relations: ['post', 'collection'],
+    });
+
+    return { isBookmarked: bookmarkCollectionItem ? 'True' : 'False' };
+  }
+
+  // async isAllPostsBookmarkedByUser(userId: string, postIds: string[]) {}
 }
