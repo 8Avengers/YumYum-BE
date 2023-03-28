@@ -22,7 +22,6 @@ export class MapService {
         where: { follower: { id: userId } },
         select: { following: { id: true } },
       });
-      console.log('followerList : ', followerList);
       for (let following of followerList) {
         const followerPost = await this.postRepository.find({
           relations: ['restaurant', 'user'],
@@ -96,7 +95,6 @@ export class MapService {
       where: { follower: { id: userId } },
       select: { following: { id: true } },
     });
-    console.log('followerList : ', followerList);
     for (let following of followerList) {
       const followerPost = await this.postRepository.find({
         relations: ['restaurant', 'user', 'images'],
