@@ -572,9 +572,11 @@ let PostService = class PostService {
                 'post.rating',
                 'post.updated_at',
                 'post.created_at',
+                'post.visibility',
             ])
                 .addSelect('COUNT(postLikes.id) as postLikesCount')
                 .groupBy("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END), restaurant.place_name, user.profile_image, user.nickname")
+                .having('post.visibility = :visibility', { visibility: 'public' })
                 .where('post.visibility = :visibility', { visibility: 'public' })
                 .where('postLikes.updated_at >= :date', { date })
                 .where("TRIM(CASE WHEN LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) > 0 THEN SUBSTRING(SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1), 1, LOCATE('>', SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1)) - 1) ELSE SUBSTRING(restaurant.category_name, LOCATE('>', restaurant.category_name) + 1) END) = :category", { category: category })

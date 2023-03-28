@@ -78,6 +78,10 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "followingCount", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ name: 'ban_count', default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "banCount", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)({ name: 'created_at' }),
     __metadata("design:type", Date)
 ], User.prototype, "created_at", void 0);

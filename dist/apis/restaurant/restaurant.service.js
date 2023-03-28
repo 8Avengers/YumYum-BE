@@ -17,9 +17,11 @@ const Repository_1 = require("typeorm/repository/Repository");
 const restaurant_entity_1 = require("./entities/restaurant.entity");
 const typeorm_1 = require("@nestjs/typeorm");
 const common_1 = require("@nestjs/common");
+const post_entity_1 = require("../post/entities/post.entity");
 let RestaurantService = class RestaurantService {
-    constructor(restaurantRepository) {
+    constructor(restaurantRepository, postRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.postRepository = postRepository;
     }
     async getRestaurantDetails(kakao_place_id) {
         return await this.restaurantRepository.findOne({
@@ -105,6 +107,9 @@ let RestaurantService = class RestaurantService {
             .leftJoin('post.images', 'image')
             .select([
             'restaurant.id',
+            'restaurant.kakao_place_id',
+            'restaurant.address_name',
+            'restaurant.road_address_name',
             'restaurant.place_name',
             'restaurant.x',
             'restaurant.y',
@@ -120,27 +125,27 @@ let RestaurantService = class RestaurantService {
             .getRawMany();
         return nearRestaurant;
     }
-    async getRelatedRestaurant(kakao_place_id) {
-        console.log(kakao_place_id);
-        const relatedRestaurantResualt = await this.restaurantRepository.find({
-            relations: ['posts', 'posts.user'],
+    async getRelatedRestaurant(kakao_place_id, page) {
+        const pageNum = Number(page) - 1;
+        const relatedRestaurantResualt = await this.postRepository.find({
+            relations: ['restaurant', 'user'],
             where: {
-                kakao_place_id: kakao_place_id,
-                posts: { visibility: 'public' },
+                restaurant: { kakao_place_id: kakao_place_id },
+                visibility: 'public',
             },
             select: {
                 id: true,
-                posts: {
+                content: true,
+                rating: true,
+                images: true,
+                user: {
                     id: true,
-                    content: true,
-                    rating: true,
-                    images: true,
-                    user: {
-                        id: true,
-                        nickname: true,
-                    },
+                    nickname: true,
+                    profile_image: true,
                 },
             },
+            skip: pageNum * 10,
+            take: 10,
         });
         return relatedRestaurantResualt;
     }
@@ -148,7 +153,9 @@ let RestaurantService = class RestaurantService {
 RestaurantService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(restaurant_entity_1.Restaurant)),
-    __metadata("design:paramtypes", [Repository_1.Repository])
+    __param(1, (0, typeorm_1.InjectRepository)(post_entity_1.Post)),
+    __metadata("design:paramtypes", [Repository_1.Repository,
+        Repository_1.Repository])
 ], RestaurantService);
 exports.RestaurantService = RestaurantService;
 //# sourceMappingURL=restaurant.service.js.map
