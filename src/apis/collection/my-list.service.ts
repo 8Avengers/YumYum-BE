@@ -672,6 +672,7 @@ export class MyListService {
         .leftJoinAndSelect('collection.user', 'user')
         .leftJoinAndSelect('collectionItem.post', 'post')
         .leftJoinAndSelect('post.postLikes', 'postLikes')
+        .leftJoinAndSelect('post.images', 'images') // 이미지 정보를 가져오기 위해 추가
         .where('collection.type = :type', { type: 'myList' })
         .andWhere('postLikes.updated_at > :oneMonthAgo', { oneMonthAgo })
         .select([
@@ -681,8 +682,10 @@ export class MyListService {
           'user.nickname',
           'user.profile_image',
           'COUNT(postLikes.id) as sumLikes',
+          'images.file_url as file_url', // 이미지 URL 정보를 가져오기 위해 추가
         ])
         .groupBy('collection.id')
+        .addGroupBy('images.id') // 이미지 정보를 가져오기 위해 추가
         .orderBy('sumLikes', 'DESC')
         .limit(5)
         .getRawMany();
@@ -698,6 +701,7 @@ export class MyListService {
             profile_image: item.user_profile_image,
           },
           sumLikes: item.sumLikes,
+          images: [item.file_url], // 이미지 URL 정보를 반환하기 위해 추가
         };
       });
 
