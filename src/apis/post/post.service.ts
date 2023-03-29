@@ -23,6 +23,7 @@ import { PostLike } from './entities/post-like.entity';
 // type Image = string | Express.Multer.File;
 import { PostUserTag } from './entities/post-usertag.entity';
 import { PostUserTagService } from './post-user-tag.service';
+import { BookmarkService } from '../collection/bookmark.service';
 
 @Injectable()
 export class PostService {
@@ -40,6 +41,7 @@ export class PostService {
     private readonly restaurantService: RestaurantService,
     private readonly uploadService: UploadService,
     private readonly postUserTagService: PostUserTagService,
+    private readonly bookmarkService: BookmarkService,
   ) {}
 
   /*
@@ -52,7 +54,11 @@ export class PostService {
     try {
       const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
-        where: { deleted_at: null, visibility: 'public' },
+        where: {
+          deleted_at: null,
+          visibility: 'public',
+          collectionItems: { collection: { type: 'myList' } },
+        },
         select: {
           id: true,
           content: true,
@@ -69,8 +75,8 @@ export class PostService {
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true, created_at: true },
-          collectionItems: { id: true, collection: { id: true } },
-          postUserTags: { id: true, user: { nickname: true } },
+          collectionItems: { id: true, collection: { id: true, type: true } },
+          // postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -81,7 +87,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
-          postUserTags: { user: true },
+          // postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         skip: pageNum * 8,
@@ -99,6 +105,9 @@ export class PostService {
         userId,
       );
 
+      const bookmarkedStatuses =
+        await this.bookmarkService.isAllPostsBookmarkedByUser(userId, postIds);
+
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
@@ -107,9 +116,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const userTags = post.postUserTags.map(
-          (userTag) => userTag.user.nickname,
-        );
+        // const userTags = post.postUserTags.map(
+        //   (userTag) => userTag.user.nickname,
+        // );
         const sortedImages = post.images.sort((a, b) => {
           if (a.created_at > b.created_at) {
             return 1;
@@ -118,6 +127,10 @@ export class PostService {
           }
           return 0;
         });
+        const myListId = post.collectionItems.map((item) => item.collection.id);
+        const isBookmarked =
+          bookmarkedStatuses.find((status) => status.postId === post.id)
+            ?.isBookmarked || 'False';
         return {
           id: post.id,
           content: post.content,
@@ -130,9 +143,10 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
-          myList: post.collectionItems,
+          myList: myListId,
           visibility: post.visibility,
-          userTags,
+          // userTags,
+          isBookmarked,
         };
       });
     } catch (err) {
@@ -156,7 +170,11 @@ export class PostService {
     try {
       const post = await this.postRepository.find({
         where: [
-          { id: postId, user: { id: userId } },
+          {
+            id: postId,
+            user: { id: userId },
+            collectionItems: { collection: { type: 'myList' } },
+          },
           { id: postId, user: { id: Not(userId) }, visibility: 'public' },
         ],
         select: {
@@ -176,8 +194,8 @@ export class PostService {
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true, created_at: true },
-          collectionItems: { id: true, collection: { id: true } },
-          postUserTags: { id: true, user: { nickname: true } },
+          collectionItems: { id: true, collection: { id: true, type: true } },
+          // postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -187,7 +205,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
-          postUserTags: { user: true },
+          // postUserTags: { user: true },
         },
         order: { images: { created_at: 'asc' } },
       });
@@ -213,9 +231,14 @@ export class PostService {
         id: item.collection.id,
       }));
 
-      const userTags = post[0].postUserTags.map(
-        (userTag) => userTag.user.nickname,
-      );
+      const { isBookmarked } =
+        await this.bookmarkService.isOnePostBookmarkedByUser(userId, postId);
+
+      console.log('******', isBookmarked);
+
+      // const userTags = post[0].postUserTags.map(
+      //   (userTag) => userTag.user.nickname,
+      // );
 
       return {
         id: post[0].id,
@@ -231,7 +254,8 @@ export class PostService {
         totalComments,
         myList,
         visibility: post[0].visibility,
-        userTags,
+        isBookmarked,
+        // userTags,
       };
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -511,7 +535,11 @@ export class PostService {
     try {
       const pageNum = Number(page) - 1;
       const posts = await this.postRepository.find({
-        where: { deleted_at: null, user: { id: userId } },
+        where: {
+          deleted_at: null,
+          user: { id: userId },
+          collectionItems: { collection: { type: 'myList' } },
+        },
         select: {
           id: true,
           content: true,
@@ -528,8 +556,8 @@ export class PostService {
           },
           user: { id: true, nickname: true, profile_image: true },
           images: { id: true, file_url: true, created_at: true },
-          collectionItems: { id: true, collection: { id: true } },
-          postUserTags: { id: true, user: { nickname: true } },
+          collectionItems: { id: true, collection: { id: true, type: true } },
+          // postUserTags: { id: true, user: { nickname: true } },
         },
         relations: {
           user: true,
@@ -540,7 +568,7 @@ export class PostService {
           collectionItems: {
             collection: true,
           },
-          postUserTags: { user: true },
+          // postUserTags: { user: true },
         },
         order: { created_at: 'desc' },
         skip: pageNum * 8,
@@ -558,6 +586,9 @@ export class PostService {
         userId,
       );
 
+      const bookmarkedStatuses =
+        await this.bookmarkService.isAllPostsBookmarkedByUser(userId, postIds);
+
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
@@ -566,9 +597,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const userTags = post.postUserTags.map(
-          (userTag) => userTag.user.nickname,
-        );
+        // const userTags = post.postUserTags.map(
+        //   (userTag) => userTag.user.nickname,
+        // );
         const sortedImages = post.images.sort((a, b) => {
           if (a.created_at > b.created_at) {
             return 1;
@@ -577,6 +608,10 @@ export class PostService {
           }
           return 0;
         });
+        const myListId = post.collectionItems.map((item) => item.collection.id);
+        const isBookmarked =
+          bookmarkedStatuses.find((status) => status.postId === post.id)
+            ?.isBookmarked || 'False';
         return {
           id: post.id,
           content: post.content,
@@ -589,9 +624,10 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
-          myList: post.collectionItems,
+          myList: myListId,
           visibility: post.visibility,
-          userTags,
+          isBookmarked,
+          // userTags,
         };
       });
     } catch (err) {
@@ -612,7 +648,10 @@ export class PostService {
       let posts;
       if (userId === myUserId) {
         posts = await this.postRepository.find({
-          where: { user: { id: userId } },
+          where: {
+            user: { id: userId },
+            collectionItems: { collection: { type: 'myList' } },
+          },
           select: {
             id: true,
             content: true,
@@ -629,8 +668,8 @@ export class PostService {
             },
             user: { id: true, nickname: true, profile_image: true },
             images: { id: true, file_url: true, created_at: true },
-            collectionItems: { id: true, collection: { id: true } },
-            postUserTags: { id: true, user: { nickname: true } },
+            collectionItems: { id: true, collection: { id: true, type: true } },
+            // postUserTags: { id: true, user: { nickname: true } },
           },
           relations: {
             user: true,
@@ -641,7 +680,7 @@ export class PostService {
             collectionItems: {
               collection: true,
             },
-            postUserTags: { user: true },
+            // postUserTags: { user: true },
           },
           order: { created_at: 'desc' },
           skip: pageNum * 8,
@@ -649,7 +688,11 @@ export class PostService {
         });
       } else {
         posts = await this.postRepository.find({
-          where: { visibility: 'public', user: { id: userId } },
+          where: {
+            visibility: 'public',
+            user: { id: userId },
+            collectionItems: { collection: { type: 'myList' } },
+          },
           select: {
             id: true,
             content: true,
@@ -666,8 +709,8 @@ export class PostService {
             },
             user: { id: true, nickname: true, profile_image: true },
             images: { id: true, file_url: true, created_at: true },
-            collectionItems: { id: true, collection: { id: true } },
-            postUserTags: { id: true, user: { nickname: true } },
+            collectionItems: { id: true, collection: { id: true, type: true } },
+            // postUserTags: { id: true, user: { nickname: true } },
           },
           relations: {
             user: true,
@@ -678,7 +721,7 @@ export class PostService {
             collectionItems: {
               collection: true,
             },
-            postUserTags: { user: true },
+            // postUserTags: { user: true },
           },
           order: { created_at: 'desc' },
           skip: pageNum * 8,
@@ -697,6 +740,12 @@ export class PostService {
         myUserId,
       );
 
+      const bookmarkedStatuses =
+        await this.bookmarkService.isAllPostsBookmarkedByUser(
+          myUserId,
+          postIds,
+        );
+
       return posts.map((post) => {
         const hashtags = post.hashtags.map((hashtag) => hashtag.name);
         const likes =
@@ -705,9 +754,9 @@ export class PostService {
           likedStatuses.find((status) => status.postId === post.id)?.isLiked ||
           'False';
         const totalComments = post.comments ? post.comments.length : 0;
-        const userTags = post.postUserTags.map(
-          (userTag) => userTag.user.nickname,
-        );
+        // const userTags = post.postUserTags.map(
+        //   (userTag) => userTag.user.nickname,
+        // );
         const sortedImages = post.images.sort((a, b) => {
           if (a.created_at > b.created_at) {
             return 1;
@@ -716,6 +765,10 @@ export class PostService {
           }
           return 0;
         });
+        const myListId = post.collectionItems.map((item) => item.collection.id);
+        const isBookmarked =
+          bookmarkedStatuses.find((status) => status.postId === post.id)
+            ?.isBookmarked || 'False';
         return {
           id: post.id,
           content: post.content,
@@ -728,9 +781,10 @@ export class PostService {
           totalLikes: likes,
           isLiked,
           totalComments,
-          myList: post.collectionItems,
+          myList: myListId,
           visibility: post.visibility,
-          userTags,
+          isBookmarked,
+          // userTags,
         };
       });
     } catch (err) {
@@ -870,6 +924,9 @@ export class PostService {
         userId,
       );
 
+      const bookmarkedStatuses =
+        await this.bookmarkService.isAllPostsBookmarkedByUser(userId, postIds);
+
       // const myList = postsAroundMe.raw.map((rawPost) => {
       //   return rawPost.collection_id;
       // });
@@ -890,7 +947,9 @@ export class PostService {
           }
           return 0;
         });
-
+        const isBookmarked =
+          bookmarkedStatuses.find((status) => status.postId === post.id)
+            ?.isBookmarked || 'False';
         // const userTags =
         //   post.postUserTags.map((userTag) => userTag.user.nickname) || [];
         return {
@@ -907,6 +966,7 @@ export class PostService {
           totalComments,
           // myList,
           visibility: post.visibility,
+          isBookmarked,
           // userTags,
         };
       });
