@@ -107,6 +107,8 @@ let RestaurantService = class RestaurantService {
             .leftJoin('post.images', 'image')
             .select([
             'restaurant.id',
+            'restaurant.category_name',
+            'restaurant.category_group_name',
             'restaurant.kakao_place_id',
             'restaurant.address_name',
             'restaurant.road_address_name',
@@ -128,7 +130,7 @@ let RestaurantService = class RestaurantService {
     async getRelatedRestaurant(kakao_place_id, page) {
         const pageNum = Number(page) - 1;
         const relatedRestaurantResualt = await this.postRepository.find({
-            relations: ['restaurant', 'user'],
+            relations: ['restaurant', 'user', 'images'],
             where: {
                 restaurant: { kakao_place_id: kakao_place_id },
                 visibility: 'public',
@@ -137,7 +139,9 @@ let RestaurantService = class RestaurantService {
                 id: true,
                 content: true,
                 rating: true,
-                images: true,
+                images: {
+                    file_url: true,
+                },
                 user: {
                     id: true,
                     nickname: true,

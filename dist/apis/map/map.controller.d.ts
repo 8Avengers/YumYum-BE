@@ -5,6 +5,5 @@ export declare class MapController {
     getFollowerSearchInMap(type: string, currentUser: any): Promise<any[]>;
     getFollowerSearchInMapList(currentUser: any): Promise<any[]>;
     getMyPostingSearchInMap(collectionId: number, currentUser: any): Promise<import("../post/entities/post.entity").Post[]>;
-    A: any;
     getUserPostingSearchInMap(userId: number): Promise<import("../post/entities/post.entity").Post[]>;
 }
