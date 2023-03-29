@@ -366,47 +366,62 @@ export class BookmarkService {
     userId: number,
     postIds: number[],
   ): Promise<{ postId: number; isBookmarked: string }[]> {
-    const bookmarkCollection = await this.collectionRepository.findOne({
-      where: { type: 'bookmark', user_id: userId },
-    });
-    if (!bookmarkCollection) {
-      return postIds.map((postId) => {
-        return { postId, isBookmarked: 'False' };
+    try {
+      const bookmarkCollection = await this.collectionRepository.findOne({
+        where: { type: 'bookmark', user_id: userId },
       });
-    }
+      if (!bookmarkCollection) {
+        return postIds.map((postId) => {
+          return { postId, isBookmarked: 'False' };
+        });
+      }
 
-    const bookmarkCollectionItems = await this.collectionItemRepository.find({
-      where: {
-        collection: { id: bookmarkCollection.id },
-        post: { id: In(postIds) },
-      },
-      relations: ['post', 'collection'],
-    });
+      const bookmarkCollectionItems = await this.collectionItemRepository.find({
+        where: {
+          collection: { id: bookmarkCollection.id },
+          post: { id: In(postIds) },
+        },
+        relations: ['post', 'collection'],
+      });
 
-    return postIds.map((postId) => {
-      const isBookmarked = bookmarkCollectionItems.some(
-        (bookmark) => bookmark.post.id === postId,
+      return postIds.map((postId) => {
+        const isBookmarked = bookmarkCollectionItems.some(
+          (bookmark) => bookmark.post.id === postId,
+        );
+        return { postId, isBookmarked: isBookmarked ? 'True' : 'False' };
+      });
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
       );
-      return { postId, isBookmarked: isBookmarked ? 'True' : 'False' };
-    });
+    }
   }
 
   async isOnePostBookmarkedByUser(userId: number, postId: number) {
-    const bookmarkCollection = await this.collectionRepository.findOne({
-      where: { type: 'bookmark', user_id: userId },
-    });
-    if (!bookmarkCollection) {
-      return { isBookmarked: 'False' };
+    try {
+      const bookmarkCollection = await this.collectionRepository.findOne({
+        where: { type: 'bookmark', user_id: userId },
+      });
+      if (!bookmarkCollection) {
+        return { isBookmarked: 'False' };
+      }
+
+      const bookmarkCollectionItem =
+        await this.collectionItemRepository.findOne({
+          where: {
+            collection: { id: bookmarkCollection.id },
+            post: { id: postId },
+          },
+          relations: ['post', 'collection'],
+        });
+
+      return { isBookmarked: bookmarkCollectionItem ? 'True' : 'False' };
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
     }
-
-    const bookmarkCollectionItem = await this.collectionItemRepository.findOne({
-      where: {
-        collection: { id: bookmarkCollection.id },
-        post: { id: postId },
-      },
-      relations: ['post', 'collection'],
-    });
-
-    return { isBookmarked: bookmarkCollectionItem ? 'True' : 'False' };
   }
 }
