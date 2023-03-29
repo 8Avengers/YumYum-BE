@@ -56,9 +56,7 @@ export declare class PostService {
         }[];
         isLiked: string;
         totalComments: number;
-        myList: {
-            id: number;
-        }[];
+        myListId: number[];
         visibility: "public" | "private";
         isBookmarked: string;
     }>;

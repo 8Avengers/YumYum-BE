@@ -20,9 +20,7 @@ export declare class PostController {
         }[];
         isLiked: string;
         totalComments: number;
-        myList: {
-            id: number;
-        }[];
+        myListId: number[];
         visibility: "public" | "private";
         isBookmarked: string;
     }>;

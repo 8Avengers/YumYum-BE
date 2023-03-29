@@ -5,11 +5,7 @@ export declare class BookmarkService {
     private collectionRepository;
     private collectionItemRepository;
     constructor(collectionRepository: Repository<Collection>, collectionItemRepository: Repository<CollectionItem>);
-    getBookmarks(userId: number): Promise<{
-        id: number;
-        name: string;
-        image: string;
-    }[]>;
+    getBookmarks(userId: number): Promise<unknown[]>;
     getCollections(collectionId: number, userId: number): Promise<{
         id: number;
         images: string;
