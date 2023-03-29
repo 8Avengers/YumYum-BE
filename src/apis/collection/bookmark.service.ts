@@ -27,6 +27,7 @@ export class BookmarkService {
           컬렉션아이템에 정보가 등록되어 정보를 가져올 수 있음.
           북마크 생성만 하면 컬렉션아이템에 정보 등록이 안됨(생성을 수정해야 이슈해결)
     */
+
   async getBookmarks(userId: number) {
     try {
       const bookmarks = await this.collectionItemRepository.find({
@@ -58,20 +59,25 @@ export class BookmarkService {
         },
       });
 
-      const newBookmarks = bookmarks.map((item) => {
+      const groupedBookmarks = bookmarks.reduce((acc, item) => {
         const {
           collection: { id, name },
           post,
         } = item;
-        return {
-          id,
-          name,
-          image:
-            post?.images && post?.images?.length > 0
-              ? post?.images[0].file_url
-              : '',
-        };
-      });
+        if (!acc[id]) {
+          acc[id] = {
+            id,
+            name,
+            image:
+              post?.images && post?.images?.length > 0
+                ? post?.images[0].file_url
+                : '',
+          };
+        }
+        return acc;
+      }, {});
+
+      const newBookmarks = Object.values(groupedBookmarks);
 
       return newBookmarks;
     } catch (err) {
