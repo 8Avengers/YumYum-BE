@@ -127,7 +127,7 @@ export class PostService {
           return 0;
         });
         const myListItems = post.collectionItems.filter(
-          (item) => item.collection.type === 'myList',
+          (item) => item.collection && item.collection.type === 'myList',
         );
         const myListId = myListItems.map((item) => item.collection.id);
         const isBookmarked =
@@ -229,14 +229,12 @@ export class PostService {
       });
 
       const myListItems = post[0].collectionItems.filter(
-        (item) => item.collection.type === 'myList',
+        (item) => item.collection && item.collection.type === 'myList',
       );
       const myListId = myListItems.map((item) => item.collection.id);
 
       const { isBookmarked } =
         await this.bookmarkService.isOnePostBookmarkedByUser(userId, postId);
-
-      console.log('******', isBookmarked);
 
       // const userTags = post[0].postUserTags.map(
       //   (userTag) => userTag.user.nickname,
@@ -610,7 +608,7 @@ export class PostService {
           return 0;
         });
         const myListItems = post.collectionItems.filter(
-          (item) => item.collection.type === 'myList',
+          (item) => item.collection && item.collection.type === 'myList',
         );
         const myListId = myListItems.map((item) => item.collection.id);
         const isBookmarked =
@@ -768,7 +766,7 @@ export class PostService {
           return 0;
         });
         const myListItems = post.collectionItems.filter(
-          (item) => item.collection.type === 'myList',
+          (item) => item.collection && item.collection.type === 'myList',
         );
         const myListId = myListItems.map((item) => item.collection.id);
         const isBookmarked =
