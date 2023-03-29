@@ -162,7 +162,7 @@ export class RestaurantService {
   async getRelatedRestaurant(kakao_place_id: string, page: string) {
     const pageNum = Number(page) - 1;
     const relatedRestaurantResualt = await this.postRepository.find({
-      relations: ['restaurant', 'user'],
+      relations: ['restaurant', 'user', 'images'],
       where: {
         restaurant: { kakao_place_id: kakao_place_id },
         visibility: 'public',
@@ -171,11 +171,13 @@ export class RestaurantService {
         id: true,
         content: true,
         rating: true,
-        images: true,
+        images: {
+          file_url: true,
+        },
         user: {
           id: true,
           nickname: true,
-          profile_image : true,
+          profile_image: true,
         },
       },
       skip: pageNum * 10,
