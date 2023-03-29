@@ -22,6 +22,49 @@ export class BookmarkService {
   /*
     ### 23.03.22
     ### 표정훈
+    ### 북마크 토글 API (만들어야함)🔥
+    get: bookmarks/:postI
+    */
+  async selectBookmark(postId: number, collectionId: number, userId: number) {
+    try {
+      //해당 포스트가 각각 컬렉션에 존재있는지 없는지만 알면 된다.
+      //⭐ 필요정보 : [{id:36, name: "", hasPost: false}] ⭐
+      const collectionItem = await this.collectionItemRepository.findOne({
+        where: {
+          post: { id: postId },
+          collection: { id: collectionId },
+        },
+        relations: ['collection'],
+      });
+
+      if (collectionItem) {
+        return {
+          id: collectionItem.collection.id,
+          name: collectionItem.collection.name,
+          hasPost: true,
+        };
+      } else {
+        //Post가 없을땐 해당 북마크만 찾아서 아이디와 이름값 반환
+        const collection = await this.collectionRepository.findOne({
+          where: { id: collectionId },
+        });
+        return {
+          id: collection.id,
+          name: collection.name,
+          hasPost: false,
+        };
+      }
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+    ### 23.03.22
+    ### 표정훈
     ### 북마크 전체 보기🔥🔥🔥
     이슈1) 새로 생성한 북마크는 조회가 안됨. 이유는 post를 넣어야 
           컬렉션아이템에 정보가 등록되어 정보를 가져올 수 있음.

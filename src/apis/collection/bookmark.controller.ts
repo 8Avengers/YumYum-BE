@@ -23,15 +23,26 @@ export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
   /*
-    ### 23.03.22
+    ### 23.03.29
     ### 표정훈
-    ### 북마크 선택시 API (만들어야함)🔥
-    get: bookmarks/:postId
-    0) API추가
-        1. 내가 가지고 있는 각각 컬렉션에서 해당 postId를 가지고 있는지
-        [{id:36, name: "", image: "", hasPost: false}]  <== 킹보라?킹호인?
-        2. 취소할 때는 이미 만들어 놓은 컬렉션에서 포스트 삭제 함수 사용
+    ### 북마크 토글
     */
+  @Get('/:postId')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: '토글 선택' })
+  @ApiResponse({ status: 200, description: '북마크 토글 성공' })
+  @ApiResponse({ status: 400, description: '북마크 토글 실패' })
+  async selectBookmark(
+    @Param('postId') postId: number,
+    @Body('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    return await this.bookmarkService.selectBookmark(
+      postId,
+      collectionId,
+      currentUser.id,
+    );
+  }
 
   /*
     ### 23.03.22
