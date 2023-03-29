@@ -38,7 +38,6 @@ export class MapController {
       collectionId,
     );
   }
-  A;
   @ApiOperation({ summary: '내 포스팅 지도' })
   @Get('/user-posting/:userId')
   async getUserPostingSearchInMap(@Param('userId') userId: number) {
