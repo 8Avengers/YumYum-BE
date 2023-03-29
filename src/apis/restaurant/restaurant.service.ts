@@ -137,6 +137,8 @@ export class RestaurantService {
       .leftJoin('post.images', 'image')
       .select([
         'restaurant.id',
+        'restaurant.category_name',
+        'restaurant.category_group_name',
         'restaurant.kakao_place_id',
         'restaurant.address_name',
         'restaurant.road_address_name',
