@@ -25,45 +25,83 @@ let BookmarkService = class BookmarkService {
     }
     async getBookmarks(userId) {
         try {
-            const bookmarks = await this.collectionRepository.find({
-                where: { user_id: userId, deletedAt: null, type: 'bookmark' },
-                select: { id: true, name: true, image: true },
+            const bookmarks = await this.collectionItemRepository.find({
+                relations: {
+                    post: {
+                        images: true,
+                    },
+                    collection: true,
+                },
+                where: {
+                    collection: {
+                        user_id: userId,
+                        deletedAt: null,
+                        type: 'bookmark',
+                    },
+                },
+                select: {
+                    collection: {
+                        id: true,
+                        name: true,
+                    },
+                    post: {
+                        id: true,
+                        images: {
+                            id: true,
+                            file_url: true,
+                        },
+                    },
+                },
             });
-            return bookmarks;
+            const newBookmarks = bookmarks.map((item) => {
+                var _a;
+                const { collection: { id, name }, post, } = item;
+                return {
+                    id,
+                    name,
+                    image: (post === null || post === void 0 ? void 0 : post.images) && ((_a = post === null || post === void 0 ? void 0 : post.images) === null || _a === void 0 ? void 0 : _a.length) > 0
+                        ? post === null || post === void 0 ? void 0 : post.images[0].file_url
+                        : '',
+                };
+            });
+            return newBookmarks;
         }
         catch (err) {
             console.error(err);
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    async getCollections(collectionId) {
+    async getCollections(collectionId, userId) {
         try {
-            const bookmark = await this.collectionRepository.find({
+            const posts = await this.collectionItemRepository.find({
                 relations: {
-                    collectionItems: {
-                        post: true,
-                        restaurant: true,
+                    post: {
+                        images: true,
                     },
                 },
-                where: { id: collectionId, deletedAt: null, type: 'bookmark' },
+                where: {
+                    collection: {
+                        id: collectionId,
+                        user_id: userId,
+                        deletedAt: null,
+                        type: 'bookmark',
+                    },
+                },
                 select: {
-                    id: true,
-                    type: true,
-                    collectionItems: {
+                    collection: {
                         id: true,
-                        post: {
-                            id: true,
-                            content: true,
-                            rating: true,
-                        },
-                        restaurant: {
-                            id: true,
-                            place_name: true,
-                        },
+                    },
+                    post: {
+                        id: true,
+                        images: { id: true, file_url: true },
                     },
                 },
             });
-            return bookmark;
+            const transformedPosts = posts.map((post) => ({
+                id: post.post.id,
+                images: post.post.images[0].file_url,
+            }));
+            return transformedPosts;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {
@@ -72,13 +110,25 @@ let BookmarkService = class BookmarkService {
             throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
         }
     }
-    createCollection(userId, name, type, visibility) {
-        return this.collectionRepository.insert({
-            user_id: userId,
-            name: name,
-            type: 'bookmark',
-            visibility: 'private',
-        });
+    async createCollection(userId, name) {
+        try {
+            const newBookmark = await this.collectionRepository.insert({
+                user_id: userId,
+                name: name,
+                type: 'bookmark',
+                visibility: 'private',
+            });
+            const newCollectionItem = await this.collectionItemRepository.insert({
+                collection: newBookmark.identifiers[0].id,
+            });
+            return newCollectionItem;
+        }
+        catch (err) {
+            if (err instanceof common_1.NotFoundException) {
+                throw err;
+            }
+            throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+        }
     }
     async updateCollection(collectionId, name) {
         try {
@@ -106,6 +156,73 @@ let BookmarkService = class BookmarkService {
             if (result.affected === 0) {
                 throw new common_1.NotFoundException('북마크가 없습니다.');
             }
+        }
+        catch (err) {
+            if (err instanceof common_1.NotFoundException) {
+                throw err;
+            }
+            else {
+                console.error(err);
+                throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+            }
+        }
+    }
+    async basicCollectionPlusPosting(postId, userId) {
+        try {
+            const basicBookmark = await this.collectionRepository.findOne({
+                where: {
+                    user_id: userId,
+                },
+                select: {
+                    id: true,
+                },
+            });
+            const existingItem = await this.collectionItemRepository.findOne({
+                where: {
+                    post: { id: postId },
+                    collection: { id: basicBookmark.id },
+                },
+            });
+            if (existingItem) {
+                return;
+            }
+            const collectionItem = this.collectionItemRepository.create({
+                post: { id: postId },
+                collection: { id: basicBookmark.id },
+            });
+            await this.collectionItemRepository.save(collectionItem);
+            return collectionItem;
+        }
+        catch (err) {
+            if (err instanceof common_1.NotFoundException) {
+                throw err;
+            }
+            else {
+                console.error(err);
+                throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+            }
+        }
+    }
+    async basicCollectionMinusPosting(postId, userId) {
+        try {
+            const basicBookmark = await this.collectionRepository.findOne({
+                where: {
+                    user_id: userId,
+                },
+                select: {
+                    id: true,
+                },
+            });
+            const existingItem = await this.collectionItemRepository.findOne({
+                where: {
+                    post: { id: postId },
+                    collection: { id: basicBookmark.id },
+                },
+            });
+            if (existingItem) {
+                await this.collectionItemRepository.remove(existingItem);
+            }
+            return;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {
@@ -152,52 +269,6 @@ let BookmarkService = class BookmarkService {
                 post: { id: postId },
             });
             return deletePost;
-        }
-        catch (err) {
-            if (err instanceof common_1.NotFoundException) {
-                throw err;
-            }
-            else {
-                console.error(err);
-                throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
-            }
-        }
-    }
-    async collectionPlusRestaurant(collectionId, restaurantId) {
-        try {
-            const existingItem = await this.collectionItemRepository.findOne({
-                where: {
-                    collection: { id: collectionId },
-                    restaurant: { id: restaurantId },
-                },
-            });
-            if (existingItem) {
-                return;
-            }
-            const collectionItem = await this.collectionItemRepository.create({
-                collection: { id: collectionId },
-                restaurant: { id: restaurantId },
-            });
-            await this.collectionItemRepository.save(collectionItem);
-            return collectionItem;
-        }
-        catch (err) {
-            if (err instanceof common_1.HttpException) {
-                throw err;
-            }
-            else {
-                console.error(err);
-                throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
-            }
-        }
-    }
-    async collectionMinusRestaurant(collectionId, restaurantId) {
-        try {
-            const deleteRestaurant = await this.collectionItemRepository.delete({
-                collection: { id: collectionId },
-                restaurant: { id: restaurantId },
-            });
-            return deleteRestaurant;
         }
         catch (err) {
             if (err instanceof common_1.NotFoundException) {
