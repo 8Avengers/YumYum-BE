@@ -66,8 +66,6 @@ export class BookmarkController {
     return await this.bookmarkService.createCollection(
       currentUser.id,
       data.name,
-      data.type,
-      data.visibility,
     );
   }
 
@@ -113,8 +111,14 @@ export class BookmarkController {
   @ApiOperation({ summary: '북마크 상세조회' })
   @ApiResponse({ status: 200, description: '북마크 상세조회 성공' })
   @ApiResponse({ status: 400, description: '북마크 상세조회 실패' })
-  async getCollections(@Param('collectionId') collectionId: number) {
-    const collections = await this.bookmarkService.getCollections(collectionId);
+  async getCollections(
+    @Param('collectionId') collectionId: number,
+    @CurrentUser() currentUser: any,
+  ) {
+    const collections = await this.bookmarkService.getCollections(
+      collectionId,
+      currentUser.id,
+    );
     return await collections;
   }
 

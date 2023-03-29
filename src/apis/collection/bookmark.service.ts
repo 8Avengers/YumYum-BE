@@ -23,10 +23,12 @@ export class BookmarkService {
     ### 23.03.22
     ### 표정훈
     ### 북마크 전체 보기🔥🔥🔥
+    이슈1) 새로 생성한 북마크는 조회가 안됨. 이유는 post를 넣어야 
+          컬렉션아이템에 정보가 등록되어 정보를 가져올 수 있음.
+          북마크 생성만 하면 컬렉션아이템에 정보 등록이 안됨(생성을 수정해야 이슈해결)
     */
   async getBookmarks(userId: number) {
     try {
-      //
       const bookmarks = await this.collectionItemRepository.find({
         relations: {
           post: {
@@ -48,7 +50,10 @@ export class BookmarkService {
           },
           post: {
             id: true,
-            images: { id: true, file_url: true },
+            images: {
+              id: true,
+              file_url: true,
+            },
           },
         },
       });
@@ -67,6 +72,7 @@ export class BookmarkService {
               : '',
         };
       });
+
       return newBookmarks;
     } catch (err) {
       console.error(err);
@@ -80,35 +86,37 @@ export class BookmarkService {
       ### 표정훈
       ### 북마크 상세 보기 🔥
       */
-  async getCollections(collectionId: number) {
+  async getCollections(collectionId: number, userId: number) {
     try {
-      const bookmark = await this.collectionRepository.find({
+      const posts = await this.collectionItemRepository.find({
         relations: {
-          collectionItems: {
-            post: true,
-            restaurant: true,
+          post: {
+            images: true,
           },
         },
-        where: { id: collectionId, deletedAt: null, type: 'bookmark' },
+        where: {
+          collection: {
+            id: collectionId,
+            user_id: userId,
+            deletedAt: null,
+            type: 'bookmark',
+          },
+        },
         select: {
-          id: true,
-          type: true,
-          collectionItems: {
+          collection: {
             id: true,
-            post: {
-              id: true,
-              content: true,
-              rating: true,
-            },
-            restaurant: {
-              id: true,
-              place_name: true,
-            },
+          },
+          post: {
+            id: true,
+            images: { id: true, file_url: true },
           },
         },
       });
-
-      return bookmark;
+      const transformedPosts = posts.map((post) => ({
+        id: post.post.id,
+        images: post.post.images[0].file_url,
+      }));
+      return transformedPosts;
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
@@ -123,18 +131,28 @@ export class BookmarkService {
       ### 표정훈
       ### 북마크 생성
       */
-  createCollection(
-    userId: number,
-    name: string,
-    type: string,
-    visibility: string,
-  ) {
-    return this.collectionRepository.insert({
-      user_id: userId,
-      name: name,
-      type: 'bookmark',
-      visibility: 'private',
-    });
+  async createCollection(userId: number, name: string) {
+    try {
+      const newBookmark = await this.collectionRepository.insert({
+        user_id: userId,
+        name: name,
+        type: 'bookmark',
+        visibility: 'private',
+      });
+
+      const newCollectionItem = await this.collectionItemRepository.insert({
+        collection: newBookmark.identifiers[0].id,
+      });
+
+      return newCollectionItem;
+    } catch (err) {
+      if (err instanceof NotFoundException) {
+        throw err;
+      }
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
 
   /*
