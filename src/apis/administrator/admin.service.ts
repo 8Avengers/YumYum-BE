@@ -8,13 +8,13 @@ import { User } from '../user/entities/user.entity';
 import { Post } from '../post/entities/post.entity';
 import { Comment } from '../comment/entities/comment.entity';
 import { LessThan, Repository } from 'typeorm';
+import { Reports } from '../report/entities/report.entity';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(Post) private postRepository: Repository<Post>,
-    @InjectRepository(Comment) private commentRepository: Repository<Comment>,
+    @InjectRepository(Reports) private reportRepository: Repository<Reports>,
   ) {}
 
   /*
@@ -22,33 +22,36 @@ export class AdminService {
     ### 최호인, 표정훈
     ### 유저 강제탈퇴 기능
     */
-  async userWithdrawal(userId: number) {
-    try {
-      const result = await this.userRepository.softDelete(userId);
-      if (result.affected === 0) {
-        throw new NotFoundException('해당 유저가 없습니다.');
-      }
-    } catch (err) {
-      console.error(err);
-      throw new InternalServerErrorException(
-        'Something went wrong while processing your request. Please try again later.',
-      );
-    }
-  }
+  // async userWithdrawal(userId: number) {
+  //   try {
+  //     const result = await this.userRepository.softDelete(userId);
+  //     if (result.affected === 0) {
+  //       throw new NotFoundException('해당 유저가 없습니다.');
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw new InternalServerErrorException(
+  //       'Something went wrong while processing your request. Please try again later.',
+  //     );
+  //   }
+  // }
 
   /*
     ### 23.03.27
     ### 최호인, 표정훈
-    ### 유저 정지 기능 3일 7일 1달 삭제 => 킹호인!
+    ### 유저 정지 기능 3일 7일 1달 삭제 !
     */
   async userBan(userId: number) {
     try {
       const user = await this.userRepository.findOne({
         where: { id: userId },
       });
-      const banCount = user.banCount;
+      let banCount = user.banCount;
 
       let days = 0;
+      if (banCount > 2) {
+        banCount = 2;
+      }
       switch (banCount) {
         case 0:
           days = 3;
@@ -98,40 +101,53 @@ export class AdminService {
   }
 
   /*
-    ### 23.03.27
+    ### 23.03.30
     ### 최호인, 표정훈
-    ### 포스트 삭제
+    ### 신고 내역
     */
-  async deletePost(postId: number) {
-    try {
-      const result = await this.postRepository.softDelete(postId);
-      if (result.affected === 0) {
-        throw new NotFoundException('존재하지 않는 포스트입니다.');
-      }
-    } catch (err) {
-      console.error(err);
-      throw new InternalServerErrorException(
-        'Something went wrong while processing your request. Please try again later.',
-      );
-    }
+
+  // 유저, 포스트, 코멘트에 신고 내역을 보여주는 곳
+  async getReportLists(type: 'user' | 'comment' | 'post') {
+    return await this.reportRepository.find({
+      where: { type },
+    });
   }
 
-  /*
-    ### 23.03.27
-    ### 최호인, 표정훈
-    ### 코멘트 삭제
-    */
-  async deleteComment(commentId: number) {
-    try {
-      const result = await this.commentRepository.softDelete(commentId);
-      if (result.affected === 0) {
-        throw new NotFoundException('존재하지 않는 코멘트입니다.');
-      }
-    } catch (err) {
-      console.error(err);
-      throw new InternalServerErrorException(
-        'Something went wrong while processing your request. Please try again later.',
-      );
-    }
-  }
+  // /*
+  //   ### 23.03.27
+  //   ### 최호인, 표정훈
+  //   ### 포스트 삭제
+  //    */
+  // async deletePost(postId: number) {
+  //   try {
+  //     const result = await this.postRepository.softDelete(postId);
+  //     if (result.affected === 0) {
+  //       throw new NotFoundException('존재하지 않는 포스트입니다.');
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw new InternalServerErrorException(
+  //       'Something went wrong while processing your request. Please try again later.',
+  //     );
+  //   }
+  // }
+
+  // /*
+  //   ### 23.03.27
+  //   ### 최호인, 표정훈
+  //   ### 코멘트 삭제
+  //   */
+  // async deleteComment(commentId: number) {
+  //   try {
+  //     const result = await this.commentRepository.softDelete(commentId);
+  //     if (result.affected === 0) {
+  //       throw new NotFoundException('존재하지 않는 코멘트입니다.');
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw new InternalServerErrorException(
+  //       'Something went wrong while processing your request. Please try again later.',
+  //     );
+  //   }
+  // }
 }

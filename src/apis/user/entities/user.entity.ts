@@ -18,6 +18,7 @@ import { CommentUserTag } from '../../comment/entities/comment-usertag.entity';
 import { IsEnum } from 'class-validator';
 
 import { Collection } from '../../collection/entities/collection.entity';
+import { Reports } from '../../report/entities/report.entity';
 @Entity()
 @Unique(['email'])
 @Unique(['provider_id'])
@@ -115,7 +116,7 @@ export class User {
   @JoinColumn()
   collections: Collection[];
 
-  // @OneToMany((type) => Reports, (reports) => reports.reporter)
-  // @JoinColumn()
-  // reports: Reports[];
+  @OneToMany((type) => Reports, (reports) => reports.reporter)
+  @JoinColumn()
+  reports: Reports[];
 }
