@@ -15,6 +15,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies/snake-naming.stra
 import { Collection } from 'src/apis/collection/entities/collection.entity';
 import { Follow } from 'src/apis/user/entities/follow.entity';
 import { CollectionItem } from 'src/apis/collection/entities/collection-item.entity';
+import { Reports } from 'src/apis/report/entities/report.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -45,6 +46,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         Restaurant,
         User,
         Follow,
+        Reports,
       ],
     };
   }

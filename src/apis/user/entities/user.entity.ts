@@ -114,4 +114,8 @@ export class User {
   @OneToMany((type) => User, (user) => user.collections)
   @JoinColumn()
   collections: Collection[];
+
+  // @OneToMany((type) => Reports, (reports) => reports.reporter)
+  // @JoinColumn()
+  // reports: Reports[];
 }

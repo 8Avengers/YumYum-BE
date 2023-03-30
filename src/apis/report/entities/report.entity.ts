@@ -9,15 +9,14 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
 
-@Entity({ name: 'reports' })
-export class ReportsEntity {
+@Entity()
+export class Reports {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (reporter) => reporter.reports)
-  reporter: User;
+  // @ManyToOne(() => User, (reporter) => reporter.reports)
+  // reporter: User;
   @Column()
   reporterId: number;
 

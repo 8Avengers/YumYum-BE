@@ -14,6 +14,7 @@ import { UploadModule } from './apis/upload/upload.module';
 import * as cron from 'node-cron';
 import { AdminModule } from './apis/administrator/admin.module';
 import { AdminService } from './apis/administrator/admin.service';
+import { ReportModule } from './apis/report/report.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AdminService } from './apis/administrator/admin.service';
     CommentModule,
     UserModule,
     AuthModule,
+    ReportModule,
     RestaurantModule,
     UploadModule,
     MapModule,
