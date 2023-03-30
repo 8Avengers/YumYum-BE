@@ -26,7 +26,7 @@
 
 ## ❄️ Project Architecture
 
-![title](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F84c1a538-6209-4a63-bdb8-2e73d719feef%2FUntitled.png?id=60fb903c-ae29-4ad3-b3db-5d33dc8dc04f&table=block&spaceId=9b2d7abe-1440-407f-a4b1-9d97908075f6&width=2000&userId=c5049af8-d03e-42ff-b646-e5e6a17fc55d&cache=v2)   
+![title](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fbe57b2e2-28bd-42f3-8780-ffebd2f9b83e%2FYUMYUM_8Avengers_%25EC%25B5%259C%25EC%25A2%2585%25EB%25B0%259C%25ED%2591%259CPPT.png?table=block&id=500423b8-d78f-45fa-b03d-3e2a1345ac0d&spaceId=9b2d7abe-1440-407f-a4b1-9d97908075f6&width=2000&userId=c5049af8-d03e-42ff-b646-e5e6a17fc55d&cache=v2)   
 
 
 ## ❄️ Stacks
