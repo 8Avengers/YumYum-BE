@@ -20,25 +20,6 @@ export class AdminService {
   /*
     ### 23.03.27
     ### 최호인, 표정훈
-    ### 유저 강제탈퇴 기능
-    */
-  // async userWithdrawal(userId: number) {
-  //   try {
-  //     const result = await this.userRepository.softDelete(userId);
-  //     if (result.affected === 0) {
-  //       throw new NotFoundException('해당 유저가 없습니다.');
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     throw new InternalServerErrorException(
-  //       'Something went wrong while processing your request. Please try again later.',
-  //     );
-  //   }
-  // }
-
-  /*
-    ### 23.03.27
-    ### 최호인, 표정훈
     ### 유저 정지 기능 3일 7일 1달 삭제 !
     */
   async userBan(userId: number) {
@@ -112,6 +93,42 @@ export class AdminService {
       where: { type },
     });
   }
+
+  /*
+    ### 23.03.30
+    ### 최호인, 표정훈
+    ### 유저 정지기간 확인
+    */
+
+  async getBanExpiration(userId: number) {
+    return await this.userRepository.find({
+      where: {
+        id: userId,
+      },
+      select: {
+        banExpiration: true,
+      },
+    });
+  }
+
+  /*
+    ### 23.03.27
+    ### 최호인, 표정훈
+    ### 유저 강제탈퇴 기능
+    */
+  // async userWithdrawal(userId: number) {
+  //   try {
+  //     const result = await this.userRepository.softDelete(userId);
+  //     if (result.affected === 0) {
+  //       throw new NotFoundException('해당 유저가 없습니다.');
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw new InternalServerErrorException(
+  //       'Something went wrong while processing your request. Please try again later.',
+  //     );
+  //   }
+  // }
 
   // /*
   //   ### 23.03.27

@@ -7,22 +7,6 @@ import { AdminService } from './admin.service';
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
   /*
-    ### 23.03.27
-    ### 최호인, 표정훈
-    ### 유저 강제탈퇴
-    */
-
-  // 해당 유저의 정보를 소프트 딜리트한다.
-  // 그러면 그때 모든 포스트, 댓글, 좋아요 등 날라가나?
-  // @ApiOperation({ summary: '유저 강제탈퇴' })
-  // @UseGuards(AuthAccessGuard)
-  // @ApiResponse({ status: 200, description: '유저 강제탈퇴 성공' })
-  // @ApiResponse({ status: 400, description: '유저 강제탈퇴 실패' })
-  // @Post('/user-withdrawal/:userId')
-  // async userWithdrawal(@Param('userId') userId: number) {
-  //   return await this.adminService.userWithdrawal(userId);
-  // }
-  /*
     ### 23.03.30
     ### 최호인, 표정훈
     ### 유저 정지
@@ -41,11 +25,26 @@ export class AdminController {
     ### 신고 내역
     */
   @ApiOperation({ summary: '신고 내역' })
+  @UseGuards(AuthAccessGuard)
   @ApiResponse({ status: 200, description: '신고 내역 성공' })
   @ApiResponse({ status: 400, description: '신고 내역 실패' })
   @Get('/:type')
   async getReportLists(@Param('type') type: 'user' | 'comment' | 'post') {
     return await this.adminService.getReportLists(type);
+  }
+
+  /*
+    ### 23.03.30
+    ### 최호인, 표정훈
+    ### 정지 기간 확인
+    */
+  @ApiOperation({ summary: '신고 내역' })
+  @UseGuards(AuthAccessGuard)
+  @ApiResponse({ status: 200, description: '신고 내역 성공' })
+  @ApiResponse({ status: 400, description: '신고 내역 실패' })
+  @Get('/user/:userId')
+  async getBanExpiration(@Param('userId') userId: number) {
+    return await this.adminService.getBanExpiration(userId);
   }
 
   // /*
@@ -73,5 +72,22 @@ export class AdminController {
   // @Post('/delete-comment/:commentId')
   // async deleteComment(@Param('commentId') commentId: number) {
   //   return await this.adminService.deleteComment(commentId);
+  // }
+
+  /*
+    ### 23.03.27
+    ### 최호인, 표정훈
+    ### 유저 강제탈퇴
+    */
+
+  // 해당 유저의 정보를 소프트 딜리트한다.
+  // 그러면 그때 모든 포스트, 댓글, 좋아요 등 날라가나?
+  // @ApiOperation({ summary: '유저 강제탈퇴' })
+  // @UseGuards(AuthAccessGuard)
+  // @ApiResponse({ status: 200, description: '유저 강제탈퇴 성공' })
+  // @ApiResponse({ status: 400, description: '유저 강제탈퇴 실패' })
+  // @Post('/user-withdrawal/:userId')
+  // async userWithdrawal(@Param('userId') userId: number) {
+  //   return await this.adminService.userWithdrawal(userId);
   // }
 }

@@ -21,9 +21,6 @@ export class Reports {
   @ManyToOne(() => User, (reporter) => reporter.reports)
   reporter: User;
 
-  // @Column()
-  // reportedId: number;
-
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
   userId: User;
@@ -38,16 +35,6 @@ export class Reports {
 
   @Column()
   description: string;
-
-  // @Column({
-  //   type: 'enum',
-  //   enum: ['checking', 'rejected', 'completed'],
-  //   default: 'checking',
-  // })
-  // status: 'checking' | 'rejected' | 'completed';
-
-  // @Column({ type: 'enum', enum: ['user', 'post', 'comment'] })
-  // type: 'user' | 'post' | 'comment';
 
   @Column({ type: 'varchar', default: 'checking' })
   status: string;
