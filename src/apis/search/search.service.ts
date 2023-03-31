@@ -42,7 +42,7 @@ export class SearchService {
     const restaurantInOnePage = 15;
     const restaurantSearchResult = await this.restaurantRepository.find({
       where: { place_name: ILike(`${keyword}%`), deleted_at: null },
-      select: { id: true, place_name: true },
+      // select: { id: true, place_name: true },
       skip: pageNum * restaurantInOnePage,
       take: restaurantInOnePage,
     });
