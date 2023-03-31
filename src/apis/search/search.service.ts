@@ -42,7 +42,7 @@ export class SearchService {
     const restaurantInOnePage = 15;
     const restaurantSearchResult = await this.restaurantRepository.find({
       where: { place_name: ILike(`${keyword}%`), deleted_at: null },
-      select: { id: true, place_name: true },
+      // select: { id: true, place_name: true },
       skip: pageNum * restaurantInOnePage,
       take: restaurantInOnePage,
     });
@@ -73,16 +73,51 @@ export class SearchService {
     */
   async getPostSearchByHashtag(hashtag: string, page: string) {
     const pageNum = Number(page) - 1;
-    const postInOnePageWithSearchHashtag = 15;
+    const postInOnePageWithSearchHashtag = 8;
     const postSearchByHashtagResult = await this.hashtagRepository.find({
-      relations: ['posts'],
+      relations: [
+        'posts',
+        'posts.user',
+        'posts.restaurant',
+        'posts.images',
+        // 'posts.collectionItem',
+        // 'posts.collectionItem.collection',
+      ],
       where: {
         name: hashtag,
         posts: { visibility: 'public' },
       },
+      select: {
+        posts: {
+          id: true,
+          content: true,
+          rating: true,
+          updated_at: true,
+          created_at: true,
+          visibility: true,
+          user: {
+            id: true,
+            nickname: true,
+            profile_image: true,
+          },
+          restaurant: {
+            kakao_place_id: true,
+            address_name: true,
+            category_name: true,
+            place_name: true,
+            road_address_name: true,
+          },
+          images: {
+            id: true,
+            file_url: true,
+            created_at: true,
+          },
+          collectionItems: { id: true, collection: { id: true, type: true } },
+        },
+      },
       skip: pageNum * postInOnePageWithSearchHashtag,
       take: postInOnePageWithSearchHashtag,
     });
-    return postSearchByHashtagResult;
+    return postSearchByHashtagResult[0].posts;
   }
 }
