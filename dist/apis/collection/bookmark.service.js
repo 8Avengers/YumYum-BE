@@ -23,6 +23,38 @@ let BookmarkService = class BookmarkService {
         this.collectionRepository = collectionRepository;
         this.collectionItemRepository = collectionItemRepository;
     }
+    async selectBookmark(postId, collectionId, userId) {
+        try {
+            const collectionItem = await this.collectionItemRepository.findOne({
+                where: {
+                    post: { id: postId },
+                    collection: { id: collectionId },
+                },
+                relations: ['collection'],
+            });
+            if (collectionItem) {
+                return {
+                    id: collectionItem.collection.id,
+                    name: collectionItem.collection.name,
+                    hasPost: true,
+                };
+            }
+            else {
+                const collection = await this.collectionRepository.findOne({
+                    where: { id: collectionId },
+                });
+                return {
+                    id: collection.id,
+                    name: collection.name,
+                    hasPost: false,
+                };
+            }
+        }
+        catch (err) {
+            console.error(err);
+            throw new common_1.InternalServerErrorException('Something went wrong while processing your request. Please try again later.');
+        }
+    }
     async getBookmarks(userId) {
         try {
             const bookmarks = await this.collectionItemRepository.find({

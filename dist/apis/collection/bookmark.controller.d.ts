@@ -3,6 +3,11 @@ import { CreateCollectionDto } from './dto/create-bookmark.dto';
 export declare class BookmarkController {
     private readonly bookmarkService;
     constructor(bookmarkService: BookmarkService);
+    selectBookmark(postId: number, collectionId: number, currentUser: any): Promise<{
+        id: number;
+        name: string;
+        hasPost: boolean;
+    }>;
     getBookmarks(currentUser: any): Promise<unknown[]>;
     createCollection(data: CreateCollectionDto, currentUser: any): Promise<import("typeorm").InsertResult>;
     updateCollection(collectionId: number, name: string): Promise<import("typeorm").UpdateResult>;

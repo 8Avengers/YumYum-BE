@@ -10,5 +10,5 @@ export declare class SearchService {
     getUserSearch(keyword: string, page: string): Promise<User[]>;
     getRestaurantSearch(keyword: string, page: string): Promise<Restaurant[]>;
     getHashtagSearch(keyword: string, page: string): Promise<Hashtag[]>;
-    getPostSearchByHashtag(hashtag: string, page: string): Promise<Hashtag[]>;
+    getPostSearchByHashtag(hashtag: string, page: string): Promise<import("../post/entities/post.entity").Post[]>;
 }
