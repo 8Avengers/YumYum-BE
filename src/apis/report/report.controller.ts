@@ -16,7 +16,7 @@ export class ReportController {
     ### 신고 기능 (컨트롤러만 3개)
     */
   @UseGuards(AuthAccessGuard)
-  @Post('/')
+  @Post('/post')
   async createReport(
     @Body() data: CreateReportDto,
     @CurrentUser() currentUser: any,

@@ -1,4 +1,3 @@
-import { User } from '../../user/entities/user.entity';
 import {
   Entity,
   Column,
@@ -10,6 +9,9 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { Post } from '../../post/entities/post.entity';
+import { User } from '../../user/entities/user.entity';
+import { Comment } from '../../comment/entities/comment.entity';
 
 @Entity()
 export class Reports {
@@ -25,23 +27,17 @@ export class Reports {
   @Column()
   reportedId: number;
 
-  // @ManyToOne(() => Post)
-  // reportedPost: Post;
-  // @Column()
-  // reportedPostId: number;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'reportedId', referencedColumnName: 'id' })
+  user: User;
 
-  // @ManyToOne(() => Comment)
-  // reportedComment: Comment;
-  // @Column()
-  // reportedCommentId: number;
+  @ManyToOne(() => Post)
+  @JoinColumn({ name: 'reportedId', referencedColumnName: 'id' })
+  post: Post;
 
-  // @ManyToOne(() => User)
-  // reportedUser: User;
-  // @Column()
-  // reportedUserId: number;
-
-  @Column()
-  title: string;
+  @ManyToOne(() => Comment)
+  @JoinColumn({ name: 'reportedId', referencedColumnName: 'id' })
+  comment: Comment;
 
   @Column()
   description: string;
@@ -52,6 +48,12 @@ export class Reports {
     default: 'checking',
   })
   status: 'checking' | 'rejected' | 'completed';
+
+  // @Column({ type: 'varchar' })
+  // type: string;
+
+  // @Column({ type: 'json' })
+  // type: any;
 
   @Column({ type: 'enum', enum: ['user', 'post', 'comment'] })
   type: 'user' | 'post' | 'comment';
