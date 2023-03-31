@@ -19,46 +19,18 @@ export class ReportController {
   @UseGuards(AuthAccessGuard)
   @ApiResponse({ status: 200, description: '신고 기능 성공' })
   @ApiResponse({ status: 400, description: '신고 기능 실패' })
-  @Post('/:type')
+  @Post('/:type/:reportedId')
   async createReport(
     @Param('type') type: 'user' | 'post' | 'comment',
+    @Param('reportedId') reportedId: number,
     @Body() data: CreateReportDto,
     @CurrentUser() currentUser: any,
   ) {
     return await this.reportService.createReport(
       currentUser.id,
-      data.reportedId,
+      reportedId,
       data.description,
       type,
-      // data.type,
     );
   }
-
-  // @UseGuards(AuthAccessGuard)
-  // @Post('/post')
-  // async createPostReport(
-  //   @Body() data: CreateReportDto,
-  //   @CurrentUser() currentUser: any,
-  // ) {
-  //   return await this.reportService.createReport(
-  //     currentUser.id,
-  //     data.reportedId,
-  //     data.description,
-  //     data.type,
-  //   );
-  // }
-
-  // @UseGuards(AuthAccessGuard)
-  // @Post('/comment')
-  // async createCommentReport(
-  //   @Body() data: CreateReportDto,
-  //   @CurrentUser() currentUser: any,
-  // ) {
-  //   return await this.reportService.createReport(
-  //     currentUser.id,
-  //     data.reportedId,
-  //     data.description,
-  //     data.type,
-  //   );
-  // }
 }

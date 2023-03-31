@@ -7,12 +7,6 @@ enum ReportType {
 }
 
 export class CreateReportDto {
-  @IsNumber()
-  readonly reportedId: number;
-
   @IsString()
   readonly description: string;
-
-  // @IsEnum(ReportType)
-  // readonly type: ReportType;
 }

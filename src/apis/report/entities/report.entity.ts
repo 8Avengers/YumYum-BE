@@ -25,35 +25,35 @@ export class Reports {
   // reportedId: number;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
-  user: User;
+  @JoinColumn({ name: 'user_id', referencedColumnName: 'id' })
+  userId: User;
 
   @ManyToOne(() => Post)
-  @JoinColumn({ name: 'postId', referencedColumnName: 'id' })
-  post: Post;
+  @JoinColumn({ name: 'post_id', referencedColumnName: 'id' })
+  postId: Post;
 
   @ManyToOne(() => Comment)
-  @JoinColumn({ name: 'commentId', referencedColumnName: 'id' })
-  comment: Comment;
+  @JoinColumn({ name: 'comment_id', referencedColumnName: 'id' })
+  commentId: Comment;
 
   @Column()
   description: string;
 
-  @Column({
-    type: 'enum',
-    enum: ['checking', 'rejected', 'completed'],
-    default: 'checking',
-  })
-  status: 'checking' | 'rejected' | 'completed';
+  // @Column({
+  //   type: 'enum',
+  //   enum: ['checking', 'rejected', 'completed'],
+  //   default: 'checking',
+  // })
+  // status: 'checking' | 'rejected' | 'completed';
 
-  @Column({ type: 'enum', enum: ['user', 'post', 'comment'] })
-  type: 'user' | 'post' | 'comment';
+  // @Column({ type: 'enum', enum: ['user', 'post', 'comment'] })
+  // type: 'user' | 'post' | 'comment';
 
-  // @Column({ type: 'json', default: 'checking' })
-  // status: any;
+  @Column({ type: 'varchar', default: 'checking' })
+  status: string;
 
-  // @Column({ type: 'json' })
-  // type: any;
+  @Column({ type: 'varchar' })
+  type: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

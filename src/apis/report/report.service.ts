@@ -21,10 +21,11 @@ export class ReportService {
   ) {
     try {
       const reportData: any = {
-        reporterId,
         description,
         type,
       };
+
+      reportData.reporter = reporterId;
 
       if (type === 'user') {
         reportData.userId = reportedId;

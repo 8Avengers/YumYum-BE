@@ -25,7 +25,7 @@ export class AdminController {
   /*
     ### 23.03.30
     ### 최호인, 표정훈
-    ### 신고 내역
+    ### 유저 정지
     */
   @ApiOperation({ summary: '유저 정지' })
   @UseGuards(AuthAccessGuard)
@@ -41,8 +41,8 @@ export class AdminController {
     ### 신고 내역
     */
   @ApiOperation({ summary: '신고 내역' })
-  @ApiResponse({ status: 200, description: '유저 정지 성공' })
-  @ApiResponse({ status: 400, description: '유저 정지 실패' })
+  @ApiResponse({ status: 200, description: '신고 내역 성공' })
+  @ApiResponse({ status: 400, description: '신고 내역 실패' })
   @Get('/:type')
   async getReportLists(@Param('type') type: 'user' | 'comment' | 'post') {
     return await this.adminService.getReportLists(type);
