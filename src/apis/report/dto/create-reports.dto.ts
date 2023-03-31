@@ -11,11 +11,8 @@ export class CreateReportDto {
   readonly reportedId: number;
 
   @IsString()
-  readonly title: string;
-
-  @IsString()
   readonly description: string;
 
-  @IsEnum(ReportType)
-  readonly type: ReportType;
+  // @IsEnum(ReportType)
+  // readonly type: ReportType;
 }

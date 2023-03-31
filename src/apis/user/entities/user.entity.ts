@@ -19,6 +19,7 @@ import { IsEnum } from 'class-validator';
 
 import { Collection } from '../../collection/entities/collection.entity';
 import { Reports } from '../../report/entities/report.entity';
+import { Ban } from '../../administrator/entities/ban.entity';
 @Entity()
 @Unique(['email'])
 @Unique(['provider_id'])
@@ -66,6 +67,10 @@ export class User {
 
   @Column({ name: 'following_count', default: 0 })
   followingCount: number;
+
+  //정지테이블과 연결
+  @OneToMany(() => Ban, (ban) => ban.userId)
+  bans: Ban[];
 
   @Column({ nullable: true })
   banExpiration: Date;

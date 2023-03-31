@@ -16,6 +16,7 @@ import { Collection } from 'src/apis/collection/entities/collection.entity';
 import { Follow } from 'src/apis/user/entities/follow.entity';
 import { CollectionItem } from 'src/apis/collection/entities/collection-item.entity';
 import { Reports } from 'src/apis/report/entities/report.entity';
+import { Ban } from 'src/apis/administrator/entities/ban.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -47,6 +48,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         User,
         Follow,
         Reports,
+        Ban,
       ],
     };
   }

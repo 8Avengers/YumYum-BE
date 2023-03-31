@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reports } from './entities/report.entity';
@@ -17,13 +17,29 @@ export class ReportService {
     reporterId: number,
     reportedId: number,
     description: string,
-    type: any,
+    type: 'user' | 'post' | 'comment',
   ) {
-    await this.reportRepository.insert({
-      reporterId,
-      reportedId,
-      description,
-      type,
-    });
+    try {
+      const reportData: any = {
+        reporterId,
+        description,
+        type,
+      };
+
+      if (type === 'user') {
+        reportData.userId = reportedId;
+      } else if (type === 'post') {
+        reportData.postId = reportedId;
+      } else if (type === 'comment') {
+        reportData.commentId = reportedId;
+      }
+
+      await this.reportRepository.insert(reportData);
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
   }
 }
