@@ -57,7 +57,6 @@ export class PostService {
         where: {
           deleted_at: null,
           visibility: 'public',
-          collectionItems: { collection: { type: 'myList' } },
         },
         select: {
           id: true,
@@ -127,7 +126,10 @@ export class PostService {
           }
           return 0;
         });
-        const myListId = post.collectionItems.map((item) => item.collection.id);
+        const myListItems = post.collectionItems.filter(
+          (item) => item.collection && item.collection.type === 'myList',
+        );
+        const myListId = myListItems.map((item) => item.collection.id);
         const isBookmarked =
           bookmarkedStatuses.find((status) => status.postId === post.id)
             ?.isBookmarked || 'False';
@@ -173,7 +175,6 @@ export class PostService {
           {
             id: postId,
             user: { id: userId },
-            collectionItems: { collection: { type: 'myList' } },
           },
           { id: postId, user: { id: Not(userId) }, visibility: 'public' },
         ],
@@ -227,14 +228,13 @@ export class PostService {
         where: { deleted_at: null, post: { id: postId } },
       });
 
-      const myList = post[0].collectionItems.map((item) => ({
-        id: item.collection.id,
-      }));
+      const myListItems = post[0].collectionItems.filter(
+        (item) => item.collection && item.collection.type === 'myList',
+      );
+      const myListId = myListItems.map((item) => item.collection.id);
 
       const { isBookmarked } =
         await this.bookmarkService.isOnePostBookmarkedByUser(userId, postId);
-
-      console.log('******', isBookmarked);
 
       // const userTags = post[0].postUserTags.map(
       //   (userTag) => userTag.user.nickname,
@@ -252,7 +252,7 @@ export class PostService {
         hashtags,
         isLiked,
         totalComments,
-        myList,
+        myListId,
         visibility: post[0].visibility,
         isBookmarked,
         // userTags,
@@ -538,7 +538,6 @@ export class PostService {
         where: {
           deleted_at: null,
           user: { id: userId },
-          collectionItems: { collection: { type: 'myList' } },
         },
         select: {
           id: true,
@@ -608,7 +607,10 @@ export class PostService {
           }
           return 0;
         });
-        const myListId = post.collectionItems.map((item) => item.collection.id);
+        const myListItems = post.collectionItems.filter(
+          (item) => item.collection && item.collection.type === 'myList',
+        );
+        const myListId = myListItems.map((item) => item.collection.id);
         const isBookmarked =
           bookmarkedStatuses.find((status) => status.postId === post.id)
             ?.isBookmarked || 'False';
@@ -650,7 +652,6 @@ export class PostService {
         posts = await this.postRepository.find({
           where: {
             user: { id: userId },
-            collectionItems: { collection: { type: 'myList' } },
           },
           select: {
             id: true,
@@ -691,7 +692,6 @@ export class PostService {
           where: {
             visibility: 'public',
             user: { id: userId },
-            collectionItems: { collection: { type: 'myList' } },
           },
           select: {
             id: true,
@@ -765,7 +765,10 @@ export class PostService {
           }
           return 0;
         });
-        const myListId = post.collectionItems.map((item) => item.collection.id);
+        const myListItems = post.collectionItems.filter(
+          (item) => item.collection && item.collection.type === 'myList',
+        );
+        const myListId = myListItems.map((item) => item.collection.id);
         const isBookmarked =
           bookmarkedStatuses.find((status) => status.postId === post.id)
             ?.isBookmarked || 'False';

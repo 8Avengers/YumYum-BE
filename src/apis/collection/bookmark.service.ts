@@ -22,11 +22,55 @@ export class BookmarkService {
   /*
     ### 23.03.22
     ### 표정훈
+    ### 북마크 토글 API (만들어야함)🔥
+    get: bookmarks/:postI
+    */
+  async selectBookmark(postId: number, collectionId: number, userId: number) {
+    try {
+      //해당 포스트가 각각 컬렉션에 존재있는지 없는지만 알면 된다.
+      //⭐ 필요정보 : [{id:36, name: "", hasPost: false}] ⭐
+      const collectionItem = await this.collectionItemRepository.findOne({
+        where: {
+          post: { id: postId },
+          collection: { id: collectionId },
+        },
+        relations: ['collection'],
+      });
+
+      if (collectionItem) {
+        return {
+          id: collectionItem.collection.id,
+          name: collectionItem.collection.name,
+          hasPost: true,
+        };
+      } else {
+        //Post가 없을땐 해당 북마크만 찾아서 아이디와 이름값 반환
+        const collection = await this.collectionRepository.findOne({
+          where: { id: collectionId },
+        });
+        return {
+          id: collection.id,
+          name: collection.name,
+          hasPost: false,
+        };
+      }
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
+    }
+  }
+
+  /*
+    ### 23.03.22
+    ### 표정훈
     ### 북마크 전체 보기🔥🔥🔥
     이슈1) 새로 생성한 북마크는 조회가 안됨. 이유는 post를 넣어야 
           컬렉션아이템에 정보가 등록되어 정보를 가져올 수 있음.
           북마크 생성만 하면 컬렉션아이템에 정보 등록이 안됨(생성을 수정해야 이슈해결)
     */
+
   async getBookmarks(userId: number) {
     try {
       const bookmarks = await this.collectionItemRepository.find({
@@ -58,20 +102,25 @@ export class BookmarkService {
         },
       });
 
-      const newBookmarks = bookmarks.map((item) => {
+      const groupedBookmarks = bookmarks.reduce((acc, item) => {
         const {
           collection: { id, name },
           post,
         } = item;
-        return {
-          id,
-          name,
-          image:
-            post?.images && post?.images?.length > 0
-              ? post?.images[0].file_url
-              : '',
-        };
-      });
+        if (!acc[id]) {
+          acc[id] = {
+            id,
+            name,
+            image:
+              post?.images && post?.images?.length > 0
+                ? post?.images[0].file_url
+                : '',
+          };
+        }
+        return acc;
+      }, {});
+
+      const newBookmarks = Object.values(groupedBookmarks);
 
       return newBookmarks;
     } catch (err) {
@@ -360,47 +409,62 @@ export class BookmarkService {
     userId: number,
     postIds: number[],
   ): Promise<{ postId: number; isBookmarked: string }[]> {
-    const bookmarkCollection = await this.collectionRepository.findOne({
-      where: { type: 'bookmark', user_id: userId },
-    });
-    if (!bookmarkCollection) {
-      return postIds.map((postId) => {
-        return { postId, isBookmarked: 'False' };
+    try {
+      const bookmarkCollection = await this.collectionRepository.findOne({
+        where: { type: 'bookmark', user_id: userId },
       });
-    }
+      if (!bookmarkCollection) {
+        return postIds.map((postId) => {
+          return { postId, isBookmarked: 'False' };
+        });
+      }
 
-    const bookmarkCollectionItems = await this.collectionItemRepository.find({
-      where: {
-        collection: { id: bookmarkCollection.id },
-        post: { id: In(postIds) },
-      },
-      relations: ['post', 'collection'],
-    });
+      const bookmarkCollectionItems = await this.collectionItemRepository.find({
+        where: {
+          collection: { id: bookmarkCollection.id },
+          post: { id: In(postIds) },
+        },
+        relations: ['post', 'collection'],
+      });
 
-    return postIds.map((postId) => {
-      const isBookmarked = bookmarkCollectionItems.some(
-        (bookmark) => bookmark.post.id === postId,
+      return postIds.map((postId) => {
+        const isBookmarked = bookmarkCollectionItems.some(
+          (bookmark) => bookmark.post.id === postId,
+        );
+        return { postId, isBookmarked: isBookmarked ? 'True' : 'False' };
+      });
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
       );
-      return { postId, isBookmarked: isBookmarked ? 'True' : 'False' };
-    });
+    }
   }
 
   async isOnePostBookmarkedByUser(userId: number, postId: number) {
-    const bookmarkCollection = await this.collectionRepository.findOne({
-      where: { type: 'bookmark', user_id: userId },
-    });
-    if (!bookmarkCollection) {
-      return { isBookmarked: 'False' };
+    try {
+      const bookmarkCollection = await this.collectionRepository.findOne({
+        where: { type: 'bookmark', user_id: userId },
+      });
+      if (!bookmarkCollection) {
+        return { isBookmarked: 'False' };
+      }
+
+      const bookmarkCollectionItem =
+        await this.collectionItemRepository.findOne({
+          where: {
+            collection: { id: bookmarkCollection.id },
+            post: { id: postId },
+          },
+          relations: ['post', 'collection'],
+        });
+
+      return { isBookmarked: bookmarkCollectionItem ? 'True' : 'False' };
+    } catch (err) {
+      console.error(err);
+      throw new InternalServerErrorException(
+        'Something went wrong while processing your request. Please try again later.',
+      );
     }
-
-    const bookmarkCollectionItem = await this.collectionItemRepository.findOne({
-      where: {
-        collection: { id: bookmarkCollection.id },
-        post: { id: postId },
-      },
-      relations: ['post', 'collection'],
-    });
-
-    return { isBookmarked: bookmarkCollectionItem ? 'True' : 'False' };
   }
 }
