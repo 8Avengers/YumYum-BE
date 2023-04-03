@@ -1,4 +1,7 @@
 # 🍽️ YumYum
+![title](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fce614614-9f37-45dc-839b-1d8d8467b792%2FUntitled.png?table=block&id=8ac44767-926a-474c-8978-202ec1eb98d2&spaceId=9b2d7abe-1440-407f-a4b1-9d97908075f6&width=2000&userId=c5049af8-d03e-42ff-b646-e5e6a17fc55d&cache=v2)   
+
+
 ![title](https://www.notion.so/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2F5ab018df-bc9c-4c4f-bd95-814af6f24ee6%2FYumYum2.png?table=block&id=20e6f37a-6e87-4d96-9ac2-ed5d38ff634f&spaceId=9b2d7abe-1440-407f-a4b1-9d97908075f6&width=2000&userId=c5049af8-d03e-42ff-b646-e5e6a17fc55d&cache=v2)   
 
 **✍🏻 서비스 소개**
