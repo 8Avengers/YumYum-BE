@@ -57,6 +57,7 @@ let BookmarkService = class BookmarkService {
     }
     async getBookmarks(userId) {
         try {
+            console.log('유저아이디', userId);
             const bookmarks = await this.collectionItemRepository.find({
                 relations: {
                     post: {

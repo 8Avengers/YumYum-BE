@@ -23,12 +23,12 @@ let BookmarkController = class BookmarkController {
     constructor(bookmarkService) {
         this.bookmarkService = bookmarkService;
     }
-    async selectBookmark(postId, collectionId, currentUser) {
-        return await this.bookmarkService.selectBookmark(postId, collectionId, currentUser.id);
-    }
     async getBookmarks(currentUser) {
         const bookmarks = await this.bookmarkService.getBookmarks(currentUser.id);
         return bookmarks;
+    }
+    async selectBookmark(postId, collectionId, currentUser) {
+        return await this.bookmarkService.selectBookmark(postId, collectionId, currentUser.id);
     }
     async createCollection(data, currentUser) {
         return await this.bookmarkService.createCollection(currentUser.id, data.name);
@@ -57,6 +57,17 @@ let BookmarkController = class BookmarkController {
     }
 };
 __decorate([
+    (0, common_1.Get)('/collections'),
+    (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
+    (0, swagger_1.ApiOperation)({ summary: '북마크 전체조회' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: '북마크 전체조회 성공' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: '북마크 전체조회 실패' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BookmarkController.prototype, "getBookmarks", null);
+__decorate([
     (0, common_1.Get)('/:postId'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
     (0, swagger_1.ApiOperation)({ summary: '토글 선택' }),
@@ -69,17 +80,6 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, Object]),
     __metadata("design:returntype", Promise)
 ], BookmarkController.prototype, "selectBookmark", null);
-__decorate([
-    (0, common_1.Get)('/collections'),
-    (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
-    (0, swagger_1.ApiOperation)({ summary: '북마크 전체조회' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: '북마크 전체조회 성공' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: '북마크 전체조회 실패' }),
-    __param(0, (0, current_user_decorator_1.CurrentUser)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], BookmarkController.prototype, "getBookmarks", null);
 __decorate([
     (0, common_1.Post)('/collections'),
     (0, common_1.UseGuards)(auth_guards_1.AuthAccessGuard),
