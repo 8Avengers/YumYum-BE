@@ -23,6 +23,22 @@ export class BookmarkController {
   constructor(private readonly bookmarkService: BookmarkService) {}
 
   /*
+    ### 23.03.22
+    ### 표정훈
+    ### 북마크 전체 보기
+    */
+
+  @Get('/collections')
+  @UseGuards(AuthAccessGuard)
+  @ApiOperation({ summary: '북마크 전체조회' })
+  @ApiResponse({ status: 200, description: '북마크 전체조회 성공' })
+  @ApiResponse({ status: 400, description: '북마크 전체조회 실패' })
+  async getBookmarks(@CurrentUser() currentUser: any) {
+    const bookmarks = await this.bookmarkService.getBookmarks(currentUser.id);
+    return bookmarks;
+  }
+
+  /*
     ### 23.03.29
     ### 표정훈
     ### 북마크 토글
@@ -42,22 +58,6 @@ export class BookmarkController {
       collectionId,
       currentUser.id,
     );
-  }
-
-  /*
-    ### 23.03.22
-    ### 표정훈
-    ### 북마크 전체 보기
-    */
-
-  @Get('/collections')
-  @UseGuards(AuthAccessGuard)
-  @ApiOperation({ summary: '북마크 전체조회' })
-  @ApiResponse({ status: 200, description: '북마크 전체조회 성공' })
-  @ApiResponse({ status: 400, description: '북마크 전체조회 실패' })
-  async getBookmarks(@CurrentUser() currentUser: any) {
-    const bookmarks = await this.bookmarkService.getBookmarks(currentUser.id);
-    return bookmarks;
   }
 
   /*
