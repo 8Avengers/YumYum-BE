@@ -489,11 +489,21 @@ let MyListService = class MyListService {
                 'images.file_url as file_url',
             ])
                 .groupBy('collection.id')
-                .addGroupBy('images.id')
                 .orderBy('sumLikes', 'DESC')
                 .limit(5)
                 .getRawMany();
-            const topCollections = top5Collections.map((item) => {
+            const topCollections = await Promise.all(top5Collections.map(async (item) => {
+                const representativeImage = await this.collectionItemRepository
+                    .createQueryBuilder('collectionItem')
+                    .leftJoinAndSelect('collectionItem.post', 'post')
+                    .leftJoinAndSelect('post.images', 'images')
+                    .where('collectionItem.collection_id = :id', {
+                    id: item.collection_id,
+                })
+                    .select(['images.file_url'])
+                    .orderBy('post.created_at', 'DESC')
+                    .limit(1)
+                    .getRawOne();
                 return {
                     id: item.collection_id,
                     name: item.collection_name,
@@ -503,9 +513,9 @@ let MyListService = class MyListService {
                         profile_image: item.user_profile_image,
                     },
                     sumLikes: item.sumLikes,
-                    images: [item.file_url],
+                    images: [representativeImage.images_file_url],
                 };
-            });
+            }));
             return topCollections;
         }
         catch (err) {
