@@ -685,25 +685,39 @@ export class MyListService {
           'images.file_url as file_url', // 이미지 URL 정보를 가져오기 위해 추가
         ])
         .groupBy('collection.id')
-        .addGroupBy('images.id') // 이미지 정보를 가져오기 위해 추가
         .orderBy('sumLikes', 'DESC')
         .limit(5)
         .getRawMany();
 
       // 상위 5개 컬렉션 정보를 구성하여 반환한다
-      const topCollections = top5Collections.map((item: any) => {
-        return {
-          id: item.collection_id,
-          name: item.collection_name,
-          user: {
-            id: item.user_id,
-            nickname: item.user_nickname,
-            profile_image: item.user_profile_image,
-          },
-          sumLikes: item.sumLikes,
-          images: [item.file_url], // 이미지 URL 정보를 반환하기 위해 추가
-        };
-      });
+      const topCollections = await Promise.all(
+        top5Collections.map(async (item: any) => {
+          // 각 컬렉션의 대표 이미지를 가져온다
+          const representativeImage = await this.collectionItemRepository
+            .createQueryBuilder('collectionItem')
+            .leftJoinAndSelect('collectionItem.post', 'post')
+            .leftJoinAndSelect('post.images', 'images')
+            .where('collectionItem.collection_id = :id', {
+              id: item.collection_id,
+            })
+            .select(['images.file_url'])
+            .orderBy('post.created_at', 'DESC')
+            .limit(1)
+            .getRawOne();
+
+          return {
+            id: item.collection_id,
+            name: item.collection_name,
+            user: {
+              id: item.user_id,
+              nickname: item.user_nickname,
+              profile_image: item.user_profile_image,
+            },
+            sumLikes: item.sumLikes,
+            images: [representativeImage.images_file_url], // 대표 이미지 URL 정보를 반환하기 위해 추가
+          };
+        }),
+      );
 
       return topCollections;
     } catch (err) {
