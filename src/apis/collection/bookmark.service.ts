@@ -162,12 +162,16 @@ export class BookmarkService {
           },
         },
       });
-      const transformedPosts = posts.map((post) => ({
-        id: post.post.id,
-        images: post.post.images[0].file_url,
-      }));
+      const transformedPosts = posts
+        .filter((post) => post.post)
+        .map((post) => ({
+          id: post.post.id,
+          images:
+            post.post.images.length > 0 ? post.post.images[0].file_url : null,
+        }));
       return transformedPosts;
     } catch (err) {
+      console.error(err);
       if (err instanceof NotFoundException) {
         throw err;
       }
@@ -245,6 +249,9 @@ export class BookmarkService {
       if (result.affected === 0) {
         throw new NotFoundException('북마크가 없습니다.');
       }
+      // const result2 = await this.collectionItemRepository.delete({
+      //   collection: { id: collectionId },
+      // });
     } catch (err) {
       if (err instanceof NotFoundException) {
         throw err;
