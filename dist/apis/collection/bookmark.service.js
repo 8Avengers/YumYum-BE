@@ -134,13 +134,16 @@ let BookmarkService = class BookmarkService {
                     },
                 },
             });
-            const transformedPosts = posts.map((post) => ({
+            const transformedPosts = posts
+                .filter((post) => post.post)
+                .map((post) => ({
                 id: post.post.id,
-                images: post.post.images[0].file_url,
+                images: post.post.images.length > 0 ? post.post.images[0].file_url : null,
             }));
             return transformedPosts;
         }
         catch (err) {
+            console.error(err);
             if (err instanceof common_1.NotFoundException) {
                 throw err;
             }
