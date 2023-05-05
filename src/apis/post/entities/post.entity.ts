@@ -49,6 +49,9 @@ export class Post {
   })
   visibility: 'public' | 'private';
 
+  @Column()
+  likes: number;
+
   @ManyToOne((type) => Restaurant, (restaurant) => restaurant.posts)
   @JoinColumn()
   restaurant: Restaurant;

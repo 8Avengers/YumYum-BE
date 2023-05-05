@@ -7,7 +7,7 @@ import { PostLikeController } from './post-like.controller';
 import { PostLikeService } from './post-like.service';
 import { PostLike } from './entities/post-like.entity';
 import { Hashtag } from './entities/hashtag.entity';
-import { PostHashtagService } from './post-hashtag.service';
+// import { PostHashtagService } from './post-hashtag.service';
 import { CollectionModule } from '../collection/collection.module';
 import { MyFeedController } from './post-myfeed.controller';
 import { Comment } from '../comment/entities/comment.entity';
@@ -30,7 +30,7 @@ import { PostUserTagService } from './post-user-tag.service';
   providers: [
     PostService,
     PostLikeService,
-    PostHashtagService,
+    // PostHashtagService,
     ImageRepository,
     PostUserTagService,
   ],

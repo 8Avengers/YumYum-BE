@@ -32,6 +32,9 @@ export class Comment {
   @DeleteDateColumn({ name: 'deleted_at' })
   deleted_at: Date;
 
+  @Column()
+  likes: number;
+
   @ManyToOne((type) => User, (user) => user.comments)
   @JoinColumn()
   user: User;

@@ -14,7 +14,7 @@ import { In, MoreThan, Not } from 'typeorm';
 import { Comment } from '../comment/entities/comment.entity';
 import { PostLikeService } from '../post/post-like.service';
 import { ImageRepository } from '../post/image.repository';
-import { PostHashtagService } from '../post/post-hashtag.service';
+// import { PostHashtagService } from '../post/post-hashtag.service';
 import { RestaurantService } from '../restaurant/restaurant.service';
 import { UploadService } from '../upload/upload.service';
 import { FindOptionsRelations } from 'typeorm';
@@ -37,7 +37,7 @@ export class MyListService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private imageRepository: ImageRepository,
-    private readonly postHashtagService: PostHashtagService,
+    // private readonly postHashtagService: PostHashtagService,
     private readonly restaurantService: RestaurantService,
     private readonly uploadService: UploadService,
   ) {}
@@ -241,7 +241,7 @@ export class MyListService {
 
       const postLikes = await this.likeService.getLikesForAllPosts(postIds);
 
-      const likedStatuses = await this.likeService.getLikedStatusforAllPosts(
+      const likedStatuses = await this.likeService.getLikedStatusForAllPosts(
         postIds,
         userId,
       );

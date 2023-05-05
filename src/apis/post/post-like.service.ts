@@ -1,24 +1,22 @@
 import {
-  HttpException,
-  HttpStatus,
+  //HttpException,
+  //HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import _ from 'lodash';
-import { Repository, In } from 'typeorm';
-import { PostLike } from './entities/post-like.entity';
-import { Post } from './entities/post.entity';
+//import _ from 'lodash';
+//import { Repository, In } from 'typeorm';
+import { PostLikeRepository } from './post-like.repository';
+import { PostRepository } from './post.repository';
 
 @Injectable()
 export class PostLikeService {
   constructor(
-    @InjectRepository(PostLike)
-    private readonly postLikeRepository: Repository<PostLike>,
-    @InjectRepository(Post)
-    private readonly postRepository: Repository<Post>,
+    private readonly postLikeRepository: PostLikeRepository,
+    private readonly postRepository: PostRepository,
   ) {}
 
   /*
@@ -29,13 +27,9 @@ export class PostLikeService {
 
   async getLikesForPost(postId: number): Promise<number> {
     try {
-      const postLikes = await this.postLikeRepository.findAndCount({
-        where: { post: { id: postId } },
-      });
+      const postLikes = await this.postLikeRepository.getLikesforPost(postId);
 
-      const count = postLikes[1];
-
-      return count;
+      return postLikes[1];
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -54,11 +48,9 @@ export class PostLikeService {
     postIds: number[],
   ): Promise<{ postId: number; totalLikes: number }[]> {
     try {
-      const postLikes = await this.postLikeRepository.find({
-        select: ['id', 'post'],
-        where: { post: { id: In(postIds) } },
-        relations: ['post'],
-      });
+      const postLikes = await this.postLikeRepository.getLikesForAllPosts(
+        postIds,
+      );
 
       const likes = postLikes.map(({ post }) => ({
         postId: post.id,
@@ -79,14 +71,15 @@ export class PostLikeService {
                                                                         ### 이드보라
                                                                         ### 사용자가 그 포스트를 좋아요 했는지 알아보기
                                                                         */
-  async getLikedStatusforOnePost(postId: number, userId: number) {
+  async getLikedStatusForOnePost(postId: number, userId: number) {
     try {
-      const postliked = await this.postLikeRepository.findOne({
-        where: { post: { id: postId }, user: { id: userId } },
-      });
+      const postLiked = await this.postLikeRepository.getLikedStatusForOnePost(
+        postId,
+        userId,
+      );
 
       return {
-        isLiked: postliked ? 'True' : 'False',
+        isLiked: postLiked ? 'True' : 'False',
       };
     } catch (err) {
       console.error(err);
@@ -102,25 +95,20 @@ export class PostLikeService {
                                                                         ### 사용자가 그 포스트를 좋아요 했는지 알아보기(모든 포스트에서)
                                                                         */
 
-  async getLikedStatusforAllPosts(postIds, userId) {
+  async getLikedStatusForAllPosts(postIds, userId) {
     try {
-      const postLikes = await this.postLikeRepository.find({
-        where: {
-          post: { id: In(postIds) },
-          user: { id: userId },
-        },
-        relations: ['post'],
-      });
+      const postLikes = await this.postLikeRepository.getLikedStatusForAllPosts(
+        postIds,
+        userId,
+      );
 
-      const likedStatuses = postIds.map((postId) => {
+      return postIds.map((postId) => {
         const isLiked = postLikes.some((like) => like.post.id === postId);
         return {
           postId,
           isLiked: isLiked ? 'True' : 'False',
         };
       });
-
-      return likedStatuses;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(
@@ -130,39 +118,28 @@ export class PostLikeService {
   }
 
   /*
-                                                                        ### 23.03.09
+                                                                        ### 23.05.04
                                                                         ### 이드보라
-                                                                        ### 포스트 하나 좋아요 하기
+                                                                        ### 포스트 하나 좋아요 하기(likes 컬럼 추가)
                                                                         */
 
   async likePost(postId, userId) {
     try {
-      const existingPost = await this.postRepository.findOne({
-        where: { id: postId },
-      });
+      const existingPost = await this.postRepository.getOneSimplePost(postId);
 
       if (!existingPost) {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
       }
 
-      const existLike = await this.postLikeRepository.findOne({
-        where: {
-          post: { id: postId },
-          user: { id: userId },
-        },
-        withDeleted: true,
-      });
+      const existLike = await this.postLikeRepository.getLikedStatusForOnePost(
+        postId,
+        userId,
+      );
 
       if (existLike && existLike.deleted_at !== null) {
-        await this.postLikeRepository.restore({
-          post: { id: postId },
-          user: { id: userId },
-        });
+        await this.postLikeRepository.restoreLike(postId, userId);
       } else {
-        await this.postLikeRepository.insert({
-          post: { id: postId },
-          user: { id: userId },
-        });
+        await this.postLikeRepository.likePost(postId, userId);
       }
     } catch (err) {
       if (err instanceof NotFoundException) {
@@ -178,27 +155,19 @@ export class PostLikeService {
 
   async unlikePost(postId, userId) {
     try {
-      const existingPost = await this.postRepository.findOne({
-        where: { id: postId },
-      });
+      const existingPost = await this.postRepository.getOneSimplePost(postId);
 
       if (!existingPost) {
         throw new NotFoundException('존재하지 않는 포스트입니다.');
       }
 
-      const existLike = await this.postLikeRepository.findOne({
-        where: {
-          post: { id: postId },
-          user: { id: userId },
-        },
-        withDeleted: true,
-      });
+      const existLike = await this.postLikeRepository.getLikedStatusForOnePost(
+        postId,
+        userId,
+      );
 
       if (existLike && existLike.deleted_at === null) {
-        await this.postLikeRepository.softDelete({
-          post: { id: postId },
-          user: { id: userId },
-        });
+        await this.postLikeRepository.unlikePost(postId, userId);
       }
     } catch (err) {
       if (err instanceof NotFoundException) {

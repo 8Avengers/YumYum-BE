@@ -153,7 +153,7 @@ export class UserProfileController {
     @CurrentUser() currentUser: User,
     @Query('page') page: string,
   ) {
-    const allPostsByUserId = await this.postService.getPostsByOtherUserId(
+    const allPostsByUserId = await this.postService.getPostsByUserId(
       userId,
       currentUser.id,
       page,

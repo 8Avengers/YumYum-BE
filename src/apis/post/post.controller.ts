@@ -196,7 +196,7 @@ export class PostController {
   @ApiOperation({ summary: '포스트 삭제하기' })
   @Delete('/:postId')
   @UseGuards(AuthAccessGuard)
-  async deletePost(@Param('postId') postId: number) {
+  deletePost(@Param('postId') postId: number) {
     return this.postService.deletePost(postId);
   }
 
